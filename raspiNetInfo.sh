@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#  
 # Script checks for common network configuration errors on 
 # Raspberry Pi and collects various network configuration 
 # information which should speed up the network error detection.
