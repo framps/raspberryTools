@@ -1,1 +1,2 @@
 *.sh filter=dater
+*.py filter=dater

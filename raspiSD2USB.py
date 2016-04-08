@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 ##################################################################################################### 
-#
+# 
 # --- Purpose:
 #
 # Copy user root partition from SD card to another partition (e.g. USB stick or external USB disk)
