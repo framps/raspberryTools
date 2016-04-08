@@ -1,0 +1,3 @@
+#!/bin/bash
+perl -pe 's/\$Date[^\$]*\$/\$Date\$/' | perl -pe 's/\$Sha1[^\$]*\$/\$Sha1\$/'
+
