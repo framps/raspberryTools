@@ -7,6 +7,7 @@ Collection of some useful tools for Raspberry Pi
 ## raspiNetInfo.sh
 
 Tests executed:
+
 1. IP assigned?
 2. ping of IP in internet possible?
 3. ping of hostname in internet possible?
