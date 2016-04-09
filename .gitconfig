@@ -1,0 +1,15 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[filter "dater"]
+	smudge = ./.gittools/git_expand_date
+	clean = ./.gittools/git_clean_date 
+[remote "origin"]
+	url = https://github.com/framps/raspberryTools
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+        remote = origin
+        merge = refs/heads/master
+
