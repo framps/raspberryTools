@@ -66,7 +66,7 @@ MYNAME = os.path.splitext(os.path.split(MYSELF)[1])[0]
 LICENSE="This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions"
 
 VERSION = "0.2.3.2"    
-
+      
 GIT_DATE = "$Date$"
 GIT_DATE_ONLY = GIT_DATE.split(' ')[1]
 GIT_TIME_ONLY = GIT_DATE.split(' ')[2]

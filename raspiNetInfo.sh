@@ -48,7 +48,7 @@ LANGUAGE_NOT_SUPPORTED_WRITTEN=0
 LICENSE="This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions"
    
 # Alle messages are logged in file also 
-
+                     
 LOG_FILE=${MYSELF/.sh/}.log
 rm -f $LOG_FILE 1>/dev/null 2>&1
 
