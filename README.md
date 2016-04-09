@@ -158,7 +158,7 @@ Moves the root parition to an external partition and modifies /boot/cmdline.txt 
 The original /boot/cmdline.txt is saved as /boot/cmdline.txt.sd just in case it's required to 
 revert to use the SD card as root partition. 
 
-Sample output:
+### Sample output
 
 ```
 raspiSD2USB.py V0.2.1 2015-04-12/20:41:05 0ff0dfd
