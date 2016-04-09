@@ -16,7 +16,7 @@ Tests executed:
 6. ssid found with iwlist scan?
 7. ssid conforms to IEEE 802.11?
 
-Sensitive information like external IPs, MAC addresses and keys in config files are masqueraded.
+Sensitive information like external IPs, MAC addresses, SSIDs and keys in config files are masqueraded.
 
 ### Sample output of script for ethernet
 
