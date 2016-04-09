@@ -1,9 +1,10 @@
 # raspberryTools
 Collection of some useful tools for Raspberry Pi
 
-1. raspiNetInfo.sh - Collect network information for people who want to help in network problem determination and test for common network configuration errors
-2. raspiSD2USB.py - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly
+1. raspiNetInfo.sh - Collect network information for people who want to help in network problem determination and test for common network configuration errors [Details for raspiNetInfo.sh][raspiNetInfo]
+2. raspiSD2USB.py - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly [Details for raspiSD2USB.py][raspiSD2USB]
 
+[raspiNetInfo]
 ## raspiNetInfo.sh
 
 Tests executed:
@@ -150,9 +151,12 @@ network={
 [/code][/spoiler]
 
 ```
+[raspiSD2USB]
 ## raspiSD2USB.py
 
 Moves the root parition to an external partition and modifies /boot/cmdline.txt accordingly.
+The original /boot/cmdline.txt is saved as /boot/cmdline.txt.sd just in case it's required to 
+revert to use the SD card as root partition. 
 
 Sample output:
 
