@@ -61,15 +61,15 @@ default via 192.168.0.1 dev eth0
 192.168.0.0/24 dev eth0  proto kernel  scope link  src 192.168.0.109 
 192.168.0.0/24 dev wlan0  proto kernel  scope link  src 192.168.0.118 
 --- ip n s
-192.168.0.6 dev wlan0 lladdr 44:8a:5b:2b:e2:e4 STALE
-192.168.0.3 dev eth0 lladdr c6:25:06:7d:97:9b STALE
-192.168.0.10 dev eth0 lladdr b8:27:eb:3c:94:90 STALE
-192.168.0.1 dev wlan0 lladdr 24:65:11:5c:01:a4 STALE
-192.168.0.113 dev wlan0 lladdr ec:55:f9:c6:64:6c STALE
-192.168.0.3 dev wlan0 lladdr c6:25:06:7d:97:9b STALE
-192.168.0.6 dev eth0 lladdr 44:8a:5b:2b:e2:e4 STALE
-192.168.0.1 dev eth0 lladdr 24:65:11:5c:01:a4 REACHABLE
-192.168.0.113 dev eth0 lladdr ec:55:f9:c6:64:6c REACHABLE
+192.168.0.6 dev wlan0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.3 dev eth0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.10 dev eth0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.1 dev wlan0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.113 dev wlan0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.3 dev wlan0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.6 dev eth0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.1 dev eth0 lladdr @@:@@:@@:@@:@@:@@ REACHABLE
+192.168.0.113 dev eth0 lladdr @@:@@:@@:@@:@@:@@ REACHABLE
 --- RNI016I: Check logile raspiNetInfo.log for sensitive data before publishing
 [/code][/spoiler]
 ```
@@ -117,15 +117,15 @@ default via 192.168.0.1 dev eth0
 192.168.0.0/24 dev eth0  proto kernel  scope link  src 192.168.0.109 
 192.168.0.0/24 dev wlan0  proto kernel  scope link  src 192.168.0.118 
 --- ip n s
-192.168.0.6 dev wlan0 lladdr 44:8a:5b:2b:e2:e4 STALE
-192.168.0.3 dev eth0 lladdr c6:25:06:7d:97:9b STALE
-192.168.0.10 dev eth0 lladdr b8:27:eb:3c:94:90 STALE
-192.168.0.1 dev wlan0 lladdr 24:65:11:5c:01:a4 STALE
-192.168.0.113 dev wlan0 lladdr ec:55:f9:c6:64:6c STALE
-192.168.0.3 dev wlan0 lladdr c6:25:06:7d:97:9b STALE
-192.168.0.6 dev eth0 lladdr 44:8a:5b:2b:e2:e4 STALE
-192.168.0.1 dev eth0 lladdr 24:65:11:5c:01:a4 REACHABLE
-192.168.0.113 dev eth0 lladdr ec:55:f9:c6:64:6c REACHABLE
+192.168.0.6 dev wlan0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.3 dev eth0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.10 dev eth0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.1 dev wlan0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.113 dev wlan0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.3 dev wlan0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.6 dev eth0 lladdr @@:@@:@@:@@:@@:@@ STALE
+192.168.0.1 dev eth0 lladdr @@:@@:@@:@@:@@:@@ REACHABLE
+192.168.0.113 dev eth0 lladdr @@:@@:@@:@@:@@:@@ REACHABLE
 --- lsusb | grep -v "root hub" | grep -i "wire"
 Bus 001 Device 006: ID 0846:9030 NetGear, Inc. WNA1100 Wireless-N 150 [Atheros AR9271]
 --- iwconfig (eth und wlan)
