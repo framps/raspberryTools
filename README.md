@@ -150,3 +150,39 @@ network={
 [/code][/spoiler]
 
 ```
+## raspiSD2USB.py
+
+Moves the root parition to an external partition and modifies /boot/cmdline.txt accordingly.
+
+Sample output:
+
+```
+raspiSD2USB.py V0.2.1 2015-04-12/20:41:05 0ff0dfd
+RSD0002I --- Detected following partitions
+RSD0003I --- /dev/mmcblk0p1 - Size: 112.00 MB - Free: 97.53 MB - Mountpoint: /boot - Partitionstype: vfat - Partitiontable: None
+RSD0003I --- /dev/mmcblk0p2 - Size: 2.85 GB - Free: 221.95 MB - Mountpoint: / - Partitionstype: ext4 - Partitiontable: None
+RSD0003I --- /dev/mmcblk0p3 - Size: 804.00 MB - Free: NA - Mountpoint: None - Partitionstype: ext4 - Partitiontable: None
+RSD0003I --- /dev/sda1 - Size: 3.84 GB - Free: 3.50 GB - Mountpoint: /mnt - Partitionstype: ext4 - Partitiontable: msdos
+RSD0028I --- Skipping /dev/mmcblk0p1 - Partition located on SD card
+RSD0028I --- Skipping /dev/mmcblk0p2 - Partition located on SD card
+RSD0028I --- Skipping /dev/mmcblk0p3 - Partition located on SD card
+RSD0009I --- Target root partition candidates: /dev/sda1
+RSD0011I --- Source root partition /dev/mmcblk0p2: Size: 2.85 GB Type: ext4
+RSD0012I --- Testing partition /dev/sda1: Size: 3.84 GB Free space: 3.50 GB Type: ext4
+RSD0005I --- Following partitions are eligible as new target root partition
+RSD0006I --- /dev/sda1
+RSD0007I --- Enter partion: /dev/sda1
+RSD0019I --- Partition /dev/mmcblk0p2 will be copied to partition /dev/sda1 copied and become new root partition
+RSD0020I --- Are you sure (y/N) ?
+J
+RSD0021I --- Copying rootpartition ... Please be patient
+tar: Removing leading `/' from member names
+tar: Write checkpoint 1000
+...
+tar: Write checkpoint 236000
+tar: proc: implausibly old time stamp 1970-01-01 01:00:00
+RSD0022I --- Updating /etc/fstab on /dev/sda1 
+RSD0023I --- Saving /boot/cmdline.txt on /dev/sda1
+RSD0024I --- Updating /boot/cmdline.txt on /dev/sda1
+RSD0025I --- Finished moving root partition from /dev/mmcblk0p2 to partition /dev/sda1 
+```
