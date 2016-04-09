@@ -34,7 +34,7 @@
 #
 
 MYSELF="${0##*/}"
-VERSION="V0.2.9"
+VERSION="V0.2.10"
 
 GIT_DATE="$Date$"
 GIT_DATE_ONLY=${GIT_DATE/: /}
@@ -573,7 +573,7 @@ function collectInfo() {
 	$IP r s | $EGREP "(eth|wlan)" | masqueradeIPs
 	
 	echo '--- ip n s'
-	$IP n s | masqueradeIPs
+	$IP n s | masqueradeIPs | masqueradeMAC
 	
 	# Info useful for wireless only
 	
