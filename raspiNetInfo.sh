@@ -46,7 +46,7 @@ GIT_CODEVERSION="$MYSELF $VERSION, $GIT_DATE_ONLY/$GIT_TIME_ONLY - $GIT_COMMIT_O
 
 LANGUAGE_NOT_SUPPORTED_WRITTEN=0
 LICENSE="This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions"
-
+   
 # Alle messages are logged in file also 
 
 LOG_FILE=${MYSELF/.sh/}.log
@@ -661,6 +661,8 @@ while getopts ":e :g :l: :h :m :s: :t" opt; do
 	esac
 done
 
+echo "$LICENSE"
+
 detectMods
 
 if [[ -z $SSID && $ETHERNET_ONLY -eq 0 ]]; then
@@ -676,7 +678,6 @@ if (( $TEST )); then
 else
 	echo "[spoiler][code]"
 	echo "$GIT_CODEVERSION"
-	echo "$LICENSE"
 	writeToConsole $MSG_STARTING_DATA_COLLECTION
 	checkConfig													
 	collectInfo													
