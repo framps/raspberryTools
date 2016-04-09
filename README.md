@@ -83,7 +83,7 @@ This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you a
 raspiNetInfo.sh V0.2.9, $/$ - 
 --- RNI010I: Starting collection of data and network analysis. This may take some time ...
 --- RNI012I: Ping of 8.8.8.8 successful
-dos LBA RNI013E: Ping of www.google.com failed
+??? RNI013E: Ping of www.google.com failed
 --- uname -a
 Linux raspberrypi 4.1.13+ #826 PREEMPT Fri Nov 13 20:13:22 GMT 2015 armv6l GNU/Linux
 --- [ -d /home/pi/.xbmc ]
