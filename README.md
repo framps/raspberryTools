@@ -3,8 +3,8 @@ Collection of some useful tools for Raspberry Pi
 
 1. raspiNetInfo.sh - Collect network information for people who want to help in network problem determination and test for common network configuration errors [Documentation and download link](http://www.linux-tips-and-tricks.de/de/raspberry/241-raspinetinfo-check-raspberry-network-configuration-for-common-errors-and-collect-networking-configuration-information/)
 
-2. raspiSD2USB.py - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly [Documentation and download link](http://www.linux-tips-and-tricks.de/de/raspberry/241-raspinetinfo-check-raspberry-network-configuration-for-common-errors-and-collect-networking-configuration-information/)
-
+2. raspiSD2USB.py - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly 
+3. 
 ## raspiNetInfo.sh
 
 Tests executed:
