@@ -67,10 +67,10 @@ LICENSE="This program comes with ABSOLUTELY NO WARRANTY; This is free software, 
 
 VERSION = "0.2.3.2"    
       
-GIT_DATE = "$Date$"
+GIT_DATE = "$Date: 2016-04-09 10:51:44 +0200$"
 GIT_DATE_ONLY = GIT_DATE.split(' ')[1]
 GIT_TIME_ONLY = GIT_DATE.split(' ')[2]
-GIT_COMMIT = "$Sha1$"
+GIT_COMMIT = "$Sha1: eecbdea41f6f7211cd54126719336e87b77826cc$"
 GIT_COMMIT_ONLY = GIT_COMMIT.split(' ')[1][:-1]
 
 GIT_CODEVERSION = MYSELF + " V" + str(VERSION) + " " + GIT_DATE_ONLY + "/" + GIT_TIME_ONLY + " " + GIT_COMMIT_ONLY
