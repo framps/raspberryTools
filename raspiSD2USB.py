@@ -61,10 +61,10 @@ MYNAME = os.path.splitext(os.path.split(MYSELF)[1])[0]
 VERSION = "0.2.3.3"    
 
 try:
-	GIT_DATE = "$Date$"
+	GIT_DATE = "$Date: 2016-05-26 20:50:52 +0200$"
 	GIT_DATE_ONLY = GIT_DATE.split(' ')[1]
 	GIT_TIME_ONLY = GIT_DATE.split(' ')[2]
-	GIT_COMMIT = "$Sha1$"
+	GIT_COMMIT = "$Sha1: 8cd496d24474eb8b528c834918e7874e6d42c837$"
 	GIT_COMMIT_ONLY = GIT_COMMIT.split(' ')[1][:-1]
 
 except Exception,e:
