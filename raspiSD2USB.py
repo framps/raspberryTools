@@ -1,6 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+#
+#    Copyright (C) 2015-2016 framp at linux-tips-and-tricks dot de
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 #####################################################################################################
 #
 # --- Purpose:
@@ -61,10 +76,10 @@ MYNAME = os.path.splitext(os.path.split(MYSELF)[1])[0]
 VERSION = "0.2.3.3"    
 
 try:
-	GIT_DATE = "$Date: 2016-05-26 20:50:52 +0200$"
+	GIT_DATE = "$Date$"
 	GIT_DATE_ONLY = GIT_DATE.split(' ')[1]
 	GIT_TIME_ONLY = GIT_DATE.split(' ')[2]
-	GIT_COMMIT = "$Sha1: 8cd496d24474eb8b528c834918e7874e6d42c837$"
+	GIT_COMMIT = "$Sha1$"
 	GIT_COMMIT_ONLY = GIT_COMMIT.split(' ')[1][:-1]
 
 except Exception,e:
