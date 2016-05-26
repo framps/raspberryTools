@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-##################################################################################################### 
-# 
+
+#####################################################################################################
+#
 # --- Purpose:
 #
 # Copy user root partition from SD card to another partition (e.g. USB stick or external USB disk)
@@ -25,21 +26,14 @@
 # 3) If there are multiple USB disks connected the target device partition type has to be gpt instead of mbr 
 #
 #####################################################################################################
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+# NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#####################################################################################################
 #
-#    Copyright (C) 2015-2016 framp at linux-tips-and-tricks dot de
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# (c) 2015 - framp at linux-tips-and-tricks dot de
 #
 #####################################################################################################
 
@@ -63,15 +57,20 @@ CMD_FILE = "/boot/cmdline.txt"
 ROOTFS = "/dev/root"
 MYSELF = os.path.basename(__file__)
 MYNAME = os.path.splitext(os.path.split(MYSELF)[1])[0]
-LICENSE="This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions"
 
-VERSION = "0.2.3.2"    
-      
-GIT_DATE = "$Date$"
-GIT_DATE_ONLY = GIT_DATE.split(' ')[1]
-GIT_TIME_ONLY = GIT_DATE.split(' ')[2]
-GIT_COMMIT = "$Sha1$"
-GIT_COMMIT_ONLY = GIT_COMMIT.split(' ')[1][:-1]
+VERSION = "0.2.3.3"    
+
+try:
+	GIT_DATE = "$Date$"
+	GIT_DATE_ONLY = GIT_DATE.split(' ')[1]
+	GIT_TIME_ONLY = GIT_DATE.split(' ')[2]
+	GIT_COMMIT = "$Sha1$"
+	GIT_COMMIT_ONLY = GIT_COMMIT.split(' ')[1][:-1]
+
+except Exception,e:
+	GIT_DATE_ONLY = "1970-01-01"
+	GIT_TIME_ONLY = "00:00:00"
+	GIT_COMMIT = "42424242"
 
 GIT_CODEVERSION = MYSELF + " V" + str(VERSION) + " " + GIT_DATE_ONLY + "/" + GIT_TIME_ONLY + " " + GIT_COMMIT_ONLY
 
@@ -97,25 +96,21 @@ def executeCommand(command, noRC=True):
 	rc = None
 	result = None
 	try:
-		logger.debug("Executing command %s " % command)
-		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-		result = proc.communicate()[0]
-		logger.debug("Result: %s " % result)
-
+		proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+		result,error = proc.communicate()
 		rc = proc.returncode		
-		logger.debug("RC: %s " % rc)
+
 		if rc != 0 and noRC:
-			raise Exception("Command '%s' failed with rc %d" % (command, rc))
+			raise Exception("Command '%s' failed with rc %d\nError message:\n%s" % (command, rc, error.rstrip()))
 		
 	except OSError, e:
-		logger.error("%s", e)
 		raise e		 
 	
 	if noRC:
 		return result
 	else:	
 		return (rc, result)
-
+		
 # i18n
 	
 class MessageCatalog(object):
@@ -265,8 +260,8 @@ class MessageCatalog(object):
 				   "DE": "RSD0027E ??? Das Script muss als root oder mit sudo aufgerufen werden" 
 	}
 	MSG_TARGET_PARTITION_ON_SSDCARD = {
-				   "EN": "RSD0028I --- Skipping {0} - Partition located on SD card",
-				   "DE": "RSD0028I --- Partition {0} wird übersprungen - Partition liegt auf der SD Karte"
+				   "EN": "RSD0028I !!! Skipping {0} - Partition located on SD card",
+				   "DE": "RSD0028I !!! Partition {0} wird übersprungen - Partition liegt auf der SD Karte"
 	}
 	
 # baseclass for all the linux commands dealing with partitions
@@ -735,8 +730,6 @@ sys.stdout = MyLogger(sys.stdout, logger, logging.INFO)
 sys.stderr = MyLogger(sys.stderr, logger, logging.ERROR)
 
 # doit now
-
-print LICENSE
 
 if os.geteuid() != 0: 
 	print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_NEEDS_ROOT)
