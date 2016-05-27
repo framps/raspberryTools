@@ -72,6 +72,7 @@ CMD_FILE = "/boot/cmdline.txt"
 ROOTFS = "/dev/root"
 MYSELF = os.path.basename(__file__)
 MYNAME = os.path.splitext(os.path.split(MYSELF)[1])[0]
+LICENSE="This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions"
 
 VERSION = "0.2.3.3"    
 
@@ -753,6 +754,7 @@ if os.geteuid() != 0:
 try:
 
 	print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_VERSION, GIT_CODEVERSION)
+	print LICENSE
 	
 	print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_DETECTED_PARTITIONS)
 	partitions = DeviceManager().getAllDetected()
