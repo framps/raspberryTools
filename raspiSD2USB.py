@@ -47,10 +47,6 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #####################################################################################################
-#
-# (c) 2015 - framp at linux-tips-and-tricks dot de
-#
-#####################################################################################################
 
 import subprocess
 import re
@@ -74,7 +70,7 @@ MYSELF = os.path.basename(__file__)
 MYNAME = os.path.splitext(os.path.split(MYSELF)[1])[0]
 LICENSE="This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions"
 
-VERSION = "0.2.3.3"    
+VERSION = "0.2.3.4"    
 
 try:
 	GIT_DATE = "$Date$"
@@ -100,7 +96,7 @@ def asReadable(number):
 	if not isinstance(number, float):
 		number = float(number)
 	
-	table = [[4, " TB"], [3, " GB"], [2, " MB"], [1, " KB"] , [0, ""]]
+	table = [[4, " TiB"], [3, " GiB"], [2, " MiB"], [1, " KiB"] , [0, " B"]]
 	
 	v = next(e for e in table if number > math.pow(1024, e[0]))
 	return "%.2f%s" % (number / math.pow(1024, v[0]), v[1])
