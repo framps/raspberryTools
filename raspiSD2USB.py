@@ -275,7 +275,7 @@ class MessageCatalog(object):
 				   "EN": "RSD0028I !!! Skipping {0} - Partition located on SD card",
 				   "DE": "RSD0028I !!! Partition {0} wird übersprungen - Partition liegt auf der SD Karte"
 	}
-	MessageCatalog.MSG_TARGET_PARTITION_SMALLER_THAN_SOURE_PARTITION = {
+	MSG_TARGET_PARTITION_SMALLER_THAN_SOURE_PARTITION = {
 				   "EN": "RSD0029W !!! Partition {0} has only {1} free space and is smaller that root partition of size {2}",
 				   "DE": "RSD0029W !!! Partition {0} hat nur {1} freien Speicherplatz und ist kleiner als die root Partition die {2} gross ist"
 	}
