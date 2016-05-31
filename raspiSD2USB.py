@@ -275,6 +275,10 @@ class MessageCatalog(object):
 				   "EN": "RSD0028I !!! Skipping {0} - Partition located on SD card",
 				   "DE": "RSD0028I !!! Partition {0} wird übersprungen - Partition liegt auf der SD Karte"
 	}
+	MessageCatalog.MSG_TARGET_PARTITION_SMALLER_THAN_SOURE_PARTITION = {
+				   "EN": "RSD0029W !!! Partition {0} has only {1} free space and is smaller that root partition of size {2}",
+				   "DE": "RSD0029W !!! Partition {0} hat nur {1} freien Speicherplatz und ist kleiner als die root Partition die {2} gross ist"
+	}
 	
 # baseclass for all the linux commands dealing with partitions
 
@@ -669,20 +673,30 @@ def collectEligiblePartitions():
 	multipleDevices = len(dm.getDevices()) > 1  
 						
 	for partition in availableTargetPartitions:
+
 		print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_TESTING_PARTITION, partition, asReadable(dm.getSize(partition)), asReadable(dm.getFree(partition)), dm.getType(partition))
 		partitionMountPoint = dm.getMountpoint(partition)
 		logger.debug("partitionMountPoint: %s" % (partitionMountPoint))
 
 		if partitionMountPoint is None:
 			print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_NOT_MOUNTED, partition)
-		elif dm.getFree(partition) < sourceRootUsed:
-			logger.debug("free(%s): %s - sourceRootUsed: %s" % (partition, dm.getFree(partition), sourceRootUsed))
-			print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_TOO_SMALL, partition, asReadable(dm.getFree(partition)))
+
+		elif dm.getFree(partition) < sourceRootSize:
+			if dm.getFree(partition) < sourceRootUsed:
+				logger.debug("free(%s): %s - sourceRootUsed: %s" % (partition, dm.getFree(partition), sourceRootUsed))
+				print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_TOO_SMALL, partition, asReadable(dm.getFree(partition)))			
+			else:
+				logger.debug("free(%s): %s - sourceRootSize: %s" % (partition, dm.getFree(partition), sourceRootSize))
+				print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_TARGET_PARTITION_SMALLER_THAN_SOURE_PARTITION, partition, asReadable(dm.getFree(partition)), asReadable(sourceRootSize))
+				validTargetPartitions.append(partition)
+
 		elif dm.getType(partition) != sourceRootType:
 			logger.debug("type(%s): %s - sourceRootSize: %s" % (partition, dm.getType(partition), sourceRootSize))
 			print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_INVALID_TYPE, partition, dm.getType(partition))
+
 		elif multipleDevices and not dm.isGPT(partition):
 			print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_INVALID_FILEPARTITION, partition, dm.getPartitiontableType(partition))
+
 		elif partition != sourceRootPartition:
 			diskFilesTgt = int(executeCommand('ls -A ' + partitionMountPoint + ' | wc -l'))
 			lostDir = int(executeCommand('ls -A ' + partitionMountPoint + ' | grep -i lost | wc -l'))
@@ -693,6 +707,7 @@ def collectEligiblePartitions():
 				validTargetPartitions.append(partition)
 			else:
 				print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_NOT_EMPTY, partition)
+
 		else:
 			print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_UNKNOWN_SKIP, partition)
 							
