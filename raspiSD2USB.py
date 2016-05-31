@@ -70,7 +70,7 @@ MYSELF = os.path.basename(__file__)
 MYNAME = os.path.splitext(os.path.split(MYSELF)[1])[0]
 LICENSE="This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions"
 
-VERSION = "0.2.3.4"    
+VERSION = "0.2.3.5"    
 
 try:
 	GIT_DATE = "$Date$"
@@ -204,8 +204,8 @@ class MessageCatalog(object):
 				   "DE": "RSD0010E ??? Root Partition wurde schon auf {0} umgezogen"
 	}
 	MSG_SOURCE_ROOT_PARTITION = {
-				   "EN": "RSD0011I --- Source root partition {0}: size: {1} Free space: {2} Type: {3}",
-				   "DE": "RSD0011I --- Quell root Partition {0}: Größe: {1} Freier Speicherplatz: {2} Typ: {3}"
+				   "EN": "RSD0011I --- Source root partition {0}: size: {1} Used space: {2} Type: {3}",
+				   "DE": "RSD0011I --- Quell root Partition {0}: Größe: {1} Benutzter Speicherplatz: {2} Typ: {3}"
 	}	
 	MSG_TESTING_PARTITION = {
 				   "EN": "RSD0012I --- Testing partition {0}: Size: {1} Free space: {2} Type: {3}",
@@ -816,7 +816,11 @@ try:
 	executeCommand(command)
 	
 	print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_DONE, sourceRootPartition, targetRootPartition)
-	
+
+except KeyboardInterrupt as ex:
+	print 
+	pass	
+
 except Exception as ex:
 	logger.error(traceback.format_exc())
 	print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_FAILURE, ex.message, LOG_FILENAME)
