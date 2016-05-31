@@ -204,8 +204,8 @@ class MessageCatalog(object):
 				   "DE": "RSD0010E ??? Root Partition wurde schon auf {0} umgezogen"
 	}
 	MSG_SOURCE_ROOT_PARTITION = {
-				   "EN": "RSD0011I --- Source root partition {0}: size: {1} type: {2}",
-				   "DE": "RSD0011I --- Quell root Partition {0}: Größe: {1} Typ: {2}"
+				   "EN": "RSD0011I --- Source root partition {0}: size: {1} Free space: {2} Type: {3}",
+				   "DE": "RSD0011I --- Quell root Partition {0}: Größe: {1} Freier Speicherplatz: {2} Typ: {3}"
 	}	
 	MSG_TESTING_PARTITION = {
 				   "EN": "RSD0012I --- Testing partition {0}: Size: {1} Free space: {2} Type: {3}",
@@ -655,12 +655,14 @@ def collectEligiblePartitions():
 	sourceRootPartition = ROOT_PARTITION
 	sourceRootType = dm.getType(ROOT_PARTITION)
 	sourceRootSize = dm.getSize(ROOT_PARTITION)
+	sourceRootFree = dm.getFree(ROOT_PARTITION)
+	sourceRootUsed = sourceRootSize - sourceRootFree
 	
 	if cmdPartition != sourceRootPartition:
 		print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_ROOT_ALREADY_MOVED, cmdPartition)
 		sys.exit(-1) 
 
-	print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_SOURCE_ROOT_PARTITION, sourceRootPartition, asReadable(sourceRootSize), sourceRootType)
+	print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_SOURCE_ROOT_PARTITION, sourceRootPartition, asReadable(sourceRootSize), asReadable(sourceRootUsed), sourceRootType)
 		
 	validTargetPartitions = []
 
@@ -673,8 +675,8 @@ def collectEligiblePartitions():
 
 		if partitionMountPoint is None:
 			print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_NOT_MOUNTED, partition)
-		elif dm.getFree(partition) < sourceRootSize:
-			logger.debug("free(%s): %s - sourceRootSize: %s" % (partition, dm.getFree(partition), sourceRootSize))
+		elif dm.getFree(partition) < sourceRootUsed:
+			logger.debug("free(%s): %s - sourceRootUsed: %s" % (partition, dm.getFree(partition), sourceRootUsed))
 			print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_TOO_SMALL, partition, asReadable(dm.getFree(partition)))
 		elif dm.getType(partition) != sourceRootType:
 			logger.debug("type(%s): %s - sourceRootSize: %s" % (partition, dm.getType(partition), sourceRootSize))
