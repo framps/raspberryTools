@@ -2,5 +2,5 @@
 data = STDIN.read
 last_date = `git log --pretty=format:"%ai" -1`
 dateReplaced = data.gsub('$Date$', '$Date: ' + last_date.to_s + '$')
-sha1 = `git log --pretty=format:"%H" -1`
+sha1 = `git log --pretty=format:"%h" -1`
 puts dateReplaced.gsub('$Sha1$', '$Sha1: ' + sha1 + '$')
