@@ -189,7 +189,7 @@ class MessageCatalog(object):
 	}
 	MSG_ENTER_PARTITION = {
 				   "EN": "RSD0007I --- Enter partition: ",
-				   "DE": "RSD0007I --- Partition eingeben: "
+				   "DE": "RSD0007I --- Partion eingeben: "
 	}
 	MSG_PARTITION_INVALIDE = {
 				   "EN": "RSD0008E ??? Partition {0} does not exist",
@@ -204,12 +204,12 @@ class MessageCatalog(object):
 				   "DE": "RSD0010E ??? Root Partition wurde schon auf {0} umgezogen"
 	}
 	MSG_SOURCE_ROOT_PARTITION = {
-				   "EN": "RSD0011I --- Source root partition {0}: size: {1} - Used space: {2} - Type: {3}",
-				   "DE": "RSD0011I --- Quell root Partition {0}: Größe: {1} - Benutzter Speicherplatz: {2} - Typ: {3}"
+				   "EN": "RSD0011I --- Source root partition {0}: size: {1} Used space: {2} Type: {3}",
+				   "DE": "RSD0011I --- Quell root Partition {0}: Größe: {1} Benutzter Speicherplatz: {2} Typ: {3}"
 	}	
 	MSG_TESTING_PARTITION = {
-				   "EN": "RSD0012I --- Testing partition {0}: Size: {1} - Free space: {2} - Type: {3}",
-				   "DE": "RSD0012I --- Partition {0} wird getestet: Größe: {1} - Freier Speicherplatz: {2} - Typ: {3}",
+				   "EN": "RSD0012I --- Testing partition {0}: Size: {1} Free space: {2} Type: {3}",
+				   "DE": "RSD0012I --- Partition {0} wird getestet: Größe: {1} Freier Speicherplatz: {2} Typ: {3}",
 	}	
 	MSG_PARTITION_NOT_MOUNTED = {
 				   "EN": "RSD0013W !!! Skipping {0} - Partition is not mounted",
@@ -282,18 +282,12 @@ class MessageCatalog(object):
 				   "EN": "RSD0014W !!! Skipping {0} - Partition is too small with {1} free space",
 				   "DE": "RSD0014W !!! Partition {0} wird übersprungen - zu klein mit {1} freiem Speicherplatz"
 	}	
+	
 	MSG_PARTITION_TOO_SMALL_BUT_FREE_OK = {
-				   "EN": "RSD0030W !!! Skipping {0}. Partition is too small with partition size {1}. But there is enough free space of {2}. Use option --force to enable this partition",
-				   "DE": "RSD0030W !!! Partition {0} wird übersprungen.  Zu klein mit der Partitionsgröße {1}. Es ist aber genügend Platz von {2} frei. Benutze Option --force um diese Partition auswählen zu können"
+				   "EN": "RSD0030W !!! Skipping {0} - Partition is too small with partition size {1}. But there is enough free space of {2}. Use option --force to enable this partition",
+				   "DE": "RSD0030W !!! Partition {0} wird übersprungen - zu klein mit der Partitionsgröße {1}. Es ist aber genügend Platz von {2} frei. Benutze Option --force um diese Partition auswählen zu können"
 	}
-	MSG_INVALID_LOG_LEVEL = {
-				   "EN": "RSD0031E ??? Invalid loglevel {0}. Use option -h to list possible arguments",
-				   "DE": "RSD0031E ??? Ungültiger Loglevel {0}. Option -h zeigt die möglichen Argumente"
-	}
-	MSG_INVALID_LANGUAGE = {
-				   "EN": "RSD0032E ??? Invalid language {0}. Use option -h to list possible arguments",
-				   "DE": "RSD0032E ??? Ungültige Sprache {0}. Option -h zeigt die möglichen Argumente"
-	}	
+	
 	
 # baseclass for all the linux commands dealing with partitions
 
@@ -695,7 +689,8 @@ def collectEligiblePartitions():
 		if partitionMountPoint is None:
 			print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_NOT_MOUNTED, partition)
 
-		elif dm.getSize(partition) < sourceRootSize:
+#		elif dm.getSize(partition) < sourceRootSize:
+		elif True: 
 			if not force:
 				if dm.getSize(partition) < sourceRootSize and dm.getFree(partition) < sourceRootUsed:
 					print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_TOO_SMALL, partition, asReadable(dm.getSize(partition)))							
@@ -754,19 +749,18 @@ args = parser.parse_args()
 if args.log:
 	LOG_FILENAME = args.log
 
-if args.language:
-	if MessageCatalog.isSupportedLocale(args.language):
-		MessageCatalog.setLocale(args.language)
-	else:
-		print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_INVALID_LANGUAGE, args.language)
-		sys.exit(-1)
-
 if args.debug:
 	if args.debug in logLevels:
 		LOG_LEVEL = logLevels[args.debug]
 	else:
-		print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_INVALID_LOG_LEVEL, args.debug)
-		sys.exit(-1)
+		print "??? Invalid log level %s" % ( args.debug )
+		sys.exit(1)		
+
+if args.language:
+	if MessageCatalog.isSupportedLocale(args.language):
+		MessageCatalog.setLocale(args.language)
+	else:
+		print "??? Invalid language %s. Using default." % (args.language)
 
 if args.force:
 	force=True	
@@ -790,13 +784,12 @@ sys.stderr = MyLogger(sys.stderr, logger, logging.ERROR)
 
 if os.geteuid() != 0: 
 	print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_NEEDS_ROOT)
-  	sys.exit(-1)
+  	sys.exit(1)
 
 try:
 
 	print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_VERSION, GIT_CODEVERSION)
 	print LICENSE
-	print
 	
 	print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_DETECTED_PARTITIONS)
 	partitions = DeviceManager().getAllDetected()
