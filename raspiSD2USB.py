@@ -138,10 +138,14 @@ class MessageCatalog(object):
 
 	@staticmethod
 	def getLocalizedMessage(message, *messageArguments):
+		msgEyeCatcher={ "I": "---", "W": "!!!", "E": "???" }
 		if not MessageCatalog.__locale in message:
 			return message[MessageCatalog.MSG_UNDEFINED].format(message)
 		else:
-			return message[MessageCatalog.__locale].format(*messageArguments)
+			msg=message[MessageCatalog.__locale].split(' ')
+			eyeCatcher=msgEyeCatcher[msg[0][-1]]
+			message=msg[0]+" " + eyeCatcher + " " + " ".join(msg[1:])
+			return message.format(*messageArguments)
 
 	@staticmethod
 	def getDefaultLocale():
@@ -161,138 +165,143 @@ class MessageCatalog(object):
 		return locale.upper() in MessageCatalog.getSupportedLocales()
 	
 	MSG_UNDEFINED = {
-                   "EN": "RSD0001E ??? Undefined message for {0}",
-                   "DE": "RSD0001E ??? Unbekannte Meldung für {0}" }
+                   "EN": "RSD0001E Undefined message for {0}",
+                   "DE": "RSD0001E Unbekannte Meldung für {0}" }
 	MSG_VERSION = {
-                   "EN": "{0}",
-                   "DE": "{0}" 
+                   "EN": "RSD0002I {0}",
+                   "DE": "RSD0002I {0}" 
 	}
 	MSG_DETECTED_PARTITIONS = {
-				   "EN": "RSD0002I --- Detected following partitions",
-				   "DE": "RSD0002I --- Folgende Partitionen wurden erkannt"
+				   "EN": "RSD0003I Detected following partitions",
+				   "DE": "RSD0003I Folgende Partitionen wurden erkannt"
 	}
 	MSG_DETECTED_PARTITION = {
-				   "EN": "RSD0003I --- {0} - Size: {1} - Free: {2} - Mountpoint: {3} - Partitiontype: {4} - Partitiontable: {5}",
-				   "DE": "RSD0003I --- {0} - Größe: {1} - Frei: {2} - Mountpunkt: {3} - Partitionstyp: {4} - Partitiontabelle: {5}"
+				   "EN": "RSD0004I {0} - Size: {1} - Free: {2} - Mountpoint: {3} - Partitiontype: {4} - Partitiontable: {5}",
+				   "DE": "RSD0004I {0} - Größe: {1} - Frei: {2} - Mountpunkt: {3} - Partitionstyp: {4} - Partitiontabelle: {5}"
 	}
 	MSG_NO_ELIGIBLE_ROOT = {
-				   "EN": "RSD0004E ??? No eligible target root partitions found",
-				   "DE": "RSD0004E ??? Keine mögliche Ziel root Partition gefunden"
+				   "EN": "RSD0005E No eligible target root partitions found",
+				   "DE": "RSD0005E Keine mögliche Ziel root Partition gefunden"
 	}
 	MSG_ELIGIBLES_AS_ROOT = {
-				   "EN": "RSD0005I --- Following partitions are eligible as new target root partition",
-				   "DE": "RSD0005I --- Folgende Partitionen sind mögliche neue Ziel root Partition"
+				   "EN": "RSD0006I Following partitions are eligible as new target root partition",
+				   "DE": "RSD0006I Folgende Partitionen sind mögliche neue Ziel root Partition"
 	}
 	MSG_ELIGIBLE_AS_ROOT = {
-				   "EN": "RSD0006I --- {0}",
-				   "DE": "RSD0006I --- {0}"
+				   "EN": "RSD0007I {0}",
+				   "DE": "RSD0007I {0}"
 	}
 	MSG_ENTER_PARTITION = {
-				   "EN": "RSD0007I --- Enter partition: ",
-				   "DE": "RSD0007I --- Partition eingeben: "
+				   "EN": "RSD0008I Enter partition: ",
+				   "DE": "RSD0008I Partition eingeben: "
 	}
 	MSG_PARTITION_INVALIDE = {
-				   "EN": "RSD0008E ??? Partition {0} does not exist",
-				   "DE": "RSD0008E ??? Partition {0} gibt es nicht"
+				   "EN": "RSD0009E Partition {0} does not exist",
+				   "DE": "RSD0009E Partition {0} gibt es nicht"
 	}
 	MSG_TARGET_PARTITION_CANDIDATES = {
-				   "EN": "RSD0009I --- Target root partition candidates: {0}",
-				   "DE": "RSD0009I --- Ziel root Partitionskandidaten: {0}"
+				   "EN": "RSD0010I Target root partition candidates: {0}",
+				   "DE": "RSD0010I Ziel root Partitionskandidaten: {0}"
 	}
 	MSG_ROOT_ALREADY_MOVED = {
-				   "EN": "RSD0010E ??? Root partition already moved to {0}",
-				   "DE": "RSD0010E ??? Root Partition wurde schon auf {0} umgezogen"
+				   "EN": "RSD0011E Root partition already moved to {0}",
+				   "DE": "RSD0011E Root Partition wurde schon auf {0} umgezogen"
 	}
 	MSG_SOURCE_ROOT_PARTITION = {
-				   "EN": "RSD0011I --- Source root partition {0}: size: {1} - Used space: {2} - Type: {3}",
-				   "DE": "RSD0011I --- Quell root Partition {0}: Größe: {1} - Benutzter Speicherplatz: {2} - Typ: {3}"
+				   "EN": "RSD0012I Source root partition {0}: size: {1} - Used space: {2} - Type: {3}",
+				   "DE": "RSD0012I Quell root Partition {0}: Größe: {1} - Benutzter Speicherplatz: {2} - Typ: {3}"
 	}	
 	MSG_TESTING_PARTITION = {
-				   "EN": "RSD0012I --- Testing partition {0}: Size: {1} - Free space: {2} - Type: {3}",
-				   "DE": "RSD0012I --- Partition {0} wird getestet: Größe: {1} - Freier Speicherplatz: {2} - Typ: {3}",
+				   "EN": "RSD0013I Testing partition {0}: Size: {1} - Free space: {2} - Type: {3}",
+				   "DE": "RSD0013I Partition {0} wird getestet: Größe: {1} - Freier Speicherplatz: {2} - Typ: {3}",
 	}	
 	MSG_PARTITION_NOT_MOUNTED = {
-				   "EN": "RSD0013W !!! Skipping {0} - Partition is not mounted",
-				   "DE": "RSD0013W !!! Partition {0} wird übersprungen - nicht gemounted"
+				   "EN": "RSD0014W Skipping {0} - Partition is not mounted",
+				   "DE": "RSD0014W Partition {0} wird übersprungen - nicht gemounted"
 	}	
 	MSG_PARTITION_TOO_SMALL = {
-				   "EN": "RSD0014W !!! Skipping {0} - Partition is too small with size {1} ",
-				   "DE": "RSD0014W !!! Partition {0} wird übersprungen - zu klein mit der Größe {1} "
+				   "EN": "RSD0015W Skipping {0} - Partition is too small with size {1} ",
+				   "DE": "RSD0015W Partition {0} wird übersprungen - zu klein mit der Größe {1} "
 	}	
 	MSG_PARTITION_INVALID_TYPE = {
-				   "EN": "RSD0015W !!! Skipping {0} - Partition has incorrect type {1}",
-				   "DE": "RSD0015W !!! Partition {0} wird übersprungen - Partitionstyp {1} stimmt nicht"
+				   "EN": "RSD0016W Skipping {0} - Partition has incorrect type {1}",
+				   "DE": "RSD0016W Partition {0} wird übersprungen - Partitionstyp {1} stimmt nicht"
 	}	
 	MSG_PARTITION_INVALID_FILEPARTITION = {
-				   "EN": "RSD0016W !!! Skipping {0} - Partition has Partitiontabletype {1} but has to be gpt because multiple disks are attached",
-				   "DE": "RSD0016W !!! Partition {0} wird übersprungen - Partition hat Partitionstabellenbtyp {1} der aber gpt sein mauss da mehrere Platten angeschlossen sind"
+				   "EN": "RSD0017W Skipping {0} - Partition has Partitiontabletype {1} but has to be gpt because multiple disks are attached",
+				   "DE": "RSD0017W Partition {0} wird übersprungen - Partition hat Partitionstabellenbtyp {1} der aber gpt sein mauss da mehrere Platten angeschlossen sind"
 	}	
 	MSG_PARTITION_NOT_EMPTY = {
-				   "EN": "RSD0017W !!! Skipping {0} - Partition is not empty or there are more directories than /home/pi",
-				   "DE": "RSD0017W !!! Partition {0} wird übersprungen - Partition ist nicht leer oder hat nicht nur das /home/pi Verzeichnis"
+				   "EN": "RSD0018W Skipping {0} - Partition is not empty or there are more directories than /home/pi",
+				   "DE": "RSD0018W Partition {0} wird übersprungen - Partition ist nicht leer oder hat nicht nur das /home/pi Verzeichnis"
 	}	
 	MSG_PARTITION_UNKNOWN_SKIP = {
-				   "EN": "RSD0018E ??? Skipping {0} for unknown reasons",
-				   "DE": "RSD0018E ??? Partition {0} wird aus unbekannten Gründen übersprungen"
+				   "EN": "RSD0019E Skipping {0} for unknown reasons",
+				   "DE": "RSD0019E Partition {0} wird aus unbekannten Gründen übersprungen"
 	}				
 	MSG_PARTITION_WILL_BE_COPIED = {
-				   "EN": "RSD0019I --- Partition {0} will be copied to partition {1} and become new root partition",
-				   "DE": "RSD0019I --- Partition {0} wird auf Partition {1} kopiert und wird die neue root Partition"
+				   "EN": "RSD0020I Partition {0} will be copied to partition {1} and become new root partition",
+				   "DE": "RSD0020I Partition {0} wird auf Partition {1} kopiert und wird die neue root Partition"
 	}				
 	MSG_ARE_YOU_SURE = {
-				   "EN": "RSD0020I --- Are you sure (y/N) ? ",
-				   "DE": "RSD0020I --- Bist Du sicher (j/N) ? "
+				   "EN": "RSD0021I Are you sure (y/N) ? ",
+				   "DE": "RSD0021I Bist Du sicher (j/N) ? "
 	}				
 	MSG_COPYING_ROOT = {
-				   "EN": "RSD0021I --- Copying rootpartition ... Please be patient",
-				   "DE": "RSD0021I --- Rootpartition wir kopiert ... Bitte Geduld"
+				   "EN": "RSD0022I Copying rootpartition ... Please be patient",
+				   "DE": "RSD0022I Rootpartition wir kopiert ... Bitte Geduld"
 	}				
 	MSG_UPDATING_FSTAB = {
-				   "EN": "RSD0022I --- Updating /etc/fstab on {0}",
-				   "DE": "RSD0022I --- /etc/fstab wird auf {0} angepasst"
+				   "EN": "RSD0023I Updating /etc/fstab on {0}",
+				   "DE": "RSD0023I /etc/fstab wird auf {0} angepasst"
 	}				
 	MSG_SAVING_OLD_CMDFILE = {
-				   "EN": "RSD0023I --- Saving {0} on {1} as {2}",
-				   "DE": "RSD0023I --- {0} wird auf {1} als {2} gesichert"
+				   "EN": "RSD0024I Saving {0} on {1} as {2}",
+				   "DE": "RSD0024I {0} wird auf {1} als {2} gesichert"
 	}				
 	MSG_UPDATING_CMDFILE = {
-				   "EN": "RSD0024I --- Updating {0} on {1}",
-				   "DE": "RSD0024I --- {0} wird auf {1} angepasst"
+				   "EN": "RSD0025I Updating {0} on {1}",
+				   "DE": "RSD0025I {0} wird auf {1} angepasst"
 	}				
 	MSG_DONE = {
-				   "EN": "RSD0025I --- Finished moving root partition from {0} to partition {1}",
-				   "DE": "RSD0025I --- Umzug von root Partition von {0} auf Partition {1} beendet"
+				   "EN": "RSD0026I Finished moving root partition from {0} to partition {1}",
+				   "DE": "RSD0026I Umzug von root Partition von {0} auf Partition {1} beendet"
 	}				
 	MSG_FAILURE = {
-				   "EN": "RSD0026E ??? Unexpected exception caught: '{0}'.\nSee log file {1} for details",
-				   "DE": "RSD0026E ??? Unerwartete Ausnahme: '{0}'.\nIn Logfile {1} finden sich weitere Fehlerdetails"
+				   "EN": "RSD0027E Unexpected exception caught: '{0}'.\nSee log file {1} for details",
+				   "DE": "RSD0027E Unerwartete Ausnahme: '{0}'.\nIn Logfile {1} finden sich weitere Fehlerdetails"
 	}				
 	MSG_NEEDS_ROOT = {
-				   "EN": "RSD0027E ??? Script has to be invoked as root or with sudo",
-				   "DE": "RSD0027E ??? Das Script muss als root oder mit sudo aufgerufen werden" 
+				   "EN": "RSD0028E Script has to be invoked as root or with sudo",
+				   "DE": "RSD0028E Das Script muss als root oder mit sudo aufgerufen werden" 
 	}
-
-#	Free slot
-
+	MSG_ROOTPARTITION_NOT_ON_SDCARD = {
+				   "EN": "RSD0029E Current root partition {0} is not located on SD card any more",
+				   "DE": "RSD0029E Die aktuelle Rootpartition {0} befindet sich nicht mehr auf der SD Karte"
+	}
 	MSG_TARGET_PARTITION_SMALLER_THAN_SOURE_PARTITION = {
-				   "EN": "RSD0029W !!! Partition {0} has only {1} free space and is smaller than root partition of size {2}",
-				   "DE": "RSD0029W !!! Partition {0} hat nur {1} freien Speicherplatz und ist kleiner als die root Partition fer Größe {2}"
+				   "EN": "RSD0030W Partition {0} has only {1} free space and is smaller than root partition of size {2}",
+				   "DE": "RSD0030W Partition {0} hat nur {1} freien Speicherplatz und ist kleiner als die root Partition fer Größe {2}"
 	}
 	MSG_PARTITION_FREE_SPACE_TOO_SMALL = {
-				   "EN": "RSD0014W !!! Skipping {0} - Partition is too small with {1} free space",
-				   "DE": "RSD0014W !!! Partition {0} wird übersprungen - zu klein mit {1} freiem Speicherplatz"
+				   "EN": "RSD0031W Skipping {0} - Partition is too small with {1} free space",
+				   "DE": "RSD0031W Partition {0} wird übersprungen - zu klein mit {1} freiem Speicherplatz"
 	}	
 	MSG_PARTITION_TOO_SMALL_BUT_FREE_OK = {
-				   "EN": "RSD0030W !!! Skipping {0}. Partition is too small with partition size {1}. But there is enough free space of {2}. Use option --force to enable this partition",
-				   "DE": "RSD0030W !!! Partition {0} wird übersprungen.  Zu klein mit der Partitionsgröße {1}. Es ist aber genügend Platz von {2} frei. Benutze Option --force um diese Partition auswählen zu können"
+				   "EN": "RSD0032W Skipping {0}. Partition is too small with partition size {1}. But there is enough free space of {2}. Use option --force to enable this partition",
+				   "DE": "RSD0032W Partition {0} wird übersprungen.  Zu klein mit der Partitionsgröße {1}. Es ist aber genügend Platz von {2} frei. Benutze Option --force um diese Partition auswählen zu können"
 	}
 	MSG_INVALID_LOG_LEVEL = {
-				   "EN": "RSD0031E ??? Invalid loglevel {0}. Use option -h to list possible arguments",
-				   "DE": "RSD0031E ??? Ungültiger Loglevel {0}. Option -h zeigt die möglichen Argumente"
+				   "EN": "RSD0033E Invalid loglevel {0}. Use option -h to list possible arguments",
+				   "DE": "RSD0033E Ungültiger Loglevel {0}. Option -h zeigt die möglichen Argumente"
 	}
 	MSG_INVALID_LANGUAGE = {
-				   "EN": "RSD0032E ??? Invalid language {0}. Use option -h to list possible arguments",
-				   "DE": "RSD0032E ??? Ungültige Sprache {0}. Option -h zeigt die möglichen Argumente"
+				   "EN": "RSD0034E Invalid language {0}. Use option -h to list possible arguments",
+				   "DE": "RSD0034E Ungültige Sprache {0}. Option -h zeigt die möglichen Argumente"
+	}	
+	MSG_NO_CMDLINE_FOUND = {
+				   "EN": "RSD0035E {0} does not exist",
+				   "DE": "RSD0035E {0} existiert nicht"
 	}	
 	
 # baseclass for all the linux commands dealing with partitions
@@ -606,7 +615,8 @@ class DeviceManager():
 	def getSDPartitions(self):
 		
 		if not os.path.exists(CMD_FILE):
-			raise Exception("Unable to find %s" % (CMD_FILE))
+			print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_NO_CMDLINE_FOUND, CMD_FILE)
+			sys.exit(-1)
 			
 		result = executeCommand('cat ' + CMD_FILE)
 
@@ -657,8 +667,9 @@ def collectEligiblePartitions():
 	logger.debug("cmdPartition %s - %s " % (cmdPartition, cmdType))
 
 	if cmdPartition != ROOT_PARTITION:
-		raise Exception ("Current root partition %s is not located on %s " % (cmdPartition, ROOT_PARTITION))
-
+		print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_ROOTPARTITION_NOT_ON_SDCARD, cmdPartition)
+		sys.exit(-1)
+		
 	availableTargetPartitions = []
 	
 	for partition in dm.getPartitions():
