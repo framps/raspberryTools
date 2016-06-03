@@ -700,7 +700,7 @@ def collectEligiblePartitions():
 				if dm.getSize(partition) < sourceRootSize and dm.getFree(partition) < sourceRootUsed:
 					print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_TOO_SMALL, partition, asReadable(dm.getSize(partition)))							
 				else:
-					print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_TOO_SMALL_BUT_FREE_OK, partition, asReadable(dm.getFree(partition)), asReadable(dm.getFree(partition)))
+					print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_PARTITION_TOO_SMALL_BUT_FREE_OK, partition, asReadable(dm.getSize(partition)), asReadable(dm.getFree(partition)))
 					
 			else:
 				if dm.getFree(partition) < sourceRootUsed:
