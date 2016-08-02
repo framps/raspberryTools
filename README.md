@@ -5,6 +5,8 @@ Collection of some useful tools for Raspberry Pi
 
 2. raspiSD2USB.py - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/475-move-of-root-partition-of-raspberry-to-an-external-partition/)
 
+3. raspiSD2USB.sh - Predecessor of raspiSD2USB written in bash. Not maintained any more. Feel free to fork and open pull requests. 
+
 ## raspiNetInfo.sh
 
 Tests executed:
