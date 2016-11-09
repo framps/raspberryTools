@@ -303,6 +303,10 @@ class MessageCatalog(object):
 				   "EN": "RSD0035E {0} does not exist",
 				   "DE": "RSD0035E {0} existiert nicht"
 	}	
+	MSG_FOUND_IN_FSTAB = {
+				   "EN": "RSD0036W Target partition {0} already used in fstab. Commenting out this line",
+				   "DE": "RSD0036W Zielpartition {0} wird in der fstab schon benutzt. Die Zeile wird auskommentiert"
+	}
 	
 # baseclass for all the linux commands dealing with partitions
 
@@ -854,6 +858,14 @@ try:
 	else:
 		targetID = targetRootPartition
 	logger.debug("targetID: %s " % (targetID))
+
+	# check if root partition is already used in fstab
+	command = 'grep -q "%s" %s/etc/fstab' % (targetRootPartition, targetDirectory)
+	(rc, result) = executeCommand(command, noRC = False)
+	if rc == 0:
+		print MessageCatalog.getLocalizedMessage(MessageCatalog.MSG_FOUND_IN_FSTAB, targetRootPartition)
+		command = 'sed -i "s|^%s|# commented out by %s|g" %s/etc/fstab' % (targetRootPartition, MYNAME, targetDirectory)
+		executeCommand(command)
 	
 	# change /etc/fstab on target
 	command = "sed -i \"s|%s|%s|\" %s/etc/fstab" % (sourceRootPartition, targetID, targetDirectory)
