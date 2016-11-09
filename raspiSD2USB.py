@@ -70,7 +70,7 @@ MYSELF = os.path.basename(__file__)
 MYNAME = os.path.splitext(os.path.split(MYSELF)[1])[0]
 LICENSE="This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions"
 
-VERSION = "0.2.3.6"    
+VERSION = "0.2.3.7"    
 
 try:
 	GIT_DATE = "$Date$"
