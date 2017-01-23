@@ -70,6 +70,7 @@ cd /mnt/target
 
 sed -i "s,root=/dev/mmcblk0p2,root=${TARGET}2," /mnt/target/boot/cmdline.txt
 sed -i "s,/dev/mmcblk0p,$TARGET," /mnt/target/etc/fstab
+echo program_usb_boot_mode=1 | tee -a /mnt/target/boot/config.txt
 
 cd ~
 umount /mnt/target/boot 
