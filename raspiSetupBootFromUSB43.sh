@@ -30,14 +30,13 @@ fi
 TARGET="/dev/sda"
 
 fdisk -l $TARGET
-echo "Priming $TARGET now. Are you sure? [j/N]"
+echo "Priming $TARGET now. Are you sure? [y/N]"
 read answer
 answer=${answer,,}
-if [[ ! answer =~ ^[yj] ]]; then
+if [[ ! $answer =~ ^[yj] ]]; then
 	exit 0
 fi
-echo "j"
-exit
+
 dd if=/dev/zero of=$TARGET bs=1MB count=10
 parted $TARGET << EOF
 mktable msdos 
