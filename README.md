@@ -5,7 +5,9 @@ Collection of some useful tools for Raspberry Pi
 
 2. raspiSD2USB.py - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/475-move-of-root-partition-of-raspberry-to-an-external-partition/)
 
-3. raspiSD2USB.sh - Predecessor of raspiSD2USB written in bash. Not maintained any more. Feel free to fork and open pull requests. 
+3. raspiSD2USB.sh - Predecessor of raspiSD2USB written in bash. Not maintained any more. Feel free to fork and open pull requests.
+
+4. wlan_check.sh - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
 
 ## raspiNetInfo.sh
 
@@ -27,7 +29,7 @@ Sensitive information like external IPs, MAC addresses, SSIDs and keys in config
 pi@raspberrypi ~ $ ./raspiNetInfo.sh -e
 This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions
 [spoiler][code]
-raspiNetInfo.sh V0.2.9, $/$ - 
+raspiNetInfo.sh V0.2.9, $/$ -
 --- RNI010I: Starting collection of data and network analysis. This may take some time ...
 --- RNI012I: Ping of 8.8.8.8 successful
 --- RNI012I: Ping of www.google.com successful
@@ -60,9 +62,9 @@ iface default inet dhcp
 127.0.0.1	localhost raspberrypi.@@@@@@@@@@.de
 127.0.1.1	owncloud
 --- ip r s | egrep "(eth|wlan)"
-default via 192.168.0.1 dev eth0 
-192.168.0.0/24 dev eth0  proto kernel  scope link  src 192.168.0.109 
-192.168.0.0/24 dev wlan0  proto kernel  scope link  src 192.168.0.118 
+default via 192.168.0.1 dev eth0
+192.168.0.0/24 dev eth0  proto kernel  scope link  src 192.168.0.109
+192.168.0.0/24 dev wlan0  proto kernel  scope link  src 192.168.0.118
 --- ip n s
 192.168.0.6 dev wlan0 lladdr @@:@@:@@:@@:@@:@@ STALE
 192.168.0.3 dev eth0 lladdr @@:@@:@@:@@:@@:@@ STALE
@@ -83,7 +85,7 @@ default via 192.168.0.1 dev eth0
 pi@raspberrypi ~ $ ./raspiNetInfo.sh -s MySSID
 This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions
 [spoiler][code]
-raspiNetInfo.sh V0.2.9, $/$ - 
+raspiNetInfo.sh V0.2.9, $/$ -
 --- RNI010I: Starting collection of data and network analysis. This may take some time ...
 --- RNI012I: Ping of 8.8.8.8 successful
 ??? RNI013E: Ping of www.google.com failed
@@ -116,9 +118,9 @@ iface default inet dhcp
 127.0.0.1	localhost raspberrypi.@@@@@@@@@.de
 127.0.1.1	owncloud
 --- ip r s | egrep "(eth|wlan)"
-default via 192.168.0.1 dev eth0 
-192.168.0.0/24 dev eth0  proto kernel  scope link  src 192.168.0.109 
-192.168.0.0/24 dev wlan0  proto kernel  scope link  src 192.168.0.118 
+default via 192.168.0.1 dev eth0
+192.168.0.0/24 dev eth0  proto kernel  scope link  src 192.168.0.109
+192.168.0.0/24 dev wlan0  proto kernel  scope link  src 192.168.0.118
 --- ip n s
 192.168.0.6 dev wlan0 lladdr @@:@@:@@:@@:@@:@@ STALE
 192.168.0.3 dev eth0 lladdr @@:@@:@@:@@:@@:@@ STALE
@@ -132,9 +134,9 @@ default via 192.168.0.1 dev eth0
 --- lsusb | grep -v "root hub" | grep -i "wire"
 Bus 001 Device 006: ID 0846:9030 NetGear, Inc. WNA1100 Wireless-N 150 [Atheros AR9271]
 --- iwconfig (eth und wlan)
-wlan0     IEEE 802.11bgn  ESSID:"@@@@@@@@"  
-          Mode:Managed  Frequency:2.412 GHz  Access Point: @@:@@:@@:@@:@@   
-          Link Quality=40/70  Signal level=-70 dBm  
+wlan0     IEEE 802.11bgn  ESSID:"@@@@@@@@"
+          Mode:Managed  Frequency:2.412 GHz  Access Point: @@:@@:@@:@@:@@
+          Link Quality=40/70  Signal level=-70 dBm
           Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
           Tx excessive retries:0  Invalid misc:5308   Missed beacon:0
 --- /etc/wpa_supplicant/wpa_supplicant.conf
@@ -157,8 +159,8 @@ network={
 ## raspiSD2USB.py
 
 Moves the root parition to an external partition and modifies /boot/cmdline.txt accordingly.
-The original /boot/cmdline.txt is saved as /boot/cmdline.txt.sd just in case it's required to 
-revert to use the SD card as root partition. 
+The original /boot/cmdline.txt is saved as /boot/cmdline.txt.sd just in case it's required to
+revert to use the SD card as root partition.
 
 ### Sample output
 
@@ -187,8 +189,8 @@ tar: Write checkpoint 1000
 ...
 tar: Write checkpoint 236000
 tar: proc: implausibly old time stamp 1970-01-01 01:00:00
-RSD0022I --- Updating /etc/fstab on /dev/sda1 
+RSD0022I --- Updating /etc/fstab on /dev/sda1
 RSD0023I --- Saving /boot/cmdline.txt on /dev/sda1
 RSD0024I --- Updating /boot/cmdline.txt on /dev/sda1
-RSD0025I --- Finished moving root partition from /dev/mmcblk0p2 to partition /dev/sda1 
+RSD0025I --- Finished moving root partition from /dev/mmcblk0p2 to partition /dev/sda1
 ```
