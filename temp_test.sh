@@ -1,15 +1,15 @@
 #!/bin/bash
 #
-# Small script which generates 100% CPU load on a Raspberry and 
-# monitors the CPU temperature. Useful to test the effectiveness of 
+# Small script which generates 100% CPU load on a Raspberry and
+# monitors the CPU temperature. Useful to test the effectiveness of
 # a heat sink and/or a fan.
-# 
-# Based on 
-# temp_test.sh - Raspberry Pi 4 Cooling - Christopher Barnatt 
+#
+# Based on
+# temp_test.sh - Raspberry Pi 4 Cooling - Christopher Barnatt
 # Youtube channel: ExplainingComputers - https://www.youtube.com/channel/UCbiGcwDWZjz05njNPrJU7jA
 # Enhanced by framp
 #
-# Copyright (C) 2019 framp at linux-tips-and-tricks dot de 
+# Copyright (C) 2019 framp at linux-tips-and-tricks dot de
 
 # defaults
 WATCH_INTERVAL=15 # seconds
@@ -30,16 +30,16 @@ function watch() {
 		vcgencmd measure_temp
 		sleep $WATCH_INTERVAL
 		(( watch_offset += $WATCH_INTERVAL ))
-	done 
+	done
 }
 
 function cleanup() {
-	(( $VERBOSE )) && echo "... Cleanup $WATCH_PID" 
+	(( $VERBOSE )) && echo "... Cleanup $WATCH_PID"
 	kill -9 $WATCH_PID  &>/dev/null
 	trap - SIGINT SIGTERM EXIT
-	exit 
+	exit
 }
- 
+
 clear
 watch_offset=0
 
@@ -59,6 +59,11 @@ while getopts "h?i:p:sv" opt; do
 	;;
     esac
 done
+
+if ! which sysbench; then
+	echo "??? Missing sysbench. Install first with 'sudo apt-get install sysbench'"
+	exit 42
+fi
 
 echo "Generate 100% CPU utilization and measure CPU temperature ..."
 if (( ! $SILENT )); then
@@ -81,4 +86,4 @@ echo -n "Final "
 vcgencmd measure_temp
 END_TIME=$SECONDS
 DURATION_TIME=$(( $END_TIME - $START_TIME ))
-TZ=UTC0 printf 'Time used: %(%H:%M:%S)T\n' $DURATION_TIME 
+TZ=UTC0 printf 'Time used: %(%H:%M:%S)T\n' $DURATION_TIME
