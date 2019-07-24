@@ -29,7 +29,7 @@ function analyze() {
 }
 
 t=$(vcgencmd get_throttled | cut -f 2 -d "=" )
-echo "Throttling in hex ('occured' bits reset on boot only): $t"
+echo "Throttling in hex : $t ('occured' bits reset on boot only)"
 analyze $t
 
 t=$(vcgencmd get_throttled 0xf | cut -f 2 -d "=" )
