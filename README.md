@@ -9,6 +9,10 @@ Collection of some useful tools for Raspberry Pi
 
 4. wlan_check.sh - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
 
+5. check_throttled.sh - Check Raspberry throttled bits and display their meaning if throtteling happened since boot or since last script invocation
+
+6. temp_test.sh - Small script which generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
+
 ## raspiNetInfo.sh
 
 Tests executed:
@@ -193,4 +197,38 @@ RSD0022I --- Updating /etc/fstab on /dev/sda1
 RSD0023I --- Saving /boot/cmdline.txt on /dev/sda1
 RSD0024I --- Updating /boot/cmdline.txt on /dev/sda1
 RSD0025I --- Finished moving root partition from /dev/mmcblk0p2 to partition /dev/sda1
+```
+
+### check_throttling.sh
+
+```
+pi@raspberrypi-buster:~ $ ./check_throttled.sh
+Throttling in hex (bits reset on boot): 0x20000
+Bit 17 set: Arm frequency capped has occurred
+Throttling in hex: 0x20002 (bits reset every call)
+```
+
+### temp_test.sh
+
+```
+pi@raspberrypi-buster:~ $ ./temp_test.sh -i 5
+Generate 100% CPU utilization and measure CPU temperature ...
+CPU watch interval: 5s
+Watch +0s:temp=55.8'C
+Starting run 1: +0s:temp=56.4'C
+Watch +5s:temp=64.5'C
+Watch +10s:temp=67.7'C
+Watch +15s:temp=70.4'C
+Watch +20s:temp=73.1'C
+Watch +25s:temp=74.1'C
+Watch +30s:temp=76.3'C
+Watch +35s:temp=77.4'C
+Watch +40s:temp=79.0'C
+Watch +45s:temp=80.6'C
+Watch +50s:temp=80.6'C
+Watch +55s:temp=81.1'C
+Watch +60s:temp=81.7'C
+Watch +65s:temp=82.2'C
+Watch +70s:temp=82.7'C
+Watch +75s:temp=82.7'C
 ```
