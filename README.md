@@ -9,7 +9,7 @@ Collection of some useful tools for Raspberry Pi
 
 4. wlan_check.sh - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
 
-5. check_throttled.sh - Check Raspberry throttled bits and display their meaning if throtteling happened since boot or since last script invocation
+5. check_throttled.sh - Check Raspberry throttled bits with `vcgencmd get_throttled` and display their meaning if throtteling happened since boot or since last script invocation
 
 6. temp_test.sh - Small script which generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
 
