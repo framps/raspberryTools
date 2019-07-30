@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# Retrieve throttling bits of Raspberry and report their meaning
+# Retrieve throttling bits of Raspberry and report their semantic
 #
 # Copyright (C) 2019 framp at linux-tips-and-tricks dot de
 #
-# Meaning according https://github.com/raspberrypi/documentation/blob/JamesH65-patch-vcgencmd-vcdbg-docs/raspbian/applications/vcgencmd.md
+# Throttle bit semantic according https://github.com/raspberrypi/documentation/blob/JamesH65-patch-vcgencmd-vcdbg-docs/raspbian/applications/vcgencmd.md
 # 0-
 
 m=( "Under-voltage detected" "Arm frequency capped" "Currently throttled" "Soft temperature limit active" \
@@ -12,19 +12,19 @@ m=( "Under-voltage detected" "Arm frequency capped" "Currently throttled" "Soft 
 "Under-voltage has occurred" "Arm frequency capped has occurred" "Throttling has occurred" "Soft temperature limit has occurred" )
 
 function analyze() {
-	b=$(perl -e "printf \"%08b\\n\", $1" 2>/dev/null)
-	i=0
-	while [[ -n $b ]]; do
-		t=${b:${#b}-1:1}
-		if (( $t != 0 )); then
-			if (( $i <= ${#m[@]} - 1 )) && [[ -n ${m[$i]} ]]; then
+	b=$(perl -e "printf \"%08b\\n\", $1" 2>/dev/null) 				# convert hex number into binary number
+	i=0 															# start with bit 0 (LSb)
+	while [[ -n $b ]]; do											# there are still bits to process
+		t=${b:${#b}-1:1} 											# extract LSb
+		if (( $t != 0 )); then 										# bit set
+			if (( $i <= ${#m[@]} - 1 )) && [[ -n ${m[$i]} ]]; then 	# bit meaning is defined
 				echo "Bit $i set: ${m[$i]}"
-			elif [[ -z ${m[$i]} ]] || (( $i > ${#m[@]} - 1 )); then
+			else													# bit meaning unknown
 				echo "Bit $i set: meaning unknown"
 			fi
 		fi
-		b=${b::-1}
-		(( i++ ))
+		b=${b::-1} 													# remove LSb from throttle bits
+		(( i++ )) 													# inc bit counter
 	done
 }
 
