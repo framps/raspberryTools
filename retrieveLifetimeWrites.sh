@@ -43,7 +43,6 @@ function bytesToHuman() {
 
 function echoLTW() { # disk
 	part=${1#"/dev/"}
-	part=${part::-1}
 	if [[ -e /sys/fs/ext4/$part/lifetime_write_kbytes ]]; then
 		size=$(( $(cat /sys/fs/ext4/$part/lifetime_write_kbytes) * 1024 ))
 		echo "$1 $(bytesToHuman $size)"
@@ -52,7 +51,8 @@ function echoLTW() { # disk
 
 if [[ $1 == "-a" ]]; then
 	blkid | awk '/TYPE="ext/ { print $1; }; ' | while read disk; do
-		echoLTW "$disk"
+		part=${disk::-1}
+		echoLTW "$part"
 	done
 else
 	if [[ ! -b $1 ]]; then
