@@ -20,11 +20,15 @@ if (( $# == 0 || $# > 1 )); then
 	exit 1
 fi
 
+function echoTBW() { # disk
+	if (( ! $(cat /sys/block/$1/queue/rotational ) )); then
+		smartctl -A "/dev/$1" | awk -v "disk=/dev/$1" '/^241/ { print "TBW of " disk ": "($10 * 512) * 1.0e-12, "TB" } '
+	fi
+}
+
 if [[ $1 == "-a" ]]; then
 	lsblk | awk '$6 == "disk" { print $1; }; ' | while read disk; do
-		if (( ! $(cat /sys/block/$disk/queue/rotational ) )); then
-			smartctl -A "/dev/$disk" | awk -v "disk=/dev/$disk" '/^241/ { print "TBW of " disk ": "($10 * 512) * 1.0e-12, "TB" } '
-		fi
+		echoTBW "$disk"
 	done
 else
 	if [[ ! -b $1 ]]; then
@@ -35,7 +39,7 @@ else
 		echo "$1 is no SSD"
 		exit 1
 	else
-		smartctl -A "/dev/$disk" | awk -v "disk=/dev/$disk" '/^241/ { print "TBW of " disk ": "($10 * 512) * 1.0e-12, "TB" } '
+		echoTBW "$1"
 	fi
 fi
 
