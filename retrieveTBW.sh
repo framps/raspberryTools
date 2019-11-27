@@ -20,9 +20,32 @@ if (( $# == 0 || $# > 1 )); then
 	exit 1
 fi
 
-function echoTBW() { # disk
+# Borrowed from http://unix.stackexchange.com/questions/44040/a-standard-tool-to-convert-a-byte-count-into-human-kib-mib-etc-like-du-ls1
+
+function bytesToHuman() {
+	local b d s S
+	local sign=1
+	b=${1:-0}; d=''; s=0; S=(Bytes {K,M,G,T,E,P,Y,Z}iB)
+	if (( b < 0 )); then
+		sign=-1
+		(( b=-b ))
+	fi
+	while ((b > 1024)); do
+		d="$(printf ".%02d" $((b % 1024 * 100 / 1024)))"
+		b=$((b / 1024))
+		let s++
+	done
+	if (( sign < 0 )); then
+		(( b=-b ))
+	fi
+	echo "$b$d ${S[$s]}"
+}
+
+function echoTBW() { # disk (no /dev)
 	if (( ! $(cat /sys/block/$1/queue/rotational ) )); then
-		smartctl -A "/dev/$1" | awk -v "disk=/dev/$1" '/^241/ { print "TBW of " disk ": "($10 * 512) * 1.0e-12, "TB" } '
+		sectorSize=$(smartctl /dev/$1 --all |grep "Sector Size" | awk '{ print $3 } ' )
+		totalLBAsWritten=$(smartctl -A "/dev/$1" | awk -v disk="/dev/$1" -v sectorSize="$sectorSize" '/^241/ { print ($10 * sectorSize) } ')
+		echo "TBW of $1: $(bytesToHuman $totalLBAsWritten)"
 	fi
 }
 
@@ -35,11 +58,12 @@ else
 		echo "$1 is no disk"
 		exit 1
 	fi
-	if [[ ! -e /sys/block/$1/queue/rotational ]] || (( $(cat /sys/block/$1/queue/rotational ) )); then
+	part=${1#"/dev/"}
+	if [[ ! -e /sys/block/$part/queue/rotational ]] || (( $(cat /sys/block/$part/queue/rotational ) )); then
 		echo "$1 is no SSD"
 		exit 1
 	else
-		echoTBW "$1"
+		echoTBW "$part"
 	fi
 fi
 

@@ -13,10 +13,10 @@ if (( $UID != 0 )); then
 fi
 
 if (( $# == 0 || $# > 1 )); then
-	echo "Purpose: Retrieve lifetime writes (kB) of ext2/3/4 disks"
-	echo "Syntax:  'sudo $me -a' to retrieve LTW of all existing ext disks"
-	echo "         'sudo $me <disk>' to retrieve LTW of passed ext disk"
-	echo "Example: 'sudo $me /dev/sda' or 'sudo $me -a'"
+	echo "Purpose: Retrieve lifetime writes (kB) of ext2/3/4 partitions"
+	echo "Syntax:  'sudo $me -a' to retrieve LTW of all existing ext partitions"
+	echo "         'sudo $me <disk>' to retrieve LTW of passed ext partitions"
+	echo "Example: 'sudo $me /dev/sda1' or 'sudo $me -a'"
 	exit 1
 fi
 
@@ -41,11 +41,11 @@ function bytesToHuman() {
 	echo "$b$d ${S[$s]}"
 }
 
-function echoLTW() { # disk
+function echoLTW() { # partition (no /dev)
 	part=${1#"/dev/"}
 	if [[ -e /sys/fs/ext4/$part/lifetime_write_kbytes ]]; then
 		size=$(( $(cat /sys/fs/ext4/$part/lifetime_write_kbytes) * 1024 ))
-		echo "$1 $(bytesToHuman $size)"
+		echo "LTW of $1: $(bytesToHuman $size)"
 	fi
 }
 
