@@ -13,6 +13,8 @@ Collection of some useful tools for Raspberry Pi
 
 6. temp_test.sh - Small script which generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
 
+7. retrieveTBW.sh - Small script which either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. helps to get an idea when the SSD will reach it's end of life.
+
 ## raspiNetInfo.sh
 
 Tests executed:
