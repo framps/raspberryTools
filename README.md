@@ -1,3 +1,5 @@
+![](https://img.shields.io/github/last-commit/framps/raspberryTools.svg?style=flat)
+
 # raspberryTools
 Collection of some useful tools for Raspberry Pi
 
