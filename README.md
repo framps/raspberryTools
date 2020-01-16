@@ -15,7 +15,9 @@ Collection of some useful tools for Raspberry Pi
 
 6. temp_test.sh - Small script which generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
 
-7. retrieveTBW.sh - Small script which either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. helps to get an idea when the SSD will reach it's end of life.
+7. retrieveTBW.sh - Small script which either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. Helps to get an idea when the SSD will reach it's end of life.
+
+8. retrieveLifetimeWrites.sh - Small script which either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card will reach it's end of life.
 
 ## raspiNetInfo.sh
 
@@ -235,4 +237,19 @@ Watch +60s:temp=81.7'C
 Watch +65s:temp=82.2'C
 Watch +70s:temp=82.7'C
 Watch +75s:temp=82.7'C
+```
+
+### retrieveLifetimeWrites.sh
+
+```
+sudo retrieveLifetimeWrites.sh  -a
+LTW of /dev/mmcblk0p2: 57.35 GiB
+LTW of /dev/sdd1: 1.66 TiB
+LTW of /dev/md0: 596.31 GiB
+```
+### retrieveTBW.sh
+
+```
+sudo retrieveTBW.sh -a
+TBW of sda: 1.56 TiB
 ```
