@@ -19,8 +19,6 @@ Collection of some useful tools for Raspberry Pi
 
 8. retrieveLifetimeWrites.sh - Small script which either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
-9. reconnectZTEModem.sh - Small recovery script for intermittent ZTE usb device change from ttyUSB2 to ttyUSB3 and vice versa
-
 ## raspiNetInfo.sh
 
 Tests executed:
