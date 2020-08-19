@@ -1,3 +1,5 @@
+![](https://img.shields.io/github/last-commit/framps/raspberryTools.svg?style=flat)
+
 # raspberryTools
 Collection of some useful tools for Raspberry Pi
 
@@ -12,6 +14,10 @@ Collection of some useful tools for Raspberry Pi
 5. check_throttled.sh - Check Raspberry throttled bits with `vcgencmd get_throttled` and display their meaning if throtteling happened since boot or since last script invocation
 
 6. temp_test.sh - Small script which generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
+
+7. retrieveTerrabytesWritten.sh - Small script which either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. Helps to get an idea when the SSD will reach it's end of life.
+
+8. retrieveLifetimeWrites.sh - Small script which either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
 ## raspiNetInfo.sh
 
@@ -199,7 +205,7 @@ RSD0024I --- Updating /boot/cmdline.txt on /dev/sda1
 RSD0025I --- Finished moving root partition from /dev/mmcblk0p2 to partition /dev/sda1
 ```
 
-### check_throttling.sh
+## check_throttling.sh
 
 ```
 pi@raspberrypi-buster:~ $ ./check_throttled.sh
@@ -208,7 +214,7 @@ Bit 17 set: Arm frequency capped has occurred
 Throttling in hex: 0x20002 (bits reset every call)
 ```
 
-### temp_test.sh
+## temp_test.sh
 
 ```
 pi@raspberrypi-buster:~ $ ./temp_test.sh -i 5
@@ -231,4 +237,20 @@ Watch +60s:temp=81.7'C
 Watch +65s:temp=82.2'C
 Watch +70s:temp=82.7'C
 Watch +75s:temp=82.7'C
+```
+
+## retrieveLifetimeWrites.sh
+
+```
+sudo retrieveLifetimeWrites.sh  -a
+LTW of /dev/mmcblk0p2: 57.35 GiB
+LTW of /dev/sdd1: 1.66 TiB
+LTW of /dev/md0: 596.31 GiB
+```
+
+## retrieveTerrabytesWritten.sh
+
+```
+sudo retrieveTBW.sh -a
+TBW of sda: 1.56 TiB
 ```
