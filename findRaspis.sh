@@ -19,4 +19,4 @@
 #
 
 MY_NETWORK="192.168.0.0/24"
-nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep "b8:27:eb"
+nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -E "b8:27:eb|dc:a6:32|e4:5f:01"
