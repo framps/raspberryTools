@@ -36,11 +36,11 @@
 MYSELF="${0##*/}"
 VERSION="V0.2.11"
 
-GIT_DATE="$Date$"
+GIT_DATE="$Date: 2020-10-10 21:33:31 +0200$"
 GIT_DATE_ONLY=${GIT_DATE/: /}
 GIT_DATE_ONLY=$(echo $GIT_DATE | cut -f 2 -d ' ')
 GIT_TIME_ONLY=$(echo $GIT_DATE | cut -f 3 -d ' ') 
-GIT_COMMIT="$Sha1$"
+GIT_COMMIT="$Sha1: fa6f7c7$"
 GIT_COMMIT_ONLY=$(echo $GIT_COMMIT | cut -f 2 -d ' ' | sed 's/\$//')
 GIT_CODEVERSION="$MYSELF $VERSION, $GIT_DATE_ONLY/$GIT_TIME_ONLY - $GIT_COMMIT_ONLY"
 
