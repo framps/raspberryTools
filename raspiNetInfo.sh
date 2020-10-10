@@ -34,7 +34,7 @@
 #
 
 MYSELF="${0##*/}"
-VERSION="V0.2.10"
+VERSION="V0.2.11"
 
 GIT_DATE="$Date$"
 GIT_DATE_ONLY=${GIT_DATE/: /}
