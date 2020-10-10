@@ -292,7 +292,8 @@ function masqueradeSSID() {
 # Masquerade MAC
 
 function masqueradeMAC() {
-	$SED "s/\(\w\{2\}\:\)\{5\}\w\{2\}/@@:@@:@@:@@:@@/g"
+	$SED -E "s/((\w{2}):){3}/@@:@@:@@:/g"
+
 }
 
 # Masquerade external IP addresses
