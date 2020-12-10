@@ -21,6 +21,16 @@
 VERSION=0.2
 MYSELF="$(basename "$0")"
 
+if ! command -v nmap COMMAND &> /dev/null; then
+	echo "Missing required program nmap."
+	exit 1
+fi
+
+if ! command -v host COMMAND &> /dev/null; then
+	echo "Missing required program host."
+	exit 1
+fi
+
 DEFAULT_SUBNETMASK="192.168.0.0/24"
 
 if [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
