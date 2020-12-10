@@ -19,6 +19,22 @@ Collection of some useful tools for Raspberry Pi
 
 8. retrieveLifetimeWrites.sh - Small script which either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
+9. findRaspis.sh - Small script which scans the local net for Raspberries and prints the IPs, macs and hostnames
+
+## findRaspis.sh
+
+```
+findRaspis.sh 
+Scanning subnet 192.168.0.0/24 for Raspberries...
+4 Raspberries found
+Retrieving hostnames ...
+IP address      Mac address       Hostname
+192.168.0.8     b8:27:eb:b4:e8:74 troubadix
+192.168.0.10    b8:27:eb:3c:94:90 idefix
+192.168.0.11    b8:27:eb:30:8a:52 obelix
+192.168.0.12    dc:a6:32:8f:28:fd asterix
+```
+
 ## raspiNetInfo.sh
 
 Tests executed:
