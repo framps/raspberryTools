@@ -2,7 +2,7 @@
 
 #   Find all existing Raspberries in local subnet
 #
-#   Copyright (C) 2020 framp at linux-tips-and-tricks dot de
+#   Copyright (C) 2021 framp at linux-tips-and-tricks dot de
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,8 +18,11 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=0.2
+VERSION=0.3
 MYSELF="$(basename "$0")"
+MYNAME=${MYSELF%.*}
+
+set -euo pipefail
 
 if ! command -v nmap COMMAND &> /dev/null; then
 	echo "Missing required program nmap."
@@ -31,7 +34,14 @@ if ! command -v host COMMAND &> /dev/null; then
 	exit 1
 fi
 
+if (( ${BASH_VERSINFO[0]} < 4 )); then
+	printf "\n\033[1;35m Minimum requirement is bash 4.0. You have $BASH_VERSION \033[m\n\n"  >&2 
+	exit 255
+fi
+
 DEFAULT_SUBNETMASK="192.168.0.0/24"
+DEFAULT_MAC_REGEX="b8:27:eb|dc:a6:32|e4:5f:01"
+INI_FILENAME="$MYNAME.ini"
 
 if [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
 	cat << EOH
@@ -42,9 +52,17 @@ Usage:
 	
 Defaults:	
 	Subnetmask: $DEFAULT_SUBNETMASK
+	Mac regex: $DEFAULT_MAC_REGEX
 	
 Example:	
 	$MYSELF 192.168.179.0/24
+	
+Init file $MYSELF.ini can be used to customize the Mac Regex. Every line has to define a Mac Regex
+
+	Example file contents
+b8:27:eb
+dc:a6:32
+e4:5f:01
 	
 EOH
 	exit 0
@@ -52,7 +70,21 @@ fi
 
 MY_NETWORK=${1:-$DEFAULT_SUBNETMASK}    
 
-echo "Scanning subnet $MY_NETWORK for Raspberries..."
+if [[ ! -f $INI_FILENAME ]]; then
+	MY_MAC_REGEX="$DEFAULT_MAC_REGEX"
+else
+	echo "Using Mac Regex from $INI_FILENAME"
+	MY_MAC_REGEX=""
+	while read line; do 
+		if [[ -n $MY_MAC_REGEX ]]; then
+			MY_MAC_REGEX="$MY_MAC_REGEX|"
+		fi
+		MY_MAC_REGEX="$MY_MAC_REGEX$line"
+	done < $INI_FILENAME
+fi	
+MY_MAC_REGEX=" (${MY_MAC_REGEX})"
+
+echo "Scanning subnet $MY_NETWORK for Raspberries using Regex$MY_MAC_REGEX ..."
 
 declare -A macAddress=()
 declare -A hostName=()
@@ -60,7 +92,7 @@ declare -A hostName=()
 # 192.168.0.12             ether   dc:a6:32:8f:28:fd   C                     wlp3s0 - 
 while read ip dummy mac rest; do
 	macAddress["$ip"]="$mac"
-done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -E " (b8:27:eb|dc:a6:32|e4:5f:01)")
+done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -E " $MY_MAC_REGEX")
 
 echo "${#macAddress[@]} Raspberries found"
 
