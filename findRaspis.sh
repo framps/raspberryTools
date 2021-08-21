@@ -2,6 +2,9 @@
 
 #   Find all existing Raspberries in local subnet
 #
+#	 Search for reservered mac addresse for Raspberries defined on 
+#   https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
+#
 #   Copyright (C) 2021 framp at linux-tips-and-tricks dot de
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -22,26 +25,31 @@ VERSION=0.3
 MYSELF="$(basename "$0")"
 MYNAME=${MYSELF%.*}
 
-set -euo pipefail
+# check for required commands and required bash version
 
 if ! command -v nmap COMMAND &> /dev/null; then
-	printf "\n\033[1;35m Missing required program nmap.\033[m\n\n"  >&2 
+	echo "Missing required program nmap."
 	exit 255
 fi
 
 if ! command -v host COMMAND &> /dev/null; then
-	printf "\n\033[1;35m Missing required program host.\033[m\n\n"  >&2 
+	echo "Missing required program host."
 	exit 255
 fi
 
 if (( ${BASH_VERSINFO[0]} < 4 )); then
-	printf "\n\033[1;35m Minimum requirement is bash 4.0. You have $BASH_VERSION \033[m\n\n"  >&2 
+	echo "Minimum bash 4.0 is required. You have $BASH_VERSION."
 	exit 255
 fi
 
+# define defaults
+
 DEFAULT_SUBNETMASK="192.168.0.0/24"
 DEFAULT_MAC_REGEX="b8:27:eb|dc:a6:32|e4:5f:01"
+# see https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
 INI_FILENAME="./.${MYNAME}"
+
+# help text
 
 if [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
 	cat << EOH
@@ -68,7 +76,11 @@ EOH
 	exit 0
 fi
 
+# read options
+
 MY_NETWORK=${1:-$DEFAULT_SUBNETMASK}    
+
+# read property file with mac regexes
 
 if [[ ! -f $INI_FILENAME ]]; then
 	MY_MAC_REGEX="$DEFAULT_MAC_REGEX"
@@ -84,10 +96,14 @@ else
 fi	
 MY_MAC_REGEX=" (${MY_MAC_REGEX})"
 
-echo "Scanning subnet $MY_NETWORK for Raspberries using Regex$MY_MAC_REGEX ..."
+# define associative arrays for mac and hostname lookups
 
 declare -A macAddress=()
 declare -A hostName=()
+
+echo "Scanning subnet $MY_NETWORK for Raspberries using Regex$MY_MAC_REGEX ..."
+
+# scan subnet for Raspberry macs
 
 # 192.168.0.12             ether   dc:a6:32:8f:28:fd   C                     wlp3s0 - 
 while read ip dummy mac rest; do
@@ -95,6 +111,8 @@ while read ip dummy mac rest; do
 done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -E " $MY_MAC_REGEX")
 
 echo "${#macAddress[@]} Raspberries found"
+
+# retrieve and print hostnames
 
 if (( ${#macAddress[@]} > 0 )); then
 	echo "Retrieving hostnames ..."
