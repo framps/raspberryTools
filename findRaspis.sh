@@ -25,13 +25,13 @@ MYNAME=${MYSELF%.*}
 set -euo pipefail
 
 if ! command -v nmap COMMAND &> /dev/null; then
-	echo "Missing required program nmap."
-	exit 1
+	printf "\n\033[1;35m Missing required program nmap.\033[m\n\n"  >&2 
+	exit 255
 fi
 
 if ! command -v host COMMAND &> /dev/null; then
-	echo "Missing required program host."
-	exit 1
+	printf "\n\033[1;35m Missing required program host.\033[m\n\n"  >&2 
+	exit 255
 fi
 
 if (( ${BASH_VERSINFO[0]} < 4 )); then
