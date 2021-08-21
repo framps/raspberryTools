@@ -41,7 +41,7 @@ fi
 
 DEFAULT_SUBNETMASK="192.168.0.0/24"
 DEFAULT_MAC_REGEX="b8:27:eb|dc:a6:32|e4:5f:01"
-INI_FILENAME="$MYNAME.ini"
+INI_FILENAME=".${MYNAME}"
 
 if [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
 	cat << EOH
@@ -52,14 +52,14 @@ Usage:
 	
 Defaults:	
 	Subnetmask: $DEFAULT_SUBNETMASK
-	Mac regex: $DEFAULT_MAC_REGEX
+	Mac regex:  $DEFAULT_MAC_REGEX
 	
 Example:	
 	$MYSELF 192.168.179.0/24
 	
-Init file $MYSELF.ini can be used to customize the Mac Regex. Every line has to define a Mac Regex
+Init file $INI_FILENAME can be used to customize the Mac Regex. Every line has to define a Mac Regex
 
-	Example file contents
+	Example file contents for $INI_FILENAME:	
 b8:27:eb
 dc:a6:32
 e4:5f:01
