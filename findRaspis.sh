@@ -21,6 +21,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+set -euo pipefail
+
 VERSION=0.3
 MYSELF="$(basename "$0")"
 MYNAME=${MYSELF%.*}
@@ -51,7 +53,7 @@ INI_FILENAME="./.${MYNAME}"
 
 # help text
 
-if [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
+if (( $# >= 1 )) && [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
 	cat << EOH
 Usage:
 	$MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for Raspberries
