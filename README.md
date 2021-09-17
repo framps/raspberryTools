@@ -1,7 +1,7 @@
 ![](https://img.shields.io/github/last-commit/framps/raspberryTools.svg?style=flat)
 
 # raspberryTools
-Collection of some useful tools for Raspberry Pi
+Collection of some useful tools for Raspberry Pi. For sample outputs of the tools see below. 
 
 1. raspiNetInfo.sh - Collect network information for people who want to help in network problem determination and test for common network configuration errors [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/307-raspinetinfo-check-raspberry-network-configuration-for-common-errors-and-collect-networking-configuration-information-3/)
 
