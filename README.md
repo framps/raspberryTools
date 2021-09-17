@@ -5,15 +5,15 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 1. [raspiNetInfo.sh](#raspinetinfosh) - Collect network information for people who want to help in network problem determination and test for common network configuration errors [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/307-raspinetinfo-check-raspberry-network-configuration-for-common-errors-and-collect-networking-configuration-information-3/)
 
-2. [raspiSD2USB.py](raspisd2usb.py) - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/475-move-of-root-partition-of-raspberry-to-an-external-partition/)
+2. [raspiSD2USB.py](#raspisd2usb.py) - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/475-move-of-root-partition-of-raspberry-to-an-external-partition/)
 
-3. [raspiSD2USB.sh](raspisd2usb.sh) - Predecessor of raspiSD2USB written in bash. Not maintained any more. Feel free to fork and open pull requests.
+3. [raspiSD2USB.sh](#raspisd2usb.sh) - Predecessor of raspiSD2USB written in bash. Not maintained any more. Feel free to fork and open pull requests.
 
-4. wlan_check.sh - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
+4. [wlan_check.sh](#wlan_checksh) - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
 
-5. check_throttled.sh - Check Raspberry throttled bits with `vcgencmd get_throttled` and display their meaning if throtteling happened since boot or since last script invocation
+5. [check_throttled.sh](#check_throttledsh) - Check Raspberry throttled bits with `vcgencmd get_throttled` and display their meaning if throtteling happened since boot or since last script invocation
 
-6. temp_test.sh - Generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
+6. [temp_test.sh](#temp_testsh) - Generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
 
 7. retrieveTerrabytesWritten.sh - Either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. Helps to get an idea when the SSD will reach it's end of life.
 
