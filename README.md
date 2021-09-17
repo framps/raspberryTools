@@ -21,7 +21,7 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 9. [findRaspis.sh](#findraspissh) - Scan the local net for Raspberries and print the IPs, macs and hostnames
 
-10. [smsRelay.py](#smsrelaypy) - Receives all SMS sent to a SMS card plogged in into an UMTS stick and forward all SMS to an eMail.
+10. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards all SMS to an eMail. UMTS stick required.
 
 ## findRaspis.sh
 
