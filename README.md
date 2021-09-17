@@ -13,18 +13,20 @@ Collection of some useful tools for Raspberry Pi
 
 5. check_throttled.sh - Check Raspberry throttled bits with `vcgencmd get_throttled` and display their meaning if throtteling happened since boot or since last script invocation
 
-6. temp_test.sh - Small script which generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
+6. temp_test.sh - Generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
 
-7. retrieveTerrabytesWritten.sh - Small script which either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. Helps to get an idea when the SSD will reach it's end of life.
+7. retrieveTerrabytesWritten.sh - Either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. Helps to get an idea when the SSD will reach it's end of life.
 
-8. retrieveLifetimeWrites.sh - Small script which either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
+8. retrieveLifetimeWrites.sh - Either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
-9. findRaspis.sh - Small script which scans the local net for Raspberries and prints the IPs, macs and hostnames
+9. findRaspis.sh - Scan the local net for Raspberries and print the IPs, macs and hostnames
+
+10. smsRelay.py - Receives all SMS sent to a SMS card plogged in into an UMTS stick and forward all SMS to an eMail.
 
 ## findRaspis.sh
 
 ```
-findRaspis.sh 
+findRaspis.sh
 Scanning subnet 192.168.0.0/24 for Raspberries...
 4 Raspberries found
 Retrieving hostnames ...
@@ -269,4 +271,24 @@ LTW of /dev/md0: 596.31 GiB
 ```
 sudo retrieveTBW.sh -a
 TBW of sda: 1.56 TiB
+```
+
+## smsRelay.py
+
+Sample eMail relayed for a `*ping` SMS
+
+```
+Dear SMSRelayUser
+
+I just received following SMS from +4947114712 for +4947144715 which I forward to you:
+
+--- START SMS ---
+*ping
+---  END SMS  ---
+
+Hope you enjoy my service.
+
+Regards
+
+Your SMS relay server on smsrelay.dummy.com
 ```
