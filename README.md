@@ -15,11 +15,11 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 6. [temp_test.sh](#temp_testsh) - Generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
 
-7. retrieveTerrabytesWritten.sh - Either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. Helps to get an idea when the SSD will reach it's end of life.
+7. [retrieveTerrabytesWritten.sh](#retrieveterrabyteswrittensh) - Either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. Helps to get an idea when the SSD will reach it's end of life.
 
-8. retrieveLifetimeWrites.sh - Either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
+8. [retrieveLifetimeWrites.sh](#retrievelifetimewritessh) - Either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
-9. findRaspis.sh - Scan the local net for Raspberries and print the IPs, macs and hostnames
+9. [findRaspis.sh](#findraspissh) - Scan the local net for Raspberries and print the IPs, macs and hostnames
 
 10. [smsRelay.py](#smsrelaypy) - Receives all SMS sent to a SMS card plogged in into an UMTS stick and forward all SMS to an eMail.
 
