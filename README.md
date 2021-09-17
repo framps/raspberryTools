@@ -5,9 +5,9 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 1. [raspiNetInfo.sh](#raspinetinfosh) - Collect network information for people who want to help in network problem determination and test for common network configuration errors [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/307-raspinetinfo-check-raspberry-network-configuration-for-common-errors-and-collect-networking-configuration-information-3/)
 
-2. [raspiSD2USB.py](#raspisd2usb.py) - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/475-move-of-root-partition-of-raspberry-to-an-external-partition/)
+2. [raspiSD2USB.py](#raspisd2usbpy) - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/475-move-of-root-partition-of-raspberry-to-an-external-partition/)
 
-3. [raspiSD2USB.sh](#raspisd2usb.sh) - Predecessor of raspiSD2USB written in bash. Not maintained any more. Feel free to fork and open pull requests.
+3. [raspiSD2USB.sh](#raspisd2usbsh) - Predecessor of raspiSD2USB written in bash. Not maintained any more. Feel free to fork and open pull requests.
 
 4. [wlan_check.sh](#wlan_checksh) - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
 
