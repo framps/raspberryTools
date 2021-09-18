@@ -44,6 +44,7 @@ BAUDRATE = 115200
 PIN = None # SIM card PIN (if any)
 SMTP_SENDER = 'admin@dummy.com'		# EMailProvider inBox User
 PING_RECEIVER = SMTP_SENDER			# and admin who receives a ping eMail
+EMAIL_SENDER = 'sender@dummy.com'	# Sender eMail 
 SMS_RECEIVER = 'smsrelay@dummy.com'	# eMail which receives any SMS
 TARGET_PHONE = "+4947114712"		# phone number the SMS is sent to
 LOG_FILE = "/home/pi/smsrelay/smsrelay.log"
