@@ -23,8 +23,6 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 10. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards all SMS to an eMail. UMTS stick required.
 
-11. checkWLANConnection.sh - Test if a WLAN connection exists to the local router and either restart WLAN interface or reboot
-
 ## findRaspis.sh
 
 ```
