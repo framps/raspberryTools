@@ -9,7 +9,7 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 3. [raspiSD2USB.sh](#raspisd2usbsh) - Predecessor of raspiSD2USB written in bash. Not maintained any more. Feel free to fork and open pull requests.
 
-4. [checkWLANAndRestart.sh] - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
+4. checkWLANAndRestart.sh - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
 
 5. [checkThrottled.sh](#checkthrottledsh) - Check Raspberry throttled bits with `vcgencmd get_throttled` and display their meaning if throtteling happened since boot or since last script invocation
 
