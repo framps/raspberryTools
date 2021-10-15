@@ -226,7 +226,7 @@ RSD0025I --- Finished moving root partition from /dev/mmcblk0p2 to partition /de
 ## checkThrottled.sh
 
 ```
-pi@raspberrypi-buster:~ $ ./check_throttled.sh
+pi@raspberrypi-buster:~ $ ./checkThrottled.sh
 Throttling in hex (bits reset on boot): 0x20000
 Bit 17 set: Arm frequency capped has occurred
 Throttling in hex: 0x20002 (bits reset every call)
@@ -235,7 +235,7 @@ Throttling in hex: 0x20002 (bits reset every call)
 ## testCPUTemperature.sh
 
 ```
-pi@raspberrypi-buster:~ $ ./temp_test.sh -i 5
+pi@raspberrypi-buster:~ $ ./testCPUTemperature.sh -i 5
 Generate 100% CPU utilization and measure CPU temperature ...
 CPU watch interval: 5s
 Watch +0s:temp=55.8'C
