@@ -9,11 +9,11 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 3. [raspiSD2USB.sh](#raspisd2usbsh) - Predecessor of raspiSD2USB written in bash. Not maintained any more. Feel free to fork and open pull requests.
 
-4. [wlan_check.sh](#wlan_checksh) - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
+4. [checkWLANAndRestart.sh](#checkwlanandrestartsh) - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
 
-5. [check_throttled.sh](#check_throttledsh) - Check Raspberry throttled bits with `vcgencmd get_throttled` and display their meaning if throtteling happened since boot or since last script invocation
+5. [checkThrottled.sh](#checkthrottledsh) - Check Raspberry throttled bits with `vcgencmd get_throttled` and display their meaning if throtteling happened since boot or since last script invocation
 
-6. [temp_test.sh](#temp_testsh) - Generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
+6. [testCPUTemperature.sh](#testcputemperaturesh) - Generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
 
 7. [retrieveTerrabytesWritten.sh](#retrieveterrabyteswrittensh) - Either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. Helps to get an idea when the SSD will reach it's end of life.
 
@@ -223,7 +223,7 @@ RSD0024I --- Updating /boot/cmdline.txt on /dev/sda1
 RSD0025I --- Finished moving root partition from /dev/mmcblk0p2 to partition /dev/sda1
 ```
 
-## check_throttling.sh
+## checkThrottled.sh
 
 ```
 pi@raspberrypi-buster:~ $ ./check_throttled.sh
@@ -232,7 +232,7 @@ Bit 17 set: Arm frequency capped has occurred
 Throttling in hex: 0x20002 (bits reset every call)
 ```
 
-## temp_test.sh
+## testCPUTemperature.sh
 
 ```
 pi@raspberrypi-buster:~ $ ./temp_test.sh -i 5

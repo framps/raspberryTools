@@ -1,9 +1,11 @@
 #!/bin/bash
-
+#
+#######################################################################################################################
+#
 #   Check whether there exists a network connection to the local router
 #   and restart interface. If then there is still no connection restart the server
 #
-#   Usually used in crontab for an unattended Raspberry 
+#   Usually used in crontab for an unattended Raspberry
 #
 #   Copyright (C) 2017 framp at linux-tips-and-tricks dot de
 #
@@ -20,6 +22,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+#######################################################################################################################
 
 DEBUG=0								# if 1 just echo commands, if 0 execute commands
 
