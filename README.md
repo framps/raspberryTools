@@ -23,7 +23,7 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 10. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards all SMS to an eMail. UMTS stick required.
 
-11. [checkPARTUUIDsInDDImage.sh] - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab 
+11. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab 
 
 ## findRaspis.sh
 
