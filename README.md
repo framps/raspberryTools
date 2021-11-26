@@ -23,6 +23,8 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 10. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards all SMS to an eMail. UMTS stick required.
 
+11. [checkPARTUUIDsInDDImage.sh] - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab 
+
 ## findRaspis.sh
 
 ```
@@ -38,6 +40,8 @@ IP address      Mac address       Hostname
 ```
 
 ## raspiNetInfo.sh
+
+[Code](https://github.com/framps/raspberryTools/blob/master/smsRelay.py)
 
 Tests executed:
 
@@ -225,6 +229,8 @@ RSD0025I --- Finished moving root partition from /dev/mmcblk0p2 to partition /de
 
 ## checkThrottled.sh
 
+[Code](https://github.com/framps/raspberryTools/blob/master/checkThrottled.sh)
+
 ```
 pi@raspberrypi-buster:~ $ ./checkThrottled.sh
 Throttling in hex (bits reset on boot): 0x20000
@@ -233,6 +239,8 @@ Throttling in hex: 0x20002 (bits reset every call)
 ```
 
 ## testCPUTemperature.sh
+
+[Code](https://github.com/framps/raspberryTools/blob/master/testCPUTemperature.sh)
 
 ```
 pi@raspberrypi-buster:~ $ ./testCPUTemperature.sh -i 5
@@ -259,6 +267,8 @@ Watch +75s:temp=82.7'C
 
 ## retrieveLifetimeWrites.sh
 
+[Code](https://github.com/framps/raspberryTools/blob/master/retrieveLifetimeWrites.sh)
+
 ```
 sudo retrieveLifetimeWrites.sh  -a
 LTW of /dev/mmcblk0p2: 57.35 GiB
@@ -268,6 +278,7 @@ LTW of /dev/md0: 596.31 GiB
 
 ## retrieveTerrabytesWritten.sh
 
+[Code](https://github.com/framps/raspberryTools/blob/master/retrieveTerrabytesWritten.sh)
 ```
 sudo retrieveTBW.sh -a
 TBW of sda: 1.56 TiB
