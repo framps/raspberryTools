@@ -5,25 +5,21 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 1. [raspiNetInfo.sh](#raspinetinfosh) - Collect network information for people who want to help in network problem determination and test for common network configuration errors [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/307-raspinetinfo-check-raspberry-network-configuration-for-common-errors-and-collect-networking-configuration-information-3/)
 
-2. [raspiSD2USB.py](#raspisd2usbpy) - Transfer root partition to an external partition (e.g. USB stick, USB disk, ...) and modify /boot/cmdline.txt accordingly [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/475-move-of-root-partition-of-raspberry-to-an-external-partition/)
+2. checkWLANAndRestart.sh - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
 
-3. [raspiSD2USB.sh](#raspisd2usbsh) - Predecessor of raspiSD2USB written in bash. Not maintained any more. Feel free to fork and open pull requests.
+3. [checkThrottled.sh](#checkthrottledsh) - Check Raspberry throttled bits with `vcgencmd get_throttled` and display their meaning if throtteling happened since boot or since last script invocation
 
-4. checkWLANAndRestart.sh - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
+4. [testCPUTemperature.sh](#testcputemperaturesh) - Generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
 
-5. [checkThrottled.sh](#checkthrottledsh) - Check Raspberry throttled bits with `vcgencmd get_throttled` and display their meaning if throtteling happened since boot or since last script invocation
+5. [retrieveTerrabytesWritten.sh](#retrieveterrabyteswrittensh) - Either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. Helps to get an idea when the SSD will reach it's end of life.
 
-6. [testCPUTemperature.sh](#testcputemperaturesh) - Generates 100% CPU load on a Raspberry and monitors the CPU temperature. Useful to test the effectiveness of a heat sink and/or fan.
+6. [retrieveLifetimeWrites.sh](#retrievelifetimewritessh) - Either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
-7. [retrieveTerrabytesWritten.sh](#retrieveterrabyteswrittensh) - Either retrieves the Total Bytes Written of all existing SSDs on the system or a specific SSD. Helps to get an idea when the SSD will reach it's end of life.
+7. [findRaspis.sh](#findraspissh) - Scan the local net for Raspberries and print the IPs, macs and hostnames
 
-8. [retrieveLifetimeWrites.sh](#retrievelifetimewritessh) - Either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
+8. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards all SMS to an eMail. UMTS stick required.
 
-9. [findRaspis.sh](#findraspissh) - Scan the local net for Raspberries and print the IPs, macs and hostnames
-
-10. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards all SMS to an eMail. UMTS stick required.
-
-11. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab 
+9. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
 
 ## findRaspis.sh
 
@@ -186,45 +182,6 @@ network={
 --- RNI016I: Check logile raspiNetInfo.log for sensitive data before publishing
 [/code][/spoiler]
 
-```
-
-## raspiSD2USB.py
-
-Moves the root parition to an external partition and modifies /boot/cmdline.txt accordingly.
-The original /boot/cmdline.txt is saved as /boot/cmdline.txt.sd just in case it's required to
-revert to use the SD card as root partition.
-
-### Sample output
-
-```
-raspiSD2USB.py V0.2.1 2015-04-12/20:41:05 0ff0dfd
-RSD0002I --- Detected following partitions
-RSD0003I --- /dev/mmcblk0p1 - Size: 112.00 MB - Free: 97.53 MB - Mountpoint: /boot - Partitionstype: vfat - Partitiontable: None
-RSD0003I --- /dev/mmcblk0p2 - Size: 2.85 GB - Free: 221.95 MB - Mountpoint: / - Partitionstype: ext4 - Partitiontable: None
-RSD0003I --- /dev/mmcblk0p3 - Size: 804.00 MB - Free: NA - Mountpoint: None - Partitionstype: ext4 - Partitiontable: None
-RSD0003I --- /dev/sda1 - Size: 3.84 GB - Free: 3.50 GB - Mountpoint: /mnt - Partitionstype: ext4 - Partitiontable: msdos
-RSD0028I --- Skipping /dev/mmcblk0p1 - Partition located on SD card
-RSD0028I --- Skipping /dev/mmcblk0p2 - Partition located on SD card
-RSD0028I --- Skipping /dev/mmcblk0p3 - Partition located on SD card
-RSD0009I --- Target root partition candidates: /dev/sda1
-RSD0011I --- Source root partition /dev/mmcblk0p2: Size: 2.85 GB Type: ext4
-RSD0012I --- Testing partition /dev/sda1: Size: 3.84 GB Free space: 3.50 GB Type: ext4
-RSD0005I --- Following partitions are eligible as new target root partition
-RSD0006I --- /dev/sda1
-RSD0007I --- Enter partion: /dev/sda1
-RSD0019I --- Partition /dev/mmcblk0p2 will be copied to partition /dev/sda1 copied and become new root partition
-RSD0020I --- Are you sure (y/N) ?
-J
-RSD0021I --- Copying rootpartition ... Please be patient
-tar: Removing leading `/' from member names
-tar: Write checkpoint 1000
-...
-tar: Write checkpoint 236000
-tar: proc: implausibly old time stamp 1970-01-01 01:00:00
-RSD0022I --- Updating /etc/fstab on /dev/sda1
-RSD0023I --- Saving /boot/cmdline.txt on /dev/sda1
-RSD0024I --- Updating /boot/cmdline.txt on /dev/sda1
-RSD0025I --- Finished moving root partition from /dev/mmcblk0p2 to partition /dev/sda1
 ```
 
 ## checkThrottled.sh
