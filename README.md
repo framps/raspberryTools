@@ -3,7 +3,7 @@
 # raspberryTools
 Collection of some useful tools for Raspberry Pi. For sample outputs of the tools click the links.
 
-1. [raspiNetInfo.sh](#raspinetinfosh) - Collect network information for people who want to help in network problem determination and test for common network configuration errors [Documentation and download link](http://www.linux-tips-and-tricks.de/en/raspberry/307-raspinetinfo-check-raspberry-network-configuration-for-common-errors-and-collect-networking-configuration-information-3/)
+1. [raspiNetInfo.sh](#raspinetinfosh) - Collect network information for people who want to help in network problem determination and test for common network configuration errors
 
 2. checkWLANAndRestart.sh - Check on regular base for WLAN connection and either restart network interface or reboot Raspberry if there is no connection
 
@@ -37,7 +37,7 @@ IP address      Mac address       Hostname
 
 ## raspiNetInfo.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/master/smsRelay.py)
+[Code](https://github.com/framps/raspberryTools/blob/master/raspiNetInfo.sh)
 
 Tests executed:
 
