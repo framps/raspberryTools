@@ -539,15 +539,15 @@ function collectInfo() {
 	$IP a s 2>&1 | masqueradeMAC | masqueradeIPV6 | masqueradeSSID  
 	
 	if [ -e /etc/resolv.conf ]; then
-		echo '--- cat /etc/resolv | grep -i "nameserver"'
-		cat /etc/resolv.conf | $EGREP -v "^(#|$)" | $GREP -i "nameserver" | masqueradeIPs
+		echo '--- grep -i "nameserver" /etc/resolv.conf'
+		$EGREP -v "^(#|$)" /etc/resolv.conf | $GREP -i "nameserver" | masqueradeIPs
 	fi
 	
-	echo "--- cat /etc/network/interfaces"
-	cat /etc/network/interfaces | $EGREP -v "^(#|$)|::" | masqueradeSSID | masqueradeWirelessKey
+	echo "--- /etc/network/interfaces"
+	$EGREP -v "^(#|$)|::" /etc/network/interfaces | masqueradeSSID | masqueradeWirelessKey
 	
-	echo "--- cat /etc/hosts"
-	cat /etc/hosts | $EGREP -v "^(#|$)|::" | masqueradeIPs
+	echo "--- /etc/hosts"
+	$EGREP -v "^(#|$)|::" /etc/hosts | masqueradeIPs
 	
 	echo '--- ip r s'
 	$IP r s | masqueradeIPs
@@ -592,7 +592,8 @@ function collectInfo() {
 
 		if [ -f /etc/wpa_supplicant/wpa_supplicant.conf ]; then		
 			echo '--- /etc/wpa_supplicant/wpa_supplicant.conf'
-			sudo cat /etc/wpa_supplicant/wpa_supplicant.conf | $EGREP -v "^(#|$)" | masqueradeMAC | masqueradeIPV6 | masqueradeSSIDinWPA | masqueradePsk
+
+			sudo $EGREP -v "^(#|$)" /etc/wpa_supplicant/wpa_supplicant.conf | masqueradeMAC | masqueradeIPV6 | masqueradeSSIDinWPA | masqueradePsk
 			echo '--- grep wpa_action /var/log/messages | tail -n 15'
 			sudo grep wpa /var/log/messages | tail -n 15 | masqueradeMAC | masqueradeIPV6 | masqueradeSSID | masqueradePsk
 		fi
