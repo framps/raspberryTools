@@ -5,7 +5,7 @@
 #	 Search for reservered mac addresse for Raspberries defined on 
 #   https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
 #
-#   Copyright (C) 2021 framp at linux-tips-and-tricks dot de
+#   Copyright (C) 2021-2022 framp at linux-tips-and-tricks dot de
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 set -euo pipefail
 
-VERSION=0.3
+VERSION=0.4
 MYSELF="$(basename "$0")"
 MYNAME=${MYSELF%.*}
 
@@ -103,7 +103,7 @@ MY_MAC_REGEX=" (${MY_MAC_REGEX})"
 declare -A macAddress=()
 declare -A hostName=()
 
-echo "Scanning subnet $MY_NETWORK for Raspberries using Regex$MY_MAC_REGEX ..."
+echo "Scanning subnet $MY_NETWORK for Raspberries ..."
 
 # scan subnet for Raspberry macs
 
@@ -112,19 +112,20 @@ while read ip dummy mac rest; do
 	macAddress["$ip"]="$mac"
 done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -E " $MY_MAC_REGEX")
 
-echo "${#macAddress[@]} Raspberries found"
-
 # retrieve and print hostnames
 
 if (( ${#macAddress[@]} > 0 )); then
-	echo "Retrieving hostnames ..."
+	echo "Retrieving hostnames for ${#macAddress[@]} Rasepberries ..."
 
 	printf "%-15s %-17s %s\n" "IP address" "Mac address" "Hostname"
 
 	# 12.0.168.192.in-addr.arpa domain name pointer asterix.
 	for ip in "${!macAddress[@]}"; do
+		set +e
 		h="$(host "$ip")"
-		if (( ! $? )); then
+		rc=$?
+		set -e
+		if (( ! $rc )); then
 			read arpa dummy dummy dummy host rest <<< "$h"
 			host=${host::-1} # delete trailing "."
 		else
@@ -132,4 +133,6 @@ if (( ${#macAddress[@]} > 0 )); then
 		fi
 		printf "%-15s %17s %s\n" $ip ${macAddress[$ip]} $host
 	done 
+else
+	echo "No Raspberries found with mac regex $MY_MAC_REGEX"
 fi
