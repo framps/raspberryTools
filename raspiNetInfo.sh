@@ -34,7 +34,7 @@
 #
 
 MYSELF="${0##*/}"
-VERSION="V0.2.12"
+VERSION="V0.2.13"
 
 GIT_DATE="$Date: 2020-10-10 21:33:31 +0200$"
 GIT_DATE_ONLY=${GIT_DATE/: /}
@@ -555,6 +555,9 @@ function collectInfo() {
 	echo '--- ip n s'
 	$IP n s | masqueradeIPs | masqueradeMAC
 
+	echo '--- ip r g 8.8.8.8'
+	$IP r g 8.8.8.8 | masqueradeIPs | masqueradeMAC
+	
 	echo '--- route -n'
 	$ROUTE -n | masqueradeIPs
 
