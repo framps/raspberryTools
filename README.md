@@ -38,6 +38,83 @@ IP address      Mac address       Hostname
 192.168.0.12    dc:a6:32:8f:28:fd asterix
 ```
 
+## checkThrottled.sh
+
+[Code](https://github.com/framps/raspberryTools/blob/master/checkThrottled.sh)
+
+```
+pi@raspberrypi-buster:~ $ ./checkThrottled.sh
+Throttling in hex (bits reset on boot): 0x20000
+Bit 17 set: Arm frequency capped has occurred
+Throttling in hex: 0x20002 (bits reset every call)
+```
+
+## testCPUTemperature.sh
+
+[Code](https://github.com/framps/raspberryTools/blob/master/testCPUTemperature.sh)
+
+```
+pi@raspberrypi-buster:~ $ ./testCPUTemperature.sh -i 5
+Generate 100% CPU utilization and measure CPU temperature ...
+CPU watch interval: 5s
+Watch +0s:temp=55.8'C
+Starting run 1: +0s:temp=56.4'C
+Watch +5s:temp=64.5'C
+Watch +10s:temp=67.7'C
+Watch +15s:temp=70.4'C
+Watch +20s:temp=73.1'C
+Watch +25s:temp=74.1'C
+Watch +30s:temp=76.3'C
+Watch +35s:temp=77.4'C
+Watch +40s:temp=79.0'C
+Watch +45s:temp=80.6'C
+Watch +50s:temp=80.6'C
+Watch +55s:temp=81.1'C
+Watch +60s:temp=81.7'C
+Watch +65s:temp=82.2'C
+Watch +70s:temp=82.7'C
+Watch +75s:temp=82.7'C
+```
+
+## retrieveLifetimeWrites.sh
+
+[Code](https://github.com/framps/raspberryTools/blob/master/retrieveLifetimeWrites.sh)
+
+```
+sudo retrieveLifetimeWrites.sh  -a
+LTW of /dev/mmcblk0p2: 57.35 GiB
+LTW of /dev/sdd1: 1.66 TiB
+LTW of /dev/md0: 596.31 GiB
+```
+
+## retrieveTerrabytesWritten.sh
+
+[Code](https://github.com/framps/raspberryTools/blob/master/retrieveTerrabytesWritten.sh)
+```
+sudo retrieveTBW.sh -a
+TBW of sda: 1.56 TiB
+```
+
+## smsRelay.py
+
+Sample eMail relayed for a `*ping` SMS
+
+```
+Dear SMSRelayUser
+
+I just received following SMS from +4947114712 for +4947144715 which I forward to you:
+
+--- START SMS ---
+*ping
+---  END SMS  ---
+
+Hope you enjoy my service.
+
+Regards
+
+Your SMS relay server on smsrelay.dummy.com
+```
+
 ## raspiNetInfo.sh
 
 [Code](https://github.com/framps/raspberryTools/blob/master/raspiNetInfo.sh)
@@ -185,81 +262,4 @@ network={
 --- RNI016I: Check logile raspiNetInfo.log for sensitive data before publishing
 [/code][/spoiler]
 
-```
-
-## checkThrottled.sh
-
-[Code](https://github.com/framps/raspberryTools/blob/master/checkThrottled.sh)
-
-```
-pi@raspberrypi-buster:~ $ ./checkThrottled.sh
-Throttling in hex (bits reset on boot): 0x20000
-Bit 17 set: Arm frequency capped has occurred
-Throttling in hex: 0x20002 (bits reset every call)
-```
-
-## testCPUTemperature.sh
-
-[Code](https://github.com/framps/raspberryTools/blob/master/testCPUTemperature.sh)
-
-```
-pi@raspberrypi-buster:~ $ ./testCPUTemperature.sh -i 5
-Generate 100% CPU utilization and measure CPU temperature ...
-CPU watch interval: 5s
-Watch +0s:temp=55.8'C
-Starting run 1: +0s:temp=56.4'C
-Watch +5s:temp=64.5'C
-Watch +10s:temp=67.7'C
-Watch +15s:temp=70.4'C
-Watch +20s:temp=73.1'C
-Watch +25s:temp=74.1'C
-Watch +30s:temp=76.3'C
-Watch +35s:temp=77.4'C
-Watch +40s:temp=79.0'C
-Watch +45s:temp=80.6'C
-Watch +50s:temp=80.6'C
-Watch +55s:temp=81.1'C
-Watch +60s:temp=81.7'C
-Watch +65s:temp=82.2'C
-Watch +70s:temp=82.7'C
-Watch +75s:temp=82.7'C
-```
-
-## retrieveLifetimeWrites.sh
-
-[Code](https://github.com/framps/raspberryTools/blob/master/retrieveLifetimeWrites.sh)
-
-```
-sudo retrieveLifetimeWrites.sh  -a
-LTW of /dev/mmcblk0p2: 57.35 GiB
-LTW of /dev/sdd1: 1.66 TiB
-LTW of /dev/md0: 596.31 GiB
-```
-
-## retrieveTerrabytesWritten.sh
-
-[Code](https://github.com/framps/raspberryTools/blob/master/retrieveTerrabytesWritten.sh)
-```
-sudo retrieveTBW.sh -a
-TBW of sda: 1.56 TiB
-```
-
-## smsRelay.py
-
-Sample eMail relayed for a `*ping` SMS
-
-```
-Dear SMSRelayUser
-
-I just received following SMS from +4947114712 for +4947144715 which I forward to you:
-
---- START SMS ---
-*ping
----  END SMS  ---
-
-Hope you enjoy my service.
-
-Regards
-
-Your SMS relay server on smsrelay.dummy.com
 ```
