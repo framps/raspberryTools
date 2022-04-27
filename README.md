@@ -20,7 +20,7 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 7. [findRaspis.sh](#findraspissh) - Scan the local net for Raspberries and print the IPs, macs and hostnames
 
-8. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards all SMS to an eMail. UMTS stick required.
+8. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards them to an eMail. UMTS stick and python2 required
 
 9. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
 
