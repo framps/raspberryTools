@@ -113,7 +113,7 @@ bootPartition="${device}1"
 rootPartition="${device}2"
 
 if [[ $device =~ [0-9]+$ ]]; then
-	echo "$device is a partition but has to be a device. Try $(sed -E "s/($device)[0-9]+/\1/")"
+	echo "$device is a partition but has to be a device. Try $(sed -E "s/[0-9]+$//" <<< "$device")"
 	exit 1
 fi
 
