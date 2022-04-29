@@ -79,7 +79,8 @@ function updateUUIDinCmdline() { # bootType uuid newUUID
 
 function usage() {
 	echo "Usage: $0 [-n] targetDevice" 1>&2
-	echo "-n: Dont't update files. Just inform what will be updated."
+	echo "-n: Don echo "$device is a partition but has to be a device. Try $(sed -E "s/[0-9]+$//" <<< "$device")"
+'t update files. Just inform what will be updated."
 	exit 1
 }
 
