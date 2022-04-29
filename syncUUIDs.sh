@@ -86,10 +86,11 @@ function usage() {
 # Parse arguments
 while getopts ":h :n" opt; do
    case "$opt" in
-		h) usage 0
-			;;
+		h) usage 
+		   exit 0
+		   ;;
 		n) dryrun=1
-			;;
+		   ;;
      \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
      :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
      *  ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
