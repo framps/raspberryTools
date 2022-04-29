@@ -1,7 +1,5 @@
 #!/bin/bash
 #
-# NOTE: Script still under construction
-#
 #######################################################################################################################
 #
 # 	Update /boot/cmdline.txt and /etc/fstab on a target device with the actual UUID/PARTUUIDs of the target device
@@ -23,11 +21,14 @@
 #
 #######################################################################################################################
 
+dryrun=0
+
+trap 'umount /mnt &>/dev/null' SIGINT SIGTERM EXIT
+
 function parseCmdline {
 	mount $bootPartition /mnt
 	local uuidTypeCmdline=$(grep -Eo "root=\S+" /mnt/cmdline.txt | sed -E "s/root=([^=]+)=(.+)/\1=\2/")
 	umount /mnt
-
 	echo "$uuidTypeCmdline"
 }
 
@@ -36,8 +37,8 @@ function parseFstab {
 	local tgt mnt
 	local bootTgt rootTgt
 	local bootType rootType
-	mount $rootPartition /mnt
 
+	mount $rootPartition /mnt
 	while read tgt mnt r; do
 		case $mnt in
 			/boot)
@@ -56,62 +57,97 @@ function parseFstab {
 }
 
 function parseBLKID {	# device uuidType
-
 	local blkid="$(blkid $1 -o udev | grep "ID_FS_${2}=")"
 	echo $blkid
 }
 
+function updateUUIDinFstab() { # bootType uuid newUUID
+	echo "Updating $1 from $2 to $3 in /etc/fstab on $rootPartition"
+	(( $dryrun )) && return
+	mount $rootPartition /mnt
+	sed -i "s/^$1=$2/$1=$3/" /mnt/etc/fstab
+	umount /mnt
+}
+
+function updateUUIDinCmdline() { # bootType uuid newUUID
+	echo "Updating $1 from $2 to $3 in /boot/cmdline.txt on $bootPartition"
+	(( $dryrun )) && return
+	mount $bootPartition /mnt
+	sed -i "s/$1=$2/$1=$3/" /mnt/cmdline.txt
+	umount /mnt
+}
+
 function usage() {
-	echo "Usage: $0 -b <bootPartition> -r <rootPartition> target" 1>&2
+	echo "Usage: $0 [-n] targetDevice" 1>&2
+	echo "-n: Dont't update files. Just inform what will be updated."
 	exit 1
 }
 
 # Parse arguments
-while getopts ":h :b: :r:" opt; do
+while getopts ":h :n" opt; do
    case "$opt" in
 		h) usage 0
 			;;
-		b) bootPartition=$OPTARG
-			;;
-		r) rootPartition=$OPTARG
+		n) dryrun=1
 			;;
      \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
      :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
      *  ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
-
 	esac
 done
 
-#if (( $OPTIND == 3 )); then
-#    echo "Not enough options specified"
-#    exit 1
-#fi
-
 shift $(( $OPTIND - 1 ))
+
+if [[ -z $1 ]]; then
+    echo "Missing device to update UUIDs"
+    exit 1
+fi
 
 if [[ $USER != "root" ]]; then
 	  echo "Call me as root"
 	  exit 127
 fi
 
-if (( $# == 0 )); then
-	if [[ ! -b $bootPartition ]]; then
-		echo "Bootpartition $bootPartition not found"
-		exit 1
-	fi
+device=$1
+bootPartition="${device}1"
+rootPartition="${device}2"
 
-	if [[ ! -b $rootPartition ]]; then
-		echo "Rootpartition $rootPartition not found"
-		exit 1
-	fi
-else
-	device=$1
-	bootPartition="${device}1"
-	rootPartition="${device}2"
+if [[ $device =~ [0-9]+$ ]]; then
+	echo "$device is a partition but has to be a device. Try $(sed -E "s/($device)[0-9]+/\1/")"
+	exit 1
 fi
 
-echo "Bootpartition: $bootPartition"
-echo "Rootpartition: $rootPartition"
+if [[ ! -e $device ]]; then
+	echo "$device not found"
+	exit 1
+fi
+
+if [[ ! -b $device ]]; then
+	echo "$device no blockdevice"
+	exit 1
+fi
+
+if [[ ! -e $bootPartition ]]; then
+	echo "$bootPartition not found"
+	exit 1
+fi
+
+if [[ ! -e $device ]]; then
+	echo "$rootPartition not found"
+	exit 1
+fi
+
+if ! mount $bootPartition /mnt; then
+	echo "Unable to mount $bootPartition"
+	exit 1
+fi
+umount $bootPartition &>/dev/null
+
+if ! mount $rootPartition /mnt; then
+	echo "Unable to mount $rootPartition"
+	exit 1
+fi
+umount $rootPartition &>/dev/null
 
 cmdline="$(parseCmdline)"
 fstab="$(parseFstab)"
@@ -124,16 +160,19 @@ newBootUUID="$(parseBLKID ${device}1 $bootType | cut -d= -f2)"
 newRootUUID="$(parseBLKID ${device}2 $rootType | cut -d= -f2)"
 
 if [[ $bootUUID == $newBootUUID ]]; then
-	echo "Boot UUID already OK"
+	echo "Boot $bootType $newBootUUID already used"
 else
 	: "Update UUID in fstab"
+	updateUUIDinFstab $bootType $bootUUID $newBootUUID
 fi
 
 
 if [[ $rootUUID == $newRootUUID ]]; then
-	echo "Root UUID already OK"
+	echo "Root $rootType $newRootUUID already used"
 else
 	: "update UUID in fstab and cmdline"
+	updateUUIDinFstab $rootType $rootUUID $newRootUUID
+	updateUUIDinCmdline $rootType $rootUUID $newRootUUID
 fi
 
 

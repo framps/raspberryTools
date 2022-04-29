@@ -1,7 +1,7 @@
 ![](https://img.shields.io/github/last-commit/framps/raspberryTools.svg?style=flat)
 
 ## Note
-There is a [very useful tools collection](https://forums.raspberrypi.com/viewtopic.php?t=196778) available, called usb-tools **Running Raspbian from USB Devices : Made Easy** which contains four very nice tools called usb-boot, sdc-boot, mbr2gpt and set-partuuid. 
+There is a [very useful tools collection](https://forums.raspberrypi.com/viewtopic.php?t=196778) available, called usb-tools **Running Raspbian from USB Devices : Made Easy** which contains four very nice tools called usb-boot, sdc-boot, mbr2gpt and set-partuuid.
 
 # raspberryTools
 Collection of some useful tools for Raspberry Pi. For sample outputs of the tools click the links.
@@ -23,6 +23,8 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 8. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards them to an eMail. UMTS stick and python2 required
 
 9. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
+
+10. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Update /boot/cmdline.txt and /etc/fstab on a device with the UUIDs or PARTUUIDs used on the device. Useful when an image was cloned on another device.
 
 ## findRaspis.sh
 
