@@ -17,7 +17,7 @@
 # Die SSID, die nicht lokalen IPs sowie die MACs und weitere sensible
 # Daten werden soweit wie moeglich in den Ausgaben maskiert.
 #
-#    Copyright (C) 2013-2016 framp at linux-tips-and-tricks dot de
+#    Copyright (C) 2013-2022 framp at linux-tips-and-tricks dot de
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,13 +34,13 @@
 #
 
 MYSELF="${0##*/}"
-VERSION="V0.2.11"
+VERSION="V0.2.13"
 
-GIT_DATE="$Date: 2020-10-10 21:33:31 +0200$"
+GIT_DATE="$Date: 2022-04-02 10:42:57 +0200$"
 GIT_DATE_ONLY=${GIT_DATE/: /}
 GIT_DATE_ONLY=$(echo $GIT_DATE | cut -f 2 -d ' ')
 GIT_TIME_ONLY=$(echo $GIT_DATE | cut -f 3 -d ' ') 
-GIT_COMMIT="$Sha1: fa6f7c7$"
+GIT_COMMIT="$Sha1: ab9bc88$"
 GIT_COMMIT_ONLY=$(echo $GIT_COMMIT | cut -f 2 -d ' ' | sed 's/\$//')
 GIT_CODEVERSION="$MYSELF $VERSION, $GIT_DATE_ONLY/$GIT_TIME_ONLY - $GIT_COMMIT_ONLY"
 
@@ -205,7 +205,7 @@ function writeToConsole() {   # messagenumber
 
 function detectMods() {
 
-	MODS="PING DIG IP EGREP AWK IFCONFIG IWCONFIG IWLIST SED LSUSB GREP PERL ROUTE"  # required commands
+	MODS="PING DIG IP EGREP AWK IFCONFIG IWCONFIG IWLIST SED LSUSB GREP PERL ROUTE ARP"  # required commands
 
 	for mod in $MODS; do
 		lwr=$(echo $mod | tr '[:upper:]' '[:lower:]')
@@ -247,13 +247,6 @@ function detectMods() {
 
 }
 
-# Masquerade wireless key in  /home/pi/.xbmc/userdata/addon_data/script.raspbmc.settings/settings.xml 
-#
-# <setting id="nm.wifi.key" value="mykey" />
-# 
-function masqueradeXBMCWirelessKey() {
-	$SED 's/\(\"nm.wifi.key\".*value=\"\)[^\"\]\+/\1@@@@@@@@/g' | $GREP "nm\."
-}
 
 # Masquerade wireless key in /etc/network/interfaces
 
@@ -350,7 +343,7 @@ $PERL -e '
 
 }
 
-# Invoke script against multiple Pis to check script against xbmc and raspbian
+# Invoke script against multiple Pis to check script against raspbian
 
 function testMyself() { # invocationparms
 
@@ -446,7 +439,7 @@ function nameserverChecks() {
 
 	local res
 	
-	if [ ! -e /etc/resolv.conf -a $IS_XBMC -eq 0 ]; then
+	if [ ! -e /etc/resolv.conf ]; then
 		writeToConsole $MSG_MISSING_RESOLV_CONF
 		return
 	fi
@@ -542,39 +535,34 @@ function collectInfo() {
 	echo "--- uname -a" 
 	uname -a
 
-	echo "--- [ -d /home/pi/.xbmc ]" 
-	if [ -d /home/pi/.xbmc ]; then
-		IS_XBMC=1
-		echo "yes"
-	else
-		IS_XBMC=0
-		echo "no"   
-	fi
-
-	echo '--- ip a s | egrep "(eth|wlan)'
-	$IP a s 2>&1 | $AWK '/(eth|wlan).:/ { on=1; print; next } on==1 && $1 !~ /[0-9]+/ { print; next } $1 ~ /[0-9]+./ { on=0 }' | masqueradeMAC | masqueradeIPV6 | masqueradeSSID  
+	echo '--- ip a s'
+	$IP a s 2>&1 | masqueradeMAC | masqueradeIPV6 | masqueradeSSID  
 	
 	if [ -e /etc/resolv.conf ]; then
-		echo '--- cat /etc/resolv | grep -i "nameserver"'
-		cat /etc/resolv.conf | $EGREP -v "^(#|$)" | $GREP -i "nameserver" | masqueradeIPs
+		echo '--- grep -i "nameserver" /etc/resolv.conf'
+		$EGREP -v "^(#|$)" /etc/resolv.conf | $GREP -i "nameserver" | masqueradeIPs
 	fi
 	
-	if (( ! $IS_XBMC )); then								# xbmc uses nm
-		echo "--- cat /etc/network/interfaces"
-		cat /etc/network/interfaces | $EGREP -v "^(#|$)|::" | masqueradeSSID | masqueradeWirelessKey
-	else
-		echo "--- cat /home/pi/.xbmc/userdata/addon_data/script.raspbmc.settings/settings.xml (Auswahl)"
-		cat /home/pi/.xbmc/userdata/addon_data/script.raspbmc.settings/settings.xml | masqueradeXBMCWirelessKey | masqueradeSSID | masqueradeMAC | masqueradeIPs
-	fi
+	echo "--- /etc/network/interfaces"
+	$EGREP -v "^(#|$)|::" /etc/network/interfaces | masqueradeSSID | masqueradeWirelessKey
 	
-	echo "--- cat /etc/hosts"
-	cat /etc/hosts | $EGREP -v "^(#|$)|::" | masqueradeIPs
+	echo "--- /etc/hosts"
+	$EGREP -v "^(#|$)|::" /etc/hosts | masqueradeIPs
 	
-	echo '--- ip r s | egrep "(eth|wlan)"'
-	$IP r s | $EGREP "(eth|wlan)" | masqueradeIPs
+	echo '--- ip r s'
+	$IP r s | masqueradeIPs
 	
 	echo '--- ip n s'
 	$IP n s | masqueradeIPs | masqueradeMAC
+
+	echo '--- ip r g 8.8.8.8'
+	$IP r g 8.8.8.8 | masqueradeIPs | masqueradeMAC
+	
+	echo '--- route -n'
+	$ROUTE -n | masqueradeIPs
+
+	echo '--- arp -av'
+	$ARP -av | masqueradeIPs | masqueradeMAC
 	
 	# Info useful for wireless only
 	
@@ -607,19 +595,13 @@ function collectInfo() {
 
 		if [ -f /etc/wpa_supplicant/wpa_supplicant.conf ]; then		
 			echo '--- /etc/wpa_supplicant/wpa_supplicant.conf'
-			sudo cat /etc/wpa_supplicant/wpa_supplicant.conf | $EGREP -v "^(#|$)" | masqueradeMAC | masqueradeIPV6 | masqueradeSSIDinWPA | masqueradePsk
+
+			sudo $EGREP -v "^(#|$)" /etc/wpa_supplicant/wpa_supplicant.conf | masqueradeMAC | masqueradeIPV6 | masqueradeSSIDinWPA | masqueradePsk
 			echo '--- grep wpa_action /var/log/messages | tail -n 15'
 			sudo grep wpa /var/log/messages | tail -n 15 | masqueradeMAC | masqueradeIPV6 | masqueradeSSID | masqueradePsk
 		fi
 	fi
 	
-	if (( $IS_XBMC )); then									# for xbmc print nm info
-		echo "--- nmcli nm"
-		nmcli nm
-		echo "--- nmcli dev"
-		nmcli dev
-	fi
-
 }
 
 ################
@@ -628,7 +610,6 @@ function collectInfo() {
 
 TEST=0														
 SSID=""														
-IS_XBMC=0													
 opt=$@
 ETHERNET_ONLY=0												
 SKIP_MODULES=0												

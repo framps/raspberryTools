@@ -24,67 +24,67 @@
 #
 #######################################################################################################################
 
-DEBUG=0								# if 1 just echo commands, if 0 execute commands
+DEBUG=0                       # if 1 just echo commands, if 0 execute commands
 
 (( $DEBUG )) && EXEC="echo"
 
 # retrieve router IP
 
 function getRouterIP() {
-	echo "$(/sbin/ip route show to 0/0 | /usr/bin/awk '{ print $3 }' | /usr/bin/head -1l)"
+   echo "$(/sbin/ip route show to 0/0 | /usr/bin/awk '{ print $3 }' | /usr/bin/head -1l)"
 }
 
 # restart network interface
 
 function netRestart() {
-	/usr/bin/logger "keine Netzwerkverbindung, wlan0 neustarten"
-	$EXEC sudo /sbin/ifdown 'wlan0'
-	sleep 60
-	$EXEC sudo /sbin/ifup --force 'wlan0'
-	echo "!!"
-	sleep 15
+   /usr/bin/logger "keine Netzwerkverbindung, wlan0 neustarten"
+   $EXEC sudo /sbin/ifdown 'wlan0'
+   sleep 60
+   $EXEC sudo /sbin/ifup --force 'wlan0'
+   echo "!!"
+   sleep 15
 }
 
 # reboot server
 
 function reboot() {
-	/usr/bin/logger "keine Netzwerkverbindung, wlan0 neustarten erfolglos, Reboot"
-	$EXEC sudo /sbin/shutdown -r now
+   /usr/bin/logger "keine Netzwerkverbindung, wlan0 neustarten erfolglos, Reboot"
+   $EXEC sudo /sbin/shutdown -r now
 }
 
 # test if IP is valid (dd.dd.dd.dd)
 
 function isValidIP() { # IP
-	grep -q -E "^([[:digit:]]+\.){3}[[:digit:]]+$" <<< "$1"
-	return $?
+   grep -q -E "^([[:digit:]]+\.){3}[[:digit:]]+$" <<< "$1"
+   return $?
 }
 
 ### main ###
 
-IP=$(getRouterIP)											# retrieve router IP
-if isValidIP "$IP"; then									# valid router IP found ?
-															# yes
-	if ! /bin/ping -c2 $IP > /dev/null; then				# can router be pinged ?
-															# no
-		netRestart											# restart interface
-		IP=$(getRouterIP)									# retrieve router IP after restart
-		if isValidIP "$IP"; then							# is new IP valid ?
-															# yes
-			if ! /bin/ping -c2 "$IP" > /dev/null; then		# can router now be pinged ?
-															# no
-				reboot										# then reboot
-			# else
-															# router can be pinged after interface restart, just exit
-			fi
-		else
-															# new IP not valid
-			reboot											# reboot
-		fi
-	# else
-		 													# router can be pinged
-															# just exit
-	fi
+IP=$(getRouterIP)                            # retrieve router IP
+if isValidIP "$IP"; then                     # valid router IP found ?
+                                             # yes
+   if ! /bin/ping -c2 $IP > /dev/null; then  # can router be pinged ?
+                                             # no
+      netRestart                             # restart interface
+      IP=$(getRouterIP)                      # retrieve router IP after restart
+      if isValidIP "$IP"; then               # is new IP valid ?
+                                             # yes
+         if ! /bin/ping -c2 "$IP" > /dev/null; then # can router now be pinged ?
+                                             # no
+            reboot                           # then reboot
+       # else
+                                             # router can be pinged after interface restart, just exit
+         fi
+      else
+                                             # new IP not valid
+         reboot                              # reboot
+      fi
+ # else
+                                             # router can be pinged
+                                             # just exit
+   fi
 else
-															# no valid router IP found
-	reboot													# reboot
+                                             # no valid router IP found
+   reboot                                    # reboot
 fi
