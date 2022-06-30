@@ -2,7 +2,7 @@
 
 #   Find all existing Raspberries in local subnet
 #
-#	 Search for reservered mac addresse for Raspberries defined on 
+#	Search for reservered mac addresse for Raspberries defined on 
 #   https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
 #
 #   Copyright (C) 2021-2022 framp at linux-tips-and-tricks dot de
@@ -23,7 +23,7 @@
 
 set -euo pipefail
 
-VERSION=0.4
+VERSION=0.5
 MYSELF="$(basename "$0")"
 MYNAME=${MYSELF%.*}
 
@@ -115,12 +115,15 @@ done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -E " $MY_MAC_REGEX")
 # retrieve and print hostnames
 
 if (( ${#macAddress[@]} > 0 )); then
-	echo "Retrieving hostnames for ${#macAddress[@]} Rasepberries ..."
+	echo "Retrieving hostnames for ${#macAddress[@]} Raspberries ..."
 
 	printf "%-15s %-17s %s\n" "IP address" "Mac address" "Hostname"
 
+	IFS=$'\n' sorted=($(sort -t . -k 3,3n -k 4,4n <<<"${!macAddress[*]}"))
+	unset IFS
+
 	# 12.0.168.192.in-addr.arpa domain name pointer asterix.
-	for ip in "${!macAddress[@]}"; do
+	for ip in "${sorted[@]}"; do
 		set +e
 		h="$(host "$ip")"
 		rc=$?
