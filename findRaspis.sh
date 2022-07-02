@@ -2,7 +2,7 @@
 
 #   Find all existing Raspberries in local subnet
 #
-#	 Search for reservered mac addresse for Raspberries defined on 
+#   Search for mac addresses used by Raspberries iwhich are defined on 
 #   https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
 #
 #   Copyright (C) 2021-2022 framp at linux-tips-and-tricks dot de
@@ -23,7 +23,7 @@
 
 set -euo pipefail
 
-VERSION=0.4
+VERSION=0.5
 MYSELF="$(basename "$0")"
 MYNAME=${MYSELF%.*}
 
@@ -67,7 +67,7 @@ Defaults:
 Example:	
 	$MYSELF 192.168.179.0/24
 	
-Init file $INI_FILENAME can be used to customize the Mac Regex. Every line has to define a Mac Regex
+Init file $INI_FILENAME can be used to customize the mac addresses scanned for. Every line has to define a mac regex
 
 	Example file contents for $INI_FILENAME:	
 b8:27:eb
@@ -115,17 +115,20 @@ done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -E " $MY_MAC_REGEX")
 # retrieve and print hostnames
 
 if (( ${#macAddress[@]} > 0 )); then
-	echo "Retrieving hostnames for ${#macAddress[@]} Rasepberries ..."
+	echo "Retrieving hostnames for ${#macAddress[@]} detected Raspberries ..."
 
-	printf "%-15s %-17s %s\n" "IP address" "Mac address" "Hostname"
+	printf "\n%-15s %-17s %s\n" "IP address" "Mac address" "Hostname"
 
-	# 12.0.168.192.in-addr.arpa domain name pointer asterix.
-	for ip in "${!macAddress[@]}"; do
+	IFS=$'\n' sorted=($(sort -t . -k 3,3n -k 4,4n <<<"${!macAddress[*]}"))
+	unset IFS
+
+	for ip in "${sorted[@]}"; do
 		set +e
 		h="$(host "$ip")"
 		rc=$?
 		set -e
 		if (( ! $rc )); then
+			# 12.0.168.192.in-addr.arpa domain name pointer asterix.
 			read arpa dummy dummy dummy host rest <<< "$h"
 			host=${host::-1} # delete trailing "."
 		else
