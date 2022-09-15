@@ -115,14 +115,10 @@ done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -E " $MY_MAC_REGEX")
 # retrieve and print hostnames
 
 if (( ${#macAddress[@]} > 0 )); then
-	echo "Retrieving hostnames for ${#macAddress[@]} detected Raspberries ..."
 
 	printf "\n%-15s %-17s %s\n" "IP address" "Mac address" "Hostname"
 
-	IFS=$'\n' sorted=($(sort -t . -k 3,3n -k 4,4n <<<"${!macAddress[*]}"))
-	unset IFS
-
-	for ip in "${sorted[@]}"; do
+	for ip in "${!macAddress[@]}"; do
 		set +e
 		h="$(host "$ip")"
 		rc=$?
