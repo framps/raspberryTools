@@ -47,7 +47,7 @@ fi
 # define defaults
 
 DEFAULT_SUBNETMASK="192.168.0.0/24"
-DEFAULT_MAC_REGEX="b8:27:eb|dc:a6:32|e4:5f:01"
+DEFAULT_MAC_REGEX="b8:27:eb|dc:a6:32|e4:5f:01|28:CD:C1"
 # see https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
 INI_FILENAME="~/.${MYNAME}"
 
