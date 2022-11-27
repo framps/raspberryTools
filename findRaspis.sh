@@ -115,7 +115,7 @@ done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -E " $MY_MAC_REGEX")
 
 if (( ${#macAddress[@]} > 0 )); then
 
-	printf "\n%-15s %-17s %s\n" "IP address" "Mac address" "Hostname/Description"
+	printf "\n%-15s %-17s %s\n" "IP address" "Mac address" "Hostname (Description)"
 
 	for ip in "${!macAddress[@]}"; do
 		set +e
@@ -130,19 +130,21 @@ if (( ${#macAddress[@]} > 0 )); then
 			host=${host::-1} # delete trailing "."
 		fi
 
+		if [[ -z "$host" ]]; then	
+			host="Unknown"
+		fi
+
 		if [[ -f $INI_FILENAME ]]; then
 			set +e
-			hostMapped="$(grep "${macAddress[$ip]}" $INI_FILENAME)"
+			hostDescription="$(grep "${macAddress[$ip]}" $INI_FILENAME)"
 			rc=$?
 			set -e
 			if (( ! $rc )); then
-				host="$(cut -f 2- -d ' ' <<< "$hostMapped")"
+				hostDescription="$(cut -f 2- -d ' ' <<< "$hostDescription" | sed 's/^ *//; s/ *$//')"
+				host="${host} ($hostDescription)"
 			fi
 		fi
 
-		if [[ -z "$host" ]]; then	
-			host="-Unknown-"
-		fi
 		printf "%-15s %17s %s\n" $ip ${macAddress[$ip]} "$host"
 	done 
 else
