@@ -30,14 +30,12 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 ```
 findRaspis.sh
-Scanning subnet 192.168.0.0/24 for Raspberries...
-4 Raspberries found
-Retrieving hostnames ...
-IP address      Mac address       Hostname
-192.168.0.8     b8:27:eb:b4:e8:74 troubadix
-192.168.0.10    b8:27:eb:3c:94:90 idefix
-192.168.0.11    b8:27:eb:30:8a:52 obelix
-192.168.0.12    dc:a6:32:8f:28:fd asterix
+Scanning subnet 192.168.0.0/24 for Raspberries ...
+
+IP address      Mac address       Hostname/Description
+192.168.0.8     b8:27:eb:b4:e8:74 Networking server
+192.168.0.10    b8:27:eb:3c:94:90 Homeautomation server
+192.168.0.12    dc:a6:32:8f:28:fd LAN server
 ```
 
 ## checkThrottled.sh
