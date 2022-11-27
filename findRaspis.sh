@@ -38,7 +38,7 @@ if ! command -v host COMMAND &> /dev/null; then
 	exit 255
 fi
 
-if (( ${BASH_VERSINFO[0]} < 4 )); then
+if (( BASH_VERSINFO[0] < 4 )); then
 	echo "Minimum bash 4.0 is required. You have $BASH_VERSION."
 	exit 255
 fi
@@ -48,12 +48,13 @@ fi
 DEFAULT_SUBNETMASK="192.168.0.0/24"
 DEFAULT_MAC_REGEX="b8:27:eb|dc:a6:32|e4:5f:01|28:CD:C1"
 # see https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
-INI_FILENAME=~/.${MYNAME}
+INI_FILENAME=$HOME/.${MYNAME}
 
 # help text
 
 if (( $# >= 1 )) && [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
 	cat << EOH
+	$MYSELF $VERSION
 Usage:
 	$MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for Raspberries
 	$MYSELF <subnetmask>          Scan subnet for Raspberries
@@ -89,10 +90,10 @@ MY_NETWORK=${1:-$DEFAULT_SUBNETMASK}
 MY_MAC_REGEX="$DEFAULT_MAC_REGEX"
 
 if [[ -f "$INI_FILENAME" ]]; then
-	MY_MAC_REGEX_FROM_INI="$(head -n 1 $INI_FILENAME | cut -f 2 -d " ")" 
+	MY_MAC_REGEX_FROM_INI="$(head -n 1 "$INI_FILENAME" | cut -f 2 -d " ")" 
 	if [[ -z "$MY_MAC_REGEX_FROM_INI" ]]; then
 		echo "Using Mac Regex from $INI_FILENAME"
-		MY_MAC_REGEX="$(head -n 1 $INI_FILENAME)"
+		MY_MAC_REGEX="$(head -n 1 "$INI_FILENAME")"
 	fi
 fi	
 MY_MAC_REGEX=" (${MY_MAC_REGEX})"
@@ -100,16 +101,15 @@ MY_MAC_REGEX=" (${MY_MAC_REGEX})"
 # define associative arrays for mac and hostname lookups
 
 declare -A macAddress=()
-declare -A hostName=()
 
 echo "Scanning subnet $MY_NETWORK for Raspberries ..."
 
 # scan subnet for Raspberry macs
 
 # 192.168.0.12             ether   dc:a6:32:8f:28:fd   C                     wlp3s0 - 
-while read ip dummy mac rest; do
+while read -r ip dummy mac rest; do
 	macAddress["$ip"]="$mac"
-done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -Ei " $MY_MAC_REGEX")
+done < <(nmap -sP "$MY_NETWORK" &>/dev/null; arp -n | grep -Ei " $MY_MAC_REGEX")
 
 # retrieve and print hostnames
 
@@ -123,10 +123,10 @@ if (( ${#macAddress[@]} > 0 )); then
 		rc=$?
 		set -e
 		host=""
-		hostMapped=""
-		if (( ! $rc )); then
+		if (( ! rc )); then
 			# 12.0.168.192.in-addr.arpa domain name pointer asterix.
-			read arpa dummy dummy dummy host rest <<< "$h"
+			read -r arpa dummy dummy dummy host rest <<< "$h"
+			: "$arpa" "$dummy" # suppress shellcheck warning
 			host=${host::-1} # delete trailing "."
 		fi
 
@@ -134,18 +134,18 @@ if (( ${#macAddress[@]} > 0 )); then
 			host="Unknown"
 		fi
 
-		if [[ -f $INI_FILENAME ]]; then
+		if [[ -f "$INI_FILENAME" ]]; then
 			set +e
-			hostDescription="$(grep "${macAddress[$ip]}" $INI_FILENAME)"
+			hostDescription="$(grep "${macAddress[$ip]}" "$INI_FILENAME")"
 			rc=$?
 			set -e
-			if (( ! $rc )); then
+			if (( ! rc )); then
 				hostDescription="$(cut -f 2- -d ' ' <<< "$hostDescription" | sed 's/^ *//; s/ *$//')"
 				host="${host} ($hostDescription)"
 			fi
 		fi
 
-		printf "%-15s %17s %s\n" $ip ${macAddress[$ip]} "$host"
+		printf "%-15s %17s %s\n" "$ip" "${macAddress[$ip]}" "$host"
 	done 
 else
 	echo "No Raspberries found with mac regex $MY_MAC_REGEX"
