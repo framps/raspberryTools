@@ -109,7 +109,7 @@ echo "Scanning subnet $MY_NETWORK for Raspberries ..."
 # 192.168.0.12             ether   dc:a6:32:8f:28:fd   C                     wlp3s0 - 
 while read ip dummy mac rest; do
 	macAddress["$ip"]="$mac"
-done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -E " $MY_MAC_REGEX")
+done < <(nmap -sP $MY_NETWORK &>/dev/null; arp -n | grep -Ei " $MY_MAC_REGEX")
 
 # retrieve and print hostnames
 
