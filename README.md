@@ -18,7 +18,7 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 6. [retrieveLifetimeWrites.sh](#retrievelifetimewritessh) - Either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
-7. [findRaspis.sh](#findraspissh) - Scan the local net for Raspberries and print the IPs, macs and hostnames sorted by IP
+7. [findRaspis.sh](#findraspissh) - Scan the local net for Raspberries and print the IPs, macs and hostnames sorted by IP. A config file allows to show meaningful descriptions to the mac system instead of the hostname
 
 8. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards them to an eMail. UMTS stick and python2 required
 
