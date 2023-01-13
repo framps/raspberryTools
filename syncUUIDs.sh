@@ -4,7 +4,7 @@
 #
 # 	Update /boot/cmdline.txt and /etc/fstab on a target device with the actual UUID/PARTUUIDs of the target device
 #
-#   Copyright (C) 2022 framp at linux-tips-and-tricks dot de
+#   Copyright (C) 2022-2023 framp at linux-tips-and-tricks dot de
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -64,8 +64,10 @@ function parseBLKID {	# device uuidType
 function updateUUIDinFstab() { # bootType uuid newUUID
 	echo "Updating $1 from $2 to $3 in /etc/fstab on $rootPartition"
 	(( $dryrun )) && return
-	mount $rootPartition /mnt
-	sed -i "s/^$1=$2/$1=$3/" /mnt/etc/fstab
+	if ! sed -i "s/^$1=$2/$1=$3/" /mnt/etc/fstab; then
+		echo "??? Unable to update /etc/fstab")
+		exit 1
+	fi
 	umount /mnt
 }
 
@@ -73,15 +75,17 @@ function updateUUIDinCmdline() { # bootType uuid newUUID
 	echo "Updating $1 from $2 to $3 in /boot/cmdline.txt on $bootPartition"
 	(( $dryrun )) && return
 	mount $bootPartition /mnt
-	sed -i "s/$1=$2/$1=$3/" /mnt/cmdline.txt
+	if ! sed -i "s/$1=$2/$1=$3/" /mnt/cmdline.txt; then
+		echo "??? Unable to update /boot/cmdline.txt")
+		exit 1
+	fi
 	umount /mnt
 }
 
 function usage() {
-	echo "Usage: $0 [-n] targetDevice" 1>&2
-	echo "-n: Don echo "$device is a partition but has to be a device. Try $(sed -E "s/[0-9]+$//" <<< "$device")"
-'t update files. Just inform what will be updated."
-	exit 1
+	echo "Usage: $0 [-n] targetDevice"
+	echo "-n: Don't update files. Just inform what will be updated."
+	exit 0
 }
 
 # Parse arguments
