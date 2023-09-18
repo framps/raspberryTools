@@ -4,7 +4,7 @@
 #
 # Retrieve throttling bits of Raspberry and report their semantic
 #
-# Throttle bit semantic according https://www.raspberrypi.com/documentation/computers/os.html
+# Throttle bit semantic according https://www.raspberrypi.com/documentation/computers/os.html and check for undervoltage
 #
 #######################################################################################################################
 #
@@ -51,7 +51,7 @@ if [[ $t != "0x0" ]]; then
 	echo "Throttling in hex: $t ('occured' bits reset on boot only)"
 	analyze $t
 else
-	echo "No throttling 'occured' bits set. Bits reset on boot only"
+	echo "Neither undervoltage nor throttling 'occured' bits set. Bits reset on boot only"
 fi
 
 t=$(vcgencmd get_throttled 0xf | cut -f 2 -d "=" )
@@ -59,5 +59,5 @@ if [[ $t != "0x0" ]]; then
 	echo "Throttling in hex: $t ('occured' bits reset after call of this script)"
 	analyze $t
 else
-	echo "No throttling 'occured' bits set. Bits reset after call of this script"
+	echo "Neither undervoltage nor throttling 'occured' bits set. Bits reset after call of this script"
 fi
