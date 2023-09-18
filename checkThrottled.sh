@@ -51,28 +51,28 @@ function analyze() {
 }
 
 if (( $UID != 0 )); then
-	echo "Call script as root or use sudo"
-	exit 42
+   echo "Call script as root or use sudo"
+   exit 42
 fi
 
 if ! $which vcgencmd &>/dev/null; then
-	echo "No vcgencmd detected."
-	exit 42
+   echo "No vcgencmd detected."
+   exit 42
 fi
 
 options=("" 0xf)
 for o in "${options[@]}"; do
-	t=$(vcgencmd get_throttled $o | cut -f 2 -d "=" )
-	if [[ $t != "0x0" ]]; then
-		echo ":-( Throttling bits in hex: $t"
-		analyze $t
-	else
-		echo ":-) Neither undervoltage nor throttling detected"
-	fi
-	echo -n "NOTE: "
-	if [[ -z $o ]]; then
-		echo "Bits reset on boot only"
-	else
-		echo "Bits reset after call of this script"
-	fi
+   t=$(vcgencmd get_throttled $o | cut -f 2 -d "=" )
+   if [[ $t != "0x0" ]]; then
+      echo ":-( Throttling bits in hex: $t"
+      analyze $t
+   else
+      echo ":-) Neither undervoltage nor throttling detected"
+   fi
+   echo -n "NOTE: "
+   if [[ -z $o ]]; then
+      echo "Bits reset on boot only"
+   else
+      echo "Bits reset after call of this script"
+   fi
 done
