@@ -4,7 +4,7 @@
 #
 # Retrieve throttling bits of Raspberry and report their semantic
 #
-# Throttle bit semantic according https://github.com/raspberrypi/documentation/blob/JamesH65-patch-vcgencmd-vcdbg-docs/raspbian/applications/vcgencmd.md
+# Throttle bit semantic according https://www.raspberrypi.com/documentation/computers/os.html
 #
 #######################################################################################################################
 #
@@ -47,9 +47,17 @@ function analyze() {
 }
 
 t=$(vcgencmd get_throttled | cut -f 2 -d "=" )
-echo "Throttling in hex : $t ('occured' bits reset on boot only)"
-analyze $t
+if [[ $t != "0x0" ]]; then
+	echo "Throttling in hex: $t ('occured' bits reset on boot only)"
+	analyze $t
+else
+	echo "No throttling detected"
+fi
 
 t=$(vcgencmd get_throttled 0xf | cut -f 2 -d "=" )
-echo "Throttling in hex: $t ('occured' bits reset after call)"
-analyze $t
+if [[ $t != "0x0" ]]; then
+	echo "Throttling in hex: $t ('occured' bits reset after call of this script)"
+	analyze $t
+else
+	echo "No throttling detected"
+fi
