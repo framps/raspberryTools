@@ -25,41 +25,44 @@
 #
 #######################################################################################################################
 
+# Bits         0                       1                     2                       3
 m=( "Under-voltage detected" "Arm frequency capped" "Currently throttled" "Soft temperature limit active" \
 ""  ""  ""  ""  ""  ""  ""  ""  ""  ""  ""  "" \
 "Under-voltage has occurred" "Arm frequency capped has occurred" "Throttling has occurred" "Soft temperature limit has occurred" )
+# Bits      16                            17                              18                              19
 
 function analyze() {
 
-	local b=$(perl -e "printf \"%08b\\n\", $1" 2>/dev/null) 				# convert hex number into binary number
-	local i=0
-	local t 															# start with bit 0 (LSb)
-	while [[ -n $b ]]; do											# there are still bits to process
-		t=${b:${#b}-1:1} 											# extract LSb
-		if (( $t != 0 )); then 										# bit set
-			if (( $i <= ${#m[@]} - 1 )) && [[ -n ${m[$i]} ]]; then 	# bit meaning is defined
-				echo "Bit $i set: ${m[$i]}"
-			else													# bit meaning unknown
-				echo "Bit $i set: meaning unknown"
-			fi
-		fi
-		b=${b::-1} 													# remove LSb from throttle bits
-		(( i++ )) 													# inc bit counter
-	done
+   local b=$(perl -e "printf \"%08b\\n\", $1" 2>/dev/null)           # convert hex number into binary number
+   local i=0                                                         # start with bit 0 (LSb)
+   local t
+   while [[ -n $b ]]; do                                             # there are still bits to process
+      t=${b:${#b}-1:1}                                               # extract LSb
+      if (( $t != 0 )); then                                         # bit set
+         if (( $i <= ${#m[@]} - 1 )) && [[ -n ${m[$i]} ]]; then      # bit meaning is defined
+            echo "Bit $i set: ${m[$i]}"
+         else                                                        # bit meaning unknown
+            echo "Bit $i set: meaning unknown"
+         fi
+      fi
+      b=${b::-1}                                                     # remove LSb from throttle bits
+      (( i++ ))                                                      # inc bit counter
+   done
 }
 
-t=$(vcgencmd get_throttled | cut -f 2 -d "=" )
-if [[ $t != "0x0" ]]; then
-	echo "Throttling in hex: $t ('occured' bits reset on boot only)"
-	analyze $t
-else
-	echo "Neither undervoltage nor throttling 'occured' bits set. Bits reset on boot only"
-fi
-
-t=$(vcgencmd get_throttled 0xf | cut -f 2 -d "=" )
-if [[ $t != "0x0" ]]; then
-	echo "Throttling in hex: $t ('occured' bits reset after call of this script)"
-	analyze $t
-else
-	echo "Neither undervoltage nor throttling 'occured' bits set. Bits reset after call of this script"
-fi
+options=("" 0xf)
+for o in "${options[@]}"; do
+	t=$(vcgencmd get_throttled $o | cut -f 2 -d "=" )
+	if [[ $t != "0x0" ]]; then
+		echo ":-( Throttling bits in hex: $t"
+		analyze $t
+	else
+		echo ":-) Neither undervoltage nor throttling detected"
+	fi
+	echo -n "NOTE: "
+	if [[ -z $o ]]; then
+		echo "Bits reset on boot only"
+	else
+		echo "Bits reset after call of this script"
+	fi
+done
