@@ -30,8 +30,10 @@ m=( "Under-voltage detected" "Arm frequency capped" "Currently throttled" "Soft 
 "Under-voltage has occurred" "Arm frequency capped has occurred" "Throttling has occurred" "Soft temperature limit has occurred" )
 
 function analyze() {
-	b=$(perl -e "printf \"%08b\\n\", $1" 2>/dev/null) 				# convert hex number into binary number
-	i=0 															# start with bit 0 (LSb)
+
+	local b=$(perl -e "printf \"%08b\\n\", $1" 2>/dev/null) 				# convert hex number into binary number
+	local i=0
+	local t 															# start with bit 0 (LSb)
 	while [[ -n $b ]]; do											# there are still bits to process
 		t=${b:${#b}-1:1} 											# extract LSb
 		if (( $t != 0 )); then 										# bit set
