@@ -50,6 +50,16 @@ function analyze() {
    done
 }
 
+if (( $UID != 0 )); then
+	echo "Call script as root or use sudo"
+	exit 42
+fi
+
+if ! $which vcgencmd &>/dev/null; then
+	echo "No vcgencmd detected."
+	exit 42
+fi
+
 options=("" 0xf)
 for o in "${options[@]}"; do
 	t=$(vcgencmd get_throttled $o | cut -f 2 -d "=" )
