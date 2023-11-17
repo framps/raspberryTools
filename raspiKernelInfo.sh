@@ -109,7 +109,7 @@ if is_pi; then
 	displayAndExec "echo \$XDG_SESSION_TYPE"
 	[[ -f /boot/config.txt ]] && displayAndExec "grep arm_64bit /boot/config.txt"
 	[[ -f /etc/rpi-issue ]] && displayAndExec "cat /etc/rpi-issue"
-	displayAndExec "tail -4 /proc/cpuinfo | grep -v "^Serial"
+	displayAndExec "tail -4 /proc/cpuinfo | grep -v \"^Seriali\""
 else
 	echo "No RaspberryPi detected"
 fi
