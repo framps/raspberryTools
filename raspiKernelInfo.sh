@@ -110,6 +110,7 @@ if is_pi; then
 	displayAndExec "tail -4 /proc/cpuinfo"
 	[[ -f /boot/config.txt ]] && displayAndExec "grep arm_64bit /boot/config.txt"
 	displayAndExec "tail -4 /proc/cpuinfo"
+	[[ -f /etc/rpi-issue ]] && displayAndExec "cat /etc/rpi-issue"
 
 else
 	echo "No RaspberryPi detected"
