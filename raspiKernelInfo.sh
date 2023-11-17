@@ -101,13 +101,16 @@ function displayAndExec() {
 }
 
 if is_pi; then
-	echo "---RPi HW version $(get_pi_type) detected"
+	echo "--- RPi HW version $(get_pi_type) detected"
 
 	displayAndExec "uname -a"
 	displayAndExec "dpkg --print-architecture"
 	displayAndExec "getconf LONG_BIT"
 	displayAndExec "echo \$XDG_SESSION_TYPE"
+	displayAndExec "tail -4 /proc/cpuinfo"
 	[[ -f /boot/config.txt ]] && displayAndExec "grep arm_64bit /boot/config.txt"
+	displayAndExec "tail -4 /proc/cpuinfo"
+
 else
 	echo "No RaspberryPi detected"
 fi
