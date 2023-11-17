@@ -57,6 +57,9 @@ displayAndExec "dpkg --print-architecture"
 displayAndExec "getconf LONG_BIT"
 displayAndExec "grep PRETTY_NAME /etc/os-release"
 displayAndExec "echo \$XDG_SESSION_TYPE"
+if [[ -n $DESKTOP_SESSION ]]; then
+	displayAndExec "echo \$DESKTOP_SESSION"
+fi	
 [[ -f /boot/config.txt ]] && displayAndExec "grep arm_64bit /boot/config.txt"
 if [[ -f /etc/rpi-issue ]]; then
 	displayAndExec "cat /etc/rpi-issue"
