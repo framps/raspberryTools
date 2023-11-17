@@ -26,6 +26,8 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 10. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Update /boot/cmdline.txt and /etc/fstab on a device with the UUIDs or PARTUUIDs used on the device. Useful when an image was cloned on another device.
 
+11. [raspiKernelInfo.sh]https://github.com/framps/raspberryTools/blob/master/raspiKerneInfo.sh) - Retrieve info about the running kernel on a Raspberry
+
 ## findRaspis.sh
 
 ```
