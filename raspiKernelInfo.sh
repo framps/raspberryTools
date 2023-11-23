@@ -30,6 +30,7 @@ function displayAndExec() {
     else
         $1
     fi
+    echo ""
 }
 # see https://github.com/RPi-Distro/pi-gen
 declare -A STAGE_DESCRIPTION=( \
@@ -39,7 +40,7 @@ declare -A STAGE_DESCRIPTION=( \
 		["stage3"]="Desktop system" \
 		["stage4"]="Normal Raspbian image" \
 		["stage5"]="The Raspbian Full image" \
-		)		
+		)
 function extractStageDescription() {
 	local stage=""
 	stage="$(grep "^Generated" /etc/rpi-issue)"
@@ -52,18 +53,24 @@ function extractStageDescription() {
 	fi
 }
 
-displayAndExec "uname -a"
-displayAndExec "dpkg --print-architecture"
-displayAndExec "getconf LONG_BIT"
+if [[ $1 == "-f" ]] ; then
+    displayAndExec "tail -4 /proc/cpuinfo"
+else
+    displayAndExec "tail -4 /proc/cpuinfo | grep -v \"^Serial\""
+fi
+displayAndExec "free --human |  grep -E '^Speicher:|Mem:' | cut -c -20"
+[[ $1 == "-f" ]] && displayAndExec "ip --brief link"
+
 displayAndExec "grep PRETTY_NAME /etc/os-release"
-displayAndExec "echo \$XDG_SESSION_TYPE"
-if [[ -n $DESKTOP_SESSION ]]; then
-	displayAndExec "echo \$DESKTOP_SESSION"
-fi	
-[[ -f /boot/config.txt ]] && displayAndExec "grep arm_64bit /boot/config.txt"
 if [[ -f /etc/rpi-issue ]]; then
 	displayAndExec "cat /etc/rpi-issue"
-	echo -e "--- Image stage description \n$(extractStageDescription)"	
-
+	echo -e "--- Image stage description \n$(extractStageDescription)\n"
 fi
-displayAndExec "tail -4 /proc/cpuinfo | grep -v \"^Serial\""		
+
+[[ -f /boot/config.txt ]] && displayAndExec "grep arm_64bit /boot/config.txt"
+displayAndExec "getconf LONG_BIT"
+displayAndExec "dpkg --print-architecture"
+displayAndExec "uname -a"
+
+displayAndExec "echo \$XDG_SESSION_TYPE"
+[[ -n $DESKTOP_SESSION ]] && displayAndExec "echo \$DESKTOP_SESSION"
