@@ -59,7 +59,8 @@ else
     displayAndExec "tail -4 /proc/cpuinfo | grep -v \"^Serial\""
 fi
 displayAndExec "free --human |  grep -E '^Speicher:|Mem:' | cut -c -20"
-[[ $1 == "-f" ]] && displayAndExec "ip --brief link"
+[[ $1 == "-f" ]] && displayAndExec "ip --brief link | grep -v '^lo'"
+displayAndExec "ip --brief address | grep -v '^lo'"
 
 displayAndExec "grep PRETTY_NAME /etc/os-release"
 if [[ -f /etc/rpi-issue ]]; then
@@ -71,6 +72,13 @@ fi
 displayAndExec "getconf LONG_BIT"
 displayAndExec "dpkg --print-architecture"
 displayAndExec "uname -a"
+
+displayAndExec "sudo parted -l"
+if [[ $1 == "-f" ]] ; then
+    displayAndExec "lsblk -f"
+else
+    displayAndExec "lsblk -o NAME,FSTYPE,LABEL,FSAVAIL,FSUSE%,MOUNTPOINT"
+fi
 
 displayAndExec "echo \$XDG_SESSION_TYPE"
 [[ -n $DESKTOP_SESSION ]] && displayAndExec "echo \$DESKTOP_SESSION"
