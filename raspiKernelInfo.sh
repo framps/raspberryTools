@@ -53,13 +53,13 @@ function extractStageDescription() {
 	fi
 }
 
-if [ "$1" == "-f" ] ; then
+if [[ $1 == "-f" ]] ; then
     displayAndExec "tail -4 /proc/cpuinfo"
 else
     displayAndExec "tail -4 /proc/cpuinfo | grep -v \"^Serial\""
 fi
 displayAndExec "free --human |  grep -E '^Speicher:|Mem:' | cut -c -20"
-[ "$1" == "-f" ] && displayAndExec "ip --brief link"
+[[ $1 == "-f" ]] && displayAndExec "ip --brief link"
 
 displayAndExec "grep PRETTY_NAME /etc/os-release"
 if [[ -f /etc/rpi-issue ]]; then
