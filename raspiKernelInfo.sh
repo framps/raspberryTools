@@ -22,9 +22,31 @@
 #
 #######################################################################################################################
 
+MYSELF=${0##*/}
+
+function usage() {
+    cat <<EOF
+Usage: $MYSELF [option]*
+
+-Options-
+-c  show the command producing the info, additionally to the short description
+-C  show the command producing the info, without short description
+-f  show full (more) infos about the system
+EOF
+}
+
 function displayAndExec() {
 
-    echo "--- $1"
+    if [[ $ONLYCOMMANDS ]] ; then
+        echo "--- $1"
+    else
+        if [[ $COMMANDS ]] ; then
+            echo "--- ${2:+$2 ---} $1"
+        else
+            echo "--- ${2:-$1}"
+        fi
+    fi
+
     if grep -q "$" <<< "$1"; then
         eval $1
     else
@@ -32,6 +54,7 @@ function displayAndExec() {
     fi
     echo ""
 }
+
 # see https://github.com/RPi-Distro/pi-gen
 declare -A STAGE_DESCRIPTION=( \
 		["stage0"]="Bootstrap" \
@@ -53,32 +76,51 @@ function extractStageDescription() {
 	fi
 }
 
-if [[ $1 == "-f" ]] ; then
-    displayAndExec "tail -4 /proc/cpuinfo"
-else
-    displayAndExec "tail -4 /proc/cpuinfo | grep -v \"^Serial\""
-fi
-displayAndExec "free --human |  grep -E '^Speicher:|Mem:' | cut -c -20"
-[[ $1 == "-f" ]] && displayAndExec "ip --brief link | grep -v '^lo'"
-displayAndExec "ip --brief address | grep -v '^lo'"
+COMMANDS=""
+ONLYCOMMANDS=""
+FULL=""
 
-displayAndExec "grep PRETTY_NAME /etc/os-release"
+while (( "$#" )); do
+
+  case "$1" in
+      -c|--commands)
+          COMMANDS=1 ; shift 1
+          ;;
+      -C|--onlycommands)
+          ONLYCOMMANDS=1 ; shift 1
+          ;;
+      -f|--full)
+          FULL=1 ; shift 1
+          ;;
+      -h|--help)
+          usage ; exit
+          ;;
+  esac
+done
+
+
+if [[ $FULL ]] ; then
+    displayAndExec "tail -4 /proc/cpuinfo"  "CPUINFO"
+else
+    displayAndExec "tail -4 /proc/cpuinfo | grep -v \"^Serial\""  "CPUINFO"
+fi
+
+displayAndExec "free --human |  grep -E '^Speicher:|Mem:' | cut -c -20"  "MEMORY"
+
+[[ $FULL ]] && displayAndExec "(ip --brief link ; ip --brief address) | grep -v '^lo'"  "NETWORK"
+
+displayAndExec "grep PRETTY_NAME /etc/os-release"  "OS"
 if [[ -f /etc/rpi-issue ]]; then
-	displayAndExec "cat /etc/rpi-issue"
-	echo -e "--- Image stage description \n$(extractStageDescription)\n"
+	displayAndExec "cat /etc/rpi-issue ; echo -e \"($(extractStageDescription))\""  "ORIGINAL IMAGE"
 fi
 
-[[ -f /boot/config.txt ]] && displayAndExec "grep arm_64bit /boot/config.txt"
-displayAndExec "getconf LONG_BIT"
-displayAndExec "dpkg --print-architecture"
-displayAndExec "uname -a"
+[[ -f /boot/config.txt ]] && displayAndExec "grep arm_64bit /boot/config.txt"  "64 BIT SET IN CONFIG?"
+displayAndExec "getconf LONG_BIT"  "SOFTWARE BITS"
+displayAndExec "dpkg --print-architecture"  "SOFTWARE ARCH"
+displayAndExec "uname -a"  "SYSTEM INFORMATION"
 
-displayAndExec "sudo parted -l"
-if [[ $1 == "-f" ]] ; then
-    displayAndExec "lsblk -f"
-else
-    displayAndExec "lsblk -o NAME,FSTYPE,LABEL,FSAVAIL,FSUSE%,MOUNTPOINT"
-fi
+[[ $FULL ]] && displayAndExec "sudo parted -l | grep -v -e '^Sector' -e '^Partition' -e '^$' -e '^Disk Flags'"  "STORAGE"
+[[ $FULL ]] && displayAndExec "lsblk -f"  "STORAGE"
 
-displayAndExec "echo \$XDG_SESSION_TYPE"
+displayAndExec "echo \$XDG_SESSION_TYPE"  "X11, WAYLAND OR TTY"
 [[ -n $DESKTOP_SESSION ]] && displayAndExec "echo \$DESKTOP_SESSION"
