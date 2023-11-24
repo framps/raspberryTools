@@ -37,10 +37,10 @@ EOF
 
 function displayAndExec() {
 
-    if [[ $ONLYCOMMANDS ]] ; then
+    if (( $ONLYCOMMANDS )) ; then
         echo "--- $1"
     else
-        if [[ $COMMANDS ]] ; then
+        if (( $COMMANDS )) ; then
             echo "--- ${2:+$2 ---} $1"
         else
             echo "--- ${2:-$1}"
@@ -76,9 +76,9 @@ function extractStageDescription() {
 	fi
 }
 
-COMMANDS=""
-ONLYCOMMANDS=""
-FULL=""
+COMMANDS=0
+ONLYCOMMANDS=0
+FULL=0
 
 while (( "$#" )); do
 
@@ -99,7 +99,7 @@ while (( "$#" )); do
 done
 
 
-if [[ $FULL ]] ; then
+if (( $FULL )) ; then
     displayAndExec "tail -4 /proc/cpuinfo"  "CPUINFO"
 else
     displayAndExec "tail -4 /proc/cpuinfo | grep -v \"^Serial\""  "CPUINFO"
@@ -107,7 +107,7 @@ fi
 
 displayAndExec "free --human |  grep -E '^Speicher:|Mem:' | cut -c -20"  "MEMORY"
 
-[[ $FULL ]] && displayAndExec "(ip --brief link ; ip --brief address) | grep -v '^lo'"  "NETWORK"
+(( $FULL )) && displayAndExec "(ip --brief link ; ip --brief address) | grep -v '^lo'"  "NETWORK"
 
 displayAndExec "grep PRETTY_NAME /etc/os-release"  "OS"
 if [[ -f /etc/rpi-issue ]]; then
@@ -119,8 +119,8 @@ displayAndExec "getconf LONG_BIT"  "SOFTWARE BITS"
 displayAndExec "dpkg --print-architecture"  "SOFTWARE ARCH"
 displayAndExec "uname -a"  "SYSTEM INFORMATION"
 
-[[ $FULL ]] && displayAndExec "sudo parted -l | grep -v -e '^Sector' -e '^Partition' -e '^$' -e '^Disk Flags'"  "STORAGE"
-[[ $FULL ]] && displayAndExec "lsblk -f"  "STORAGE"
+(( $FULL )) && displayAndExec "sudo parted -l | grep -v -e '^Sector' -e '^Partition' -e '^$' -e '^Disk Flags'"  "STORAGE"
+(( $FULL )) && displayAndExec "lsblk -f"  "STORAGE"
 
 displayAndExec "echo \$XDG_SESSION_TYPE"  "X11, WAYLAND OR TTY"
 [[ -n $DESKTOP_SESSION ]] && displayAndExec "echo \$DESKTOP_SESSION"
