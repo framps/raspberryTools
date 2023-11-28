@@ -1,7 +1,10 @@
 #!/bin/bash
 #######################################################################################################################
 #
-# 		Retrieve information about running kernel on a Raspberry
+#    Retrieve information about running kernel on a Raspberry
+#
+#    Call with 
+#    curl -s https://raw.githubusercontent.com/rpi-simonz/raspberryTools/master/raspiKernelInfo.sh | bash
 #
 ####################################################################################################
 #
