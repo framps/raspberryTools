@@ -63,7 +63,9 @@ function do_uninstall() {
 			exit 1
 		fi
 
-		sudo rm /boot/$DELETED_KERNELS_FILENAME
+		if [[ -e /boot/$DELETED_KERNELS_FILENAME ]]; then
+			sudo rm /boot/$DELETED_KERNELS_FILENAME
+		fi
 		(( $? )) && { echo "Failure deleting /boot/$DELETED_KERNELS_FILENAME"; exit 42; }
 		ls -1 /boot | grep -v -E $(uname -r) | grep -E "^initrd" | sed 's/initrd/linux-image/; s/\.img//' | xargs -I {} echo -e "{}" >> $DELETED_KERNELS_FILENAME; sudo mv $DELETED_KERNELS_FILENAME /boot
 		(( $? )) && { echo "Failure collect kernels"; exit 42; }
