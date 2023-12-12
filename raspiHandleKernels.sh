@@ -114,9 +114,9 @@ while getopts "uieh?" opt; do
 done
 
 if (( $MODE_INSTALL )); then
-	do_uninstall
-elif (( $MODE_UNINSTALL )); then
 	do_install
+elif (( $MODE_UNINSTALL )); then
+	do_uninstall
 else
 	show_help
 fi	
