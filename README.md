@@ -28,6 +28,8 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 11. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
+12. [raspiHandleKernels.sh](https://github.com/framps/raspberryTools/blob/master/raspiHandleKernels.sh) - Delete and reinstall unused kernels in a boockworm image to speed up apt upgrade processing
+
 ## findRaspis.sh
 
 ```
