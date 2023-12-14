@@ -3,7 +3,7 @@
 #######################################################################################################################
 #
 # 	 This script deletes unused kernels on a Raspberry Pi running bookworm with option -u and
-#	 creates a file /boot/deletedKernels.txt in order to be able to reinstall the deleted kernels with option -i
+#	 creates a file /boot/raspiHandleKernels.krnl in order to be able to reinstall the deleted kernels with option -i
 #
 #	 Use option -e to execute the updates on the system. Otherwise it's just a dry run.
 #
@@ -32,14 +32,14 @@ readonly VERSION="v0.1"
 
 readonly MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 readonly MYNAME=${MYSELF%.*}
-readonly DELETED_KERNELS_FILENAME="deletedKernels.txt"
+readonly DELETED_KERNELS_FILENAME="$MYNAME.krnl"
 readonly INITRD_GREP_REGEX="^initrd\.img.+-rpi+"
 readonly INITRD_DELETE_SED="s/^initrd\.img/linux-image/"
 
 readonly OS_RELEASE="/etc/os-release"
 
 function show_help() {
-	echo "$MYSELF -i (-e)? | -u (-e)? | -h | -v"
+	echo "$MYSELF -i [-e] | -u [-e] | -h | -? | -v"
 	echo "-e: deactivate dry run mode and modify system"
 	echo "-i: reinstall kernels deleted with option -u"
 	echo "-u: uninstall any unused kernels"
@@ -79,28 +79,30 @@ function check4Bookworm() {
 
 function do_uninstall() {
 
-	local num="$(ls -1 /boot | grep -v -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo "{}")"
-	if [[ -z "$num" ]]; then
+	local unusedKernels="$(ls -1 /boot | grep -v -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo "{}")"
+	if [[ -z "$unusedKernels" ]]; then
 		error "No unused kernels detected"
 		exit 1
 	fi
-	local kept="$(ls -1 /boot | grep -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo "{}")"
-	if [[ -z "$kept" ]]; then
+	local keptKernels="$(ls -1 /boot | grep -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo "{}")"
+	if [[ -z "$keptKernels" ]]; then
 		error "No kernels will be kept"
 		exit 1
 	fi
 
 	info "Following kernel will be kept"
-	echo "$kept"
+	echo "$keptKernels"
 
-	info "Following unused kernels will be deleted"
-	echo "$num"
+	local numUnusedKernels="$(wc -l <<< "$unusedKernels")"
+
+	info "Following $numUnusedKernels unused kernels will be deleted"
+	echo "$unusedKernels"
 
 	if (( $MODE_EXECUTE )); then
 
 		local answer
 
-		read -p "Are you sure to delete all unused kernels ? (y/N) " answer
+		read -p "Are you sure to delete all $numUnusedKernels unused kernels ? (y/N) " answer
 		if ! yesNo "$answer"; then
 			exit 1
 		fi
@@ -116,13 +118,13 @@ function do_uninstall() {
 			(( $? )) && { error "Failure deleting /boot/$DELETED_KERNELS_FILENAME"; exit 42; }
 		fi
 
-		info "Saving installed kernel names in /boot/$DELETED_KERNELS_FILENAME"
+		info "Saving $numUnusedKernels unused kernel names in /boot/$DELETED_KERNELS_FILENAME"
 		ls -1 /boot | grep -v -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo -e "{}" >> $DELETED_KERNELS_FILENAME; sudo mv $DELETED_KERNELS_FILENAME /boot
-		(( $? )) && { error "Failure collect kernels"; exit 42; }
+		(( $? )) && { error "Failure collecting kernels"; exit 42; }
 
-		info "Removing unused kernels"
+		info "Removing $numUnusedKernels unused kernels"
 		ls -1 /boot | grep -v -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs sudo apt -y remove
-		(( $? )) && { error "Failure remove kernels"; exit 42; }
+		(( $? )) && { error "Failure removing kernels"; exit 42; }
 		set -e
 	fi
 }
@@ -133,13 +135,16 @@ function do_install() {
 		error "Missing /boot/$DELETED_KERNELS_FILENAME to reinstall unused kernels"
 		exit 42
 	fi
+	
+	local numUnusedKernels=$(wc -l /boot/$DELETED_KERNELS_FILENAME | cut -f 1 -d ' ')
+	
 	if (( ! $MODE_EXECUTE )); then
-		info "Following unused kernels will be installed"
+		info "Following $numUnusedKernels unused kernels will be installed"
 		while IFS= read -r line; do
 			echo "$line"
 		done < /boot/$DELETED_KERNELS_FILENAME
 	else
-		info "Installing unused kernels"
+		info "Installing $numUnusedKernels unused kernels"
 		echo "$(</boot/$DELETED_KERNELS_FILENAME)"
 		while IFS= read -r line; do
 			sudo apt install $line
@@ -161,26 +166,28 @@ MODE_INSTALL=0
 MODE_UNINSTALL=0
 MODE_EXECUTE=0
 
-while getopts "eihuv?" opt; do
+while getopts ":ehiuv?" opt; do
+
     case "$opt" in
-	 h|\?)
-       show_help
-       exit 0
-		;;
-    u) MODE_UNINSTALL=1
-       ;;
-    i) MODE_INSTALL=1
-		;;
-    e) MODE_EXECUTE=1
-		;;
-    v) echo "$MYSELF $VERSION"
-		exit 0
-		;;
-	*) echo "Unknown option $op"
-		show_help
-		exit 1
-		;;
+		e) MODE_EXECUTE=1
+			;;
+		h|\?)
+			show_help
+			exit 0
+			;;
+		i) MODE_INSTALL=1
+			;;
+		u) MODE_UNINSTALL=1
+			;;
+		v) echo "$MYSELF $VERSION"
+			exit 0
+			;;
+		*) echo "Unknown option $opt"
+			show_help
+			exit 1
+			;;
     esac
+    
 done
 
 if (( $MODE_INSTALL )); then
