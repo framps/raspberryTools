@@ -33,6 +33,10 @@ readonly VERSION="v0.1"
 readonly MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 readonly MYNAME=${MYSELF%.*}
 readonly DELETED_KERNELS_FILENAME="deletedKernels.txt"
+readonly INITRD_GREP_REGEX="^initrd\.img.+-rpi+"
+readonly INITRD_DELETE_SED="s/initrd\.img/linux-image/"
+
+readonly OS_RELEASE="/etc/os-release"
 
 function show_help() {
 	echo "$MYSELF -i (-e)? | -u (-e)? | -h | -v"
@@ -60,15 +64,27 @@ function yesNo() {
 	return
 }
 
+function check4Pi() {
+  dpkg --print-architecture | grep -q -E "arm(hf|64)"
+}
+
+function check4Bookworm() {
+	if [[ -e $OS_RELEASE ]]; then
+		if grep -qi '^VERSION_CODENAME=bookworm' $OS_RELEASE; then
+			return 0
+		fi
+	fi
+	return 1
+}
 
 function do_uninstall() {
 
-	local num="$(ls -1 /boot | grep -v -E $(uname -r) | grep -E "^initrd" | sed 's/initrd/linux-image/; s/\.img//' | xargs -I {} echo "{}")"
+	local num="$(ls -1 /boot | grep -v -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo "{}")"
 	if [[ -z "$num" ]]; then
 		error "No unused kernels detected"
 		exit 1
 	fi
-	local kept="$(ls -1 /boot | grep -E $(uname -r) | grep -E "^initrd" | sed 's/initrd/linux-image/; s/\.img//' | xargs -I {} echo "{}")"
+	local kept="$(ls -1 /boot | grep -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo "{}")"
 	if [[ -z "$kept" ]]; then
 		error "No kernels will be kept"
 		exit 1
@@ -100,11 +116,11 @@ function do_uninstall() {
 		fi
 
 		info "Saving installed kernel names in /boot/$DELETED_KERNELS_FILENAME"
-		ls -1 /boot | grep -v -E $(uname -r) | grep -E "^initrd" | sed 's/initrd/linux-image/; s/\.img//' | xargs -I {} echo -e "{}" >> $DELETED_KERNELS_FILENAME; sudo mv $DELETED_KERNELS_FILENAME /boot
+		ls -1 /boot | grep -v -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo -e "{}" >> $DELETED_KERNELS_FILENAME; sudo mv $DELETED_KERNELS_FILENAME /boot
 		(( $? )) && { error "Failure collect kernels"; exit 42; }
 
 		info "Removing unused kernels"
-		ls -1 /boot | grep -v -E $(uname -r) | grep -E "^initrd" | sed 's/initrd/linux-image/; s/\.img//' | xargs sudo apt -y remove
+		ls -1 /boot | grep -v -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs sudo apt -y remove
 		(( $? )) && { error "Failure remove kernels"; exit 42; }
 		set -e
 	fi
@@ -129,6 +145,16 @@ function do_install() {
 		done < /boot/$DELETED_KERNELS_FILENAME
 	fi
 }
+
+if ! check4Pi; then
+	error "No RaspberryPi detected"
+	exit 1
+fi	
+
+if ! check4Bookworm; then
+	error "No Bookworm detected"
+	exit 1
+fi	
 
 MODE_INSTALL=0
 MODE_UNINSTALL=0
