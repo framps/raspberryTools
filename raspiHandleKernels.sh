@@ -34,7 +34,7 @@ readonly MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 readonly MYNAME=${MYSELF%.*}
 readonly DELETED_KERNELS_FILENAME="deletedKernels.txt"
 readonly INITRD_GREP_REGEX="^initrd\.img.+-rpi+"
-readonly INITRD_DELETE_SED="s/initrd\.img/linux-image/"
+readonly INITRD_DELETE_SED="s/^initrd\.img/linux-image/"
 
 readonly OS_RELEASE="/etc/os-release"
 
@@ -97,14 +97,15 @@ function do_uninstall() {
 	echo "$num"
 
 	if (( $MODE_EXECUTE )); then
-		echo -n "Are you sure to delete all unused kernels (y/N) ? "
-		read answer
+
+		local answer
+
+		read -p "Are you sure to delete all unused kernels ? (y/N) " answer
 		if ! yesNo "$answer"; then
 			exit 1
 		fi
 
-		echo -n "Do you have a backup (y/N) ? "
-		read answer
+		read -p "Do you have a backup ? (y/N) " answer
 		if ! yesNo "$answer"; then
 			exit 1
 		fi
@@ -149,12 +150,12 @@ function do_install() {
 if ! check4Pi; then
 	error "No RaspberryPi detected"
 	exit 1
-fi	
+fi
 
 if ! check4Bookworm; then
 	error "No Bookworm detected"
 	exit 1
-fi	
+fi
 
 MODE_INSTALL=0
 MODE_UNINSTALL=0
