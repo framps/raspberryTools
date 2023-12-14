@@ -52,7 +52,7 @@ function error() {
 }
 
 function yesNo() {
-	
+
 	local answer=${1:0:1}
 	answer=${1:-"n"}
 
@@ -62,20 +62,24 @@ function yesNo() {
 
 
 function do_uninstall() {
-	
+
 	local num="$(ls -1 /boot | grep -v -E $(uname -r) | grep -E "^initrd" | sed 's/initrd/linux-image/; s/\.img//' | xargs -I {} echo "{}")"
 	if [[ -z "$num" ]]; then
 		error "No unused kernels detected"
 		exit 1
 	fi
 	local kept="$(ls -1 /boot | grep -E $(uname -r) | grep -E "^initrd" | sed 's/initrd/linux-image/; s/\.img//' | xargs -I {} echo "{}")"
+	if [[ -z "$kept" ]]; then
+		error "No kernels will be kept"
+		exit 1
+	fi
 
 	info "Following kernel will be kept"
 	echo "$kept"
-	
+
 	info "Following unused kernels will be deleted"
 	echo "$num"
-	
+
 	if (( $MODE_EXECUTE )); then
 		echo -n "Are you sure to delete all unused kernels (y/N) ? "
 		read answer
@@ -95,15 +99,15 @@ function do_uninstall() {
 			(( $? )) && { error "Failure deleting /boot/$DELETED_KERNELS_FILENAME"; exit 42; }
 		fi
 
-		info "Saving installed kernel names in /boot/$DELETED_KERNELS_FILENAME" 
+		info "Saving installed kernel names in /boot/$DELETED_KERNELS_FILENAME"
 		ls -1 /boot | grep -v -E $(uname -r) | grep -E "^initrd" | sed 's/initrd/linux-image/; s/\.img//' | xargs -I {} echo -e "{}" >> $DELETED_KERNELS_FILENAME; sudo mv $DELETED_KERNELS_FILENAME /boot
-		(( $? )) && { error "Failure collect kernels"; exit 42; }		
+		(( $? )) && { error "Failure collect kernels"; exit 42; }
 
 		info "Removing unused kernels"
-		ls -1 /boot | grep -v -E $(uname -r) | grep -E "^initrd" | sed 's/initrd/linux-image/; s/\.img//' | xargs sudo apt -y remove		
+		ls -1 /boot | grep -v -E $(uname -r) | grep -E "^initrd" | sed 's/initrd/linux-image/; s/\.img//' | xargs sudo apt -y remove
 		(( $? )) && { error "Failure remove kernels"; exit 42; }
 		set -e
-	fi	
+	fi
 }
 
 function do_install() {
@@ -125,7 +129,7 @@ function do_install() {
 		done < /boot/$DELETED_KERNELS_FILENAME
 	fi
 }
-	
+
 MODE_INSTALL=0
 MODE_UNINSTALL=0
 MODE_EXECUTE=0
@@ -158,4 +162,4 @@ elif (( $MODE_UNINSTALL )); then
 	do_uninstall
 else
 	show_help
-fi	
+fi
