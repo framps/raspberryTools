@@ -65,14 +65,13 @@ function yesNo() {
 }
 
 function check4Pi() {
-  dpkg --print-architecture | grep -q -E "arm(hf|64)"
+	dpkg --print-architecture | grep -q -E "arm(hf|64)"
 }
 
 function check4Bookworm() {
 	if [[ -e $OS_RELEASE ]]; then
-		if grep -qi '^VERSION_CODENAME=bookworm' $OS_RELEASE; then
-			return 0
-		fi
+		grep -qi '^VERSION_CODENAME=bookworm' $OS_RELEASE
+		return 
 	fi
 	return 1
 }
