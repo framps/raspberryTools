@@ -92,7 +92,7 @@ function usage() {
 # Parse arguments
 while getopts ":h :u" opt; do
    case "$opt" in
-		h) usage 
+		h) usage
 		   exit 0
 		   ;;
 		u) dryrun=0
@@ -139,7 +139,7 @@ if [[ ! -e $bootPartition ]]; then
 	exit 1
 fi
 
-if [[ ! -e $device ]]; then
+if [[ ! -e $rootPartition ]]; then
 	echo "$rootPartition not found"
 	exit 1
 fi
