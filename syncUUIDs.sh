@@ -21,7 +21,7 @@
 #
 #######################################################################################################################
 
-dryrun=0
+dryrun=1
 
 trap 'umount /mnt &>/dev/null' SIGINT SIGTERM EXIT
 
@@ -39,9 +39,10 @@ function parseFstab {
 	local bootType rootType
 
 	mount $rootPartition /mnt
+
 	while read tgt mnt r; do
 		case $mnt in
-			/boot)
+			/boot | /boot/firmware)
 				bootTgt=$tgt
 				;;
 			/)
@@ -64,8 +65,8 @@ function parseBLKID {	# device uuidType
 function updateUUIDinFstab() { # bootType uuid newUUID
 	echo "Updating $1 from $2 to $3 in /etc/fstab on $rootPartition"
 	(( $dryrun )) && return
-	if ! sed -i "s/^$1=$2/$1=$3/" /mnt/etc/fstab; then
-		echo "??? Unable to update /etc/fstab")
+	if ! sed -i --follow-symlinks  "s/^$1=$2/$1=$3/" /mnt/etc/fstab; then
+		echo "??? Unable to update /etc/fstab"
 		exit 1
 	fi
 	umount /mnt
@@ -75,26 +76,26 @@ function updateUUIDinCmdline() { # bootType uuid newUUID
 	echo "Updating $1 from $2 to $3 in /boot/cmdline.txt on $bootPartition"
 	(( $dryrun )) && return
 	mount $bootPartition /mnt
-	if ! sed -i "s/$1=$2/$1=$3/" /mnt/cmdline.txt; then
-		echo "??? Unable to update /boot/cmdline.txt")
+	if ! sed -i  --follow-symlinks "s/$1=$2/$1=$3/" /mnt/cmdline.txt; then
+		echo "??? Unable to update /boot/cmdline.txt"
 		exit 1
 	fi
 	umount /mnt
 }
 
 function usage() {
-	echo "Usage: $0 [-n] targetDevice"
-	echo "-n: Don't update files. Just inform what will be updated."
+	echo "Usage: $0 [-u] targetDevice"
+	echo "-u: Update files. Default informs what will be updated."
 	exit 0
 }
 
 # Parse arguments
-while getopts ":h :n" opt; do
+while getopts ":h :u" opt; do
    case "$opt" in
 		h) usage 
 		   exit 0
 		   ;;
-		n) dryrun=1
+		u) dryrun=0
 		   ;;
      \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
      :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
@@ -168,7 +169,7 @@ newRootUUID="$(parseBLKID ${device}2 $rootType | cut -d= -f2)"
 if [[ $bootUUID == $newBootUUID ]]; then
 	echo "Boot $bootType $newBootUUID already used"
 else
-	: "Update UUID in fstab"
+	: echo "Update UUID in fstab from $bootUUID to $newBootUUID"
 	updateUUIDinFstab $bootType $bootUUID $newBootUUID
 fi
 
@@ -176,7 +177,7 @@ fi
 if [[ $rootUUID == $newRootUUID ]]; then
 	echo "Root $rootType $newRootUUID already used"
 else
-	: "update UUID in fstab and cmdline"
+	: echo "update UUID in fstab and cmdline from $rootUUID to $newRootUUID"
 	updateUUIDinFstab $rootType $rootUUID $newRootUUID
 	updateUUIDinCmdline $rootType $rootUUID $newRootUUID
 fi
