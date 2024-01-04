@@ -2,9 +2,9 @@
 #
 #######################################################################################################################
 #
-# 	Update /boot/cmdline.txt and /etc/fstab on a target device with the actual UUID/PARTUUIDs of the target device
+#   Check and update /boot/cmdline.txt and /etc/fstab on a device with the actual UUIDs/PARTUUIDs of the device
 #
-#   Copyright (C) 2022-2023 framp at linux-tips-and-tricks dot de
+#   Copyright (C) 2022-2024 framp at linux-tips-and-tricks dot de
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -21,14 +21,20 @@
 #
 #######################################################################################################################
 
-dryrun=1
+set -euo pipefail
 
-trap 'umount /mnt &>/dev/null' SIGINT SIGTERM EXIT
+readonly CMDLINE="/cmdline.txt"
+readonly FSTAB="/etc/fstab"
+readonly MOUNTPOINT="/mnt"
+
+dryrun=1		# default, enable update with option -u
+
+trap 'umount $MOUNTPOINT &>/dev/null' SIGINT SIGTERM EXIT
 
 function parseCmdline {
-	mount $bootPartition /mnt
-	local uuidTypeCmdline=$(grep -Eo "root=\S+" /mnt/cmdline.txt | sed -E "s/root=([^=]+)=(.+)/\1=\2/")
-	umount /mnt
+	mount $bootPartition $MOUNTPOINT
+	local uuidTypeCmdline=$(grep -Eo "root=\S+" ${MOUNTPOINT}${CMDLINE} | sed -E "s/root=([^=]+)=(.+)/\1=\2/")
+	umount $MOUNTPOINT
 	echo "$uuidTypeCmdline"
 }
 
@@ -38,7 +44,7 @@ function parseFstab {
 	local bootTgt rootTgt
 	local bootType rootType
 
-	mount $rootPartition /mnt
+	mount $rootPartition $MOUNTPOINT
 
 	while read tgt mnt r; do
 		case $mnt in
@@ -49,9 +55,9 @@ function parseFstab {
 				rootTgt=$tgt
 				;;
 		esac
-	done </mnt/etc/fstab
+	done <${MOUNTPOINT}${FSTAB}
 
-	umount /mnt
+	umount $MOUNTPOINT
 
 	echo "$bootTgt"
 	echo "$rootTgt"
@@ -63,33 +69,42 @@ function parseBLKID {	# device uuidType
 }
 
 function updateUUIDinFstab() { # bootType uuid newUUID
-	echo "Updating $1 from $2 to $3 in /etc/fstab on $rootPartition"
+	echo "Updating $1 from $2 to $3 in $FSTAB on $rootPartition"
 	(( $dryrun )) && return
-	if ! sed -i --follow-symlinks  "s/^$1=$2/$1=$3/" /mnt/etc/fstab; then
-		echo "??? Unable to update /etc/fstab"
+	echo "Creating fstab backup ${MOUNTPOINT}${FSTAB}.bak"
+	mount $rootPartition $MOUNTPOINT
+	cp /mnt/etc/fstab ${MOUNTPOINT}${FSTAB}.bak
+	if ! sed -i --follow-symlinks  "s/^$1=$2/$1=$3/" ${MOUNTPOINT}${FSTAB}; then
+		echo "??? Unable to update $FSTAB"
 		exit 1
 	fi
-	umount /mnt
+	umount $MOUNTPOINT
 }
 
 function updateUUIDinCmdline() { # bootType uuid newUUID
-	echo "Updating $1 from $2 to $3 in /boot/cmdline.txt on $bootPartition"
+	echo "Updating $1 from $2 to $3 in cmdline.txt on $bootPartition"
 	(( $dryrun )) && return
-	mount $bootPartition /mnt
-	if ! sed -i  --follow-symlinks "s/$1=$2/$1=$3/" /mnt/cmdline.txt; then
-		echo "??? Unable to update /boot/cmdline.txt"
+	echo "Creating cmdline backup ${MOUNTPOINT}${CMDLINE}.bak"
+	mount $bootPartition $MOUNTPOINT
+	cp /mnt/cmdline.txt ${MOUNTPOINT}${CMDLINE}.bak
+	if ! sed -i  --follow-symlinks "s/$1=$2/$1=$3/" ${MOUNTPOINT}${CMDLINE}; then
+		echo "??? Unable to update $CMDLINE"
 		exit 1
 	fi
-	umount /mnt
+	umount $MOUNTPOINT
 }
 
 function usage() {
-	echo "Usage: $0 [-u] targetDevice"
+	echo "Usage: $0 [-u] device"
 	echo "-u: Update files. Default informs what will be updated."
+	echo "Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1"
 	exit 0
 }
 
-# Parse arguments
+#
+# main
+#
+
 while getopts ":h :u" opt; do
    case "$opt" in
 		h) usage
@@ -97,17 +112,17 @@ while getopts ":h :u" opt; do
 		   ;;
 		u) dryrun=0
 		   ;;
-     \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
-     :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
-     *  ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+	 \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
+	 :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+	 *  ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
 	esac
 done
 
 shift $(( $OPTIND - 1 ))
 
 if [[ -z $1 ]]; then
-    echo "Missing device to update UUIDs"
-    exit 1
+	echo "Missing device to update UUIDs"
+	exit 1
 fi
 
 if [[ $USER != "root" ]]; then
@@ -116,21 +131,30 @@ if [[ $USER != "root" ]]; then
 fi
 
 device=$1
-bootPartition="${device}1"
-rootPartition="${device}2"
 
-if [[ $device =~ [0-9]+$ ]]; then
-	echo "$device is a partition but has to be a device. Try $(sed -E "s/[0-9]+$//" <<< "$device")"
-	exit 1
-fi
+case $device in
+
+	/dev/sd*) 
+		bootPartition="${device}1"
+		rootPartition="${device}2"
+		;;
+	/dev/mmcblk*|/dev/nvme*) 
+		bootPartition="${device}p1"
+		rootPartition="${device}p2"
+		;;
+	*)
+		echo "Invalid device $device"
+		echo "Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1"
+		exit 1
+esac
 
 if [[ ! -e $device ]]; then
-	echo "$device not found"
+	echo "$device does not exist"
 	exit 1
 fi
 
 if [[ ! -b $device ]]; then
-	echo "$device no blockdevice"
+	echo "$device is no blockdevice"
 	exit 1
 fi
 
@@ -163,23 +187,23 @@ bootType="$(cut -d= -f1 <<< "$(grep "\-01" <<< "$fstab")")"
 bootUUID="$(cut -d= -f2 <<< "$(grep "\-01" <<< "$fstab")")"
 rootType="$(cut -d= -f1 <<< "$(grep "\-02" <<< "$fstab")")"
 rootUUID="$(cut -d= -f2 <<< "$(grep "\-02" <<< "$fstab")")"
-newBootUUID="$(parseBLKID ${device}1 $bootType | cut -d= -f2)"
-newRootUUID="$(parseBLKID ${device}2 $rootType | cut -d= -f2)"
+newBootUUID="$(parseBLKID ${bootPartition} $bootType | cut -d= -f2)"
+newRootUUID="$(parseBLKID ${rootPartition} $rootType | cut -d= -f2)"
 
 if [[ $bootUUID == $newBootUUID ]]; then
-	echo "Boot $bootType $newBootUUID already used"
+	echo "Boot $bootType $newBootUUID already used in $FSTAB"
 else
 	: echo "Update UUID in fstab from $bootUUID to $newBootUUID"
 	updateUUIDinFstab $bootType $bootUUID $newBootUUID
+	(( dryrun )) &&	echo "Use option -u to update the incorrect UUIDs"
 fi
 
 
 if [[ $rootUUID == $newRootUUID ]]; then
-	echo "Root $rootType $newRootUUID already used"
+	echo "Root $rootType $newRootUUID already used in $FSTAB and $CMDLINE"
 else
 	: echo "update UUID in fstab and cmdline from $rootUUID to $newRootUUID"
 	updateUUIDinFstab $rootType $rootUUID $newRootUUID
 	updateUUIDinCmdline $rootType $rootUUID $newRootUUID
+	(( dryrun )) &&	echo "Use option -u to update the incorrect UUIDs"
 fi
-
-
