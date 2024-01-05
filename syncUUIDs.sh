@@ -28,13 +28,15 @@ readonly FSTAB="/etc/fstab"
 readonly MOUNTPOINT="/mnt"
 
 dryrun=1		# default, enable update with option -u
+mismatchDetected=0
+fstabSaved=0
 
 trap 'umount $MOUNTPOINT &>/dev/null' SIGINT SIGTERM EXIT
 
 function parseCmdline {
-	mount $bootPartition $MOUNTPOINT
+	mount $bootPartition $MOUNTPOINT 2>/dev/null
 	local uuidTypeCmdline=$(grep -Eo "root=\S+" ${MOUNTPOINT}${CMDLINE} | sed -E "s/root=([^=]+)=(.+)/\1=\2/")
-	umount $MOUNTPOINT
+	umount $MOUNTPOINT 2>/dev/null
 	echo "$uuidTypeCmdline"
 }
 
@@ -44,7 +46,7 @@ function parseFstab {
 	local bootTgt rootTgt
 	local bootType rootType
 
-	mount $rootPartition $MOUNTPOINT
+	mount $rootPartition $MOUNTPOINT 2>/dev/null
 
 	while read tgt mnt r; do
 		case $mnt in
@@ -57,7 +59,7 @@ function parseFstab {
 		esac
 	done <${MOUNTPOINT}${FSTAB}
 
-	umount $MOUNTPOINT
+	umount $MOUNTPOINT 2>/dev/null
 
 	echo "$bootTgt"
 	echo "$rootTgt"
@@ -69,37 +71,51 @@ function parseBLKID {	# device uuidType
 }
 
 function updateUUIDinFstab() { # bootType uuid newUUID
-	echo "Updating $1 from $2 to $3 in $FSTAB on $rootPartition"
-	(( $dryrun )) && return
-	echo "Creating fstab backup ${MOUNTPOINT}${FSTAB}.bak"
-	mount $rootPartition $MOUNTPOINT
-	cp /mnt/etc/fstab ${MOUNTPOINT}${FSTAB}.bak
+
+	if (( $dryrun )); then
+		echo "$1 $2 should be updated to $3 in $FSTAB on $rootPartition"
+		return
+	fi
+
+	mount $rootPartition $MOUNTPOINT 2>/dev/null
+
+	if (( ! fstabSaved )); then
+		echo "Creating fstab backup ${FSTAB}.bak on $rootPartition"
+		cp /mnt/etc/fstab ${MOUNTPOINT}${FSTAB}.bak
+		fstabSaved=1
+	fi
+	echo "Updating $1 $2 to $3 in $FSTAB on $rootPartition"
 	if ! sed -i --follow-symlinks  "s/^$1=$2/$1=$3/" ${MOUNTPOINT}${FSTAB}; then
 		echo "??? Unable to update $FSTAB"
 		exit 1
 	fi
-	umount $MOUNTPOINT
+	umount $MOUNTPOINT 2>/dev/null
 }
 
 function updateUUIDinCmdline() { # bootType uuid newUUID
-	echo "Updating $1 from $2 to $3 in cmdline.txt on $bootPartition"
-	(( $dryrun )) && return
-	echo "Creating cmdline backup ${MOUNTPOINT}${CMDLINE}.bak"
-	mount $bootPartition $MOUNTPOINT
+	if (( $dryrun )); then
+		echo "$1 $2 should be updated to $3 in $CMDLINE on $bootPartition"
+		return
+	fi
+	echo "Creating cmdline backup ${CMDLINE}.bak on $bootPartition"
+	mount $bootPartition $MOUNTPOINT 2>/dev/null
 	cp /mnt/cmdline.txt ${MOUNTPOINT}${CMDLINE}.bak
+	echo "Updating $1 $2 to $3 in cmdline.txt on $bootPartition"
 	if ! sed -i  --follow-symlinks "s/$1=$2/$1=$3/" ${MOUNTPOINT}${CMDLINE}; then
 		echo "??? Unable to update $CMDLINE"
 		exit 1
 	fi
-	umount $MOUNTPOINT
+	umount $MOUNTPOINT 2>/dev/null
 }
 
 function usage() {
-	echo "Synchronize UUIDs in /etc/fstab and /boot/cmdline.txt with existing UUIDs of device partitions"
-	echo "If no option is passed the existing UUIDs are retrieved and displayed only. No files are updated"
+	echo
+	echo "Synchronize UUIDs or PARTUUIDs in /etc/fstab and /boot/cmdline.txt with existing UUIDs or PARTUUIDs of device partitions."
+	echo "If no option is passed the existing UUIDs or PARTUUIDs are retrieved and displayed only. No files are updated."
 	echo
 	echo "Usage: $0 [-u] device"
-	echo "-u: Update files."
+	echo "-u: Create backup of files and update the UUIDs"
+	echo
 	echo "Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1"
 	exit 0
 }
@@ -109,6 +125,8 @@ function usage() {
 #
 
 (( $# <= 0 )) && { usage; exit; }
+
+
 
 while getopts ":h :u" opt; do
    case "$opt" in
@@ -173,13 +191,13 @@ if [[ ! -e $rootPartition ]]; then
 	exit 1
 fi
 
-if ! mount $bootPartition /mnt; then
+if ! mount $bootPartition /mnt 2>/dev/null; then
 	echo "Unable to mount $bootPartition"
 	exit 1
 fi
 umount $bootPartition &>/dev/null
 
-if ! mount $rootPartition /mnt; then
+if ! mount $rootPartition /mnt 2>/dev/null; then
 	echo "Unable to mount $rootPartition"
 	exit 1
 fi
@@ -202,20 +220,24 @@ newRootUUID="$(parseBLKID ${rootPartition} $rootType | cut -d= -f2)"
 [[ -z "$newBootUUID" ]] && { echo "newBootUUID not discovered"; exit; }
 [[ -z "$newRootUUID" ]] && { echo "newRootUUID not discovered"; exit; }
 
+echo "$bootPartition has $bootType $bootUUID"
+echo "$rootPartition has $rootType $rootUUID"
+
 if [[ $bootUUID == $newBootUUID ]]; then
 	echo "Boot $bootType $newBootUUID already used in $FSTAB"
 else
-	: echo "Update UUID in fstab from $bootUUID to $newBootUUID"
 	updateUUIDinFstab $bootType $bootUUID $newBootUUID
-	(( dryrun )) &&	echo "Use option -u to update the incorrect UUIDs"
+	mismatchDetected=1
 fi
-
 
 if [[ $rootUUID == $newRootUUID ]]; then
 	echo "Root $rootType $newRootUUID already used in $FSTAB and $CMDLINE"
 else
-	: echo "update UUID in fstab and cmdline from $rootUUID to $newRootUUID"
 	updateUUIDinFstab $rootType $rootUUID $newRootUUID
 	updateUUIDinCmdline $rootType $rootUUID $newRootUUID
-	(( dryrun )) &&	echo "Use option -u to update the incorrect UUIDs"
+	mismatchDetected=1
+fi
+
+if (( $mismatchDetected && dryrun)); then
+	echo "Use option -u to update the incorrect UUIDs or PARTUUIDs"
 fi

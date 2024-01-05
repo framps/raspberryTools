@@ -24,7 +24,7 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 9. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
 
-10. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Update /boot/cmdline.txt and /etc/fstab on a device with the UUIDs or PARTUUIDs used on the device. Useful when an image was cloned on another device.
+10. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs or PARTUUIDs used on the device partitions. Option -u will synchronize the files. Useful when an image was cloned to another device and fails during boot.
 
 11. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
@@ -40,6 +40,41 @@ IP address      Mac address       Hostname (Description)
 192.168.0.8     b8:27:eb:b4:e8:74 troubadix (Networking server)
 192.168.0.10    b8:27:eb:3c:94:90 idefix (Homeautomation server)
 192.168.0.12    dc:a6:32:8f:28:fd asterix (LAN server)
+```
+
+## syncUUIDs.sh
+
+Check UUIDs (UUIDs are OK):
+```
+sudo ./syncUUIDs.sh  /dev/mmcblk0
+/dev/mmcblk0p1 has PARTUUID 5e1ad0e3-01
+/dev/mmcblk0p2 has PARTUUID 5e1ad0e3-02
+Boot PARTUUID 5e1ad0e3-01 already used in /etc/fstab
+Root PARTUUID 5e1ad0e3-02 already used in /etc/fstab and /cmdline.txt
+```
+
+Check UUIDs (UUIDs are not OK):
+
+```
+sudo ./syncUUIDs.sh  /dev/mmcblk0
+/dev/mmcblk0p1 has PARTUUID 5e1ad0e3-01
+/dev/mmcblk0p2 has PARTUUID 5e1ad0e3-02
+PARTUUID 1e1ad0e3-01 should be updated to 5e1ad0e3-01 in /etc/fstab on /dev/mmcblk0p2
+PARTUUID 1e1ad0e3-02 should be updated to 5e1ad0e3-02 in /etc/fstab on /dev/mmcblk0p2
+PARTUUID 1e1ad0e3-02 should be updated to 5e1ad0e3-02 in /cmdline.txt on /dev/mmcblk0p1
+```
+
+Update UUIDs (UUIDs are not OK):
+
+```
+sudo ./syncUUIDs.sh  -u /dev/mmcblk0
+/dev/mmcblk0p1 has PARTUUID 5e1ad0e3-01
+/dev/mmcblk0p2 has PARTUUID 5e1ad0e3-02
+Creating fstab backup /etc/fstab.bak on /dev/mmcblk0p2
+Updating PARTUUID 1e1ad0e3-01 to 5e1ad0e3-01 in /etc/fstab on /dev/mmcblk0p2
+Updating PARTUUID 1e1ad0e3-02 to 5e1ad0e3-02 in /etc/fstab on /dev/mmcblk0p2
+Creating cmdline backup /cmdline.txt.bak on /dev/mmcblk0p1
+Updating PARTUUID 1e1ad0e3-02 to 5e1ad0e3-02 in cmdline.txt on /dev/mmcblk0p1
 ```
 
 ## checkThrottled.sh
