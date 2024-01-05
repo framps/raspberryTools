@@ -95,8 +95,11 @@ function updateUUIDinCmdline() { # bootType uuid newUUID
 }
 
 function usage() {
+	echo "Synchronize UUIDs in /etc/fstab and /boot/cmdline.txt with existing UUIDs of device partitions"
+	echo "If no option is passed the existing UUIDs are retrieved and displayed only. No files are updated"
+	echo
 	echo "Usage: $0 [-u] device"
-	echo "-u: Update files. Default informs what will be updated."
+	echo "-u: Update files."
 	echo "Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1"
 	exit 0
 }
@@ -104,6 +107,8 @@ function usage() {
 #
 # main
 #
+
+(( $# <= 0 )) && { usage; exit; }
 
 while getopts ":h :u" opt; do
    case "$opt" in
@@ -134,11 +139,11 @@ device=$1
 
 case $device in
 
-	/dev/sd*) 
+	/dev/sd*)
 		bootPartition="${device}1"
 		rootPartition="${device}2"
 		;;
-	/dev/mmcblk*|/dev/nvme*) 
+	/dev/mmcblk*|/dev/nvme*)
 		bootPartition="${device}p1"
 		rootPartition="${device}p2"
 		;;
@@ -189,6 +194,13 @@ rootType="$(cut -d= -f1 <<< "$(grep "\-02" <<< "$fstab")")"
 rootUUID="$(cut -d= -f2 <<< "$(grep "\-02" <<< "$fstab")")"
 newBootUUID="$(parseBLKID ${bootPartition} $bootType | cut -d= -f2)"
 newRootUUID="$(parseBLKID ${rootPartition} $rootType | cut -d= -f2)"
+
+[[ -z "$bootType" ]] && { echo "bootType not discovered"; exit; }
+[[ -z "$rootType" ]] && { echo "rootType not discovered"; exit; }
+[[ -z "$bootUUID" ]] && { echo "bootUUID not discovered"; exit; }
+[[ -z "$rootUUID" ]] && { echo "rootUUID not discovered"; exit; }
+[[ -z "$newBootUUID" ]] && { echo "newBootUUID not discovered"; exit; }
+[[ -z "$newRootUUID" ]] && { echo "newRootUUID not discovered"; exit; }
 
 if [[ $bootUUID == $newBootUUID ]]; then
 	echo "Boot $bootType $newBootUUID already used in $FSTAB"
