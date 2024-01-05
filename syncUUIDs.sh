@@ -2,7 +2,9 @@
 #
 #######################################################################################################################
 #
-#   Check and update /boot/cmdline.txt and /etc/fstab on a device with the actual UUIDs/PARTUUIDs of the device
+#   Check and optionally update /boot/cmdline.txt and /etc/fstab on a device with RaspbianOS installed
+#	with the actual UUIDs/PARTUUIDs of the device. Useful if a cloned RaspbianOS fails to boot because
+#	of UUID/PARTUUID mismatch.
 #
 #   Copyright (C) 2022-2024 framp at linux-tips-and-tricks dot de
 #
@@ -27,8 +29,8 @@ readonly CMDLINE="/cmdline.txt"
 readonly FSTAB="/etc/fstab"
 readonly MOUNTPOINT="/mnt"
 
-dryrun=1		# default, enable update with option -u
-mismatchDetected=0
+dryrun=1				# default, enable update with option -u
+mismatchDetected=0		
 fstabSaved=0
 
 trap 'umount $MOUNTPOINT &>/dev/null' SIGINT SIGTERM EXIT
@@ -110,8 +112,10 @@ function updateUUIDinCmdline() { # bootType uuid newUUID
 
 function usage() {
 	echo
-	echo "Synchronize UUIDs or PARTUUIDs in /etc/fstab and /boot/cmdline.txt with existing UUIDs or PARTUUIDs of device partitions."
-	echo "If no option is passed the existing UUIDs or PARTUUIDs are retrieved and displayed only. No files are updated."
+	echo "Synchronize UUIDs or PARTUUIDs in /etc/fstab and /boot/cmdline.txt"
+	echo "with existing UUIDs or PARTUUIDs of device partitions."
+	echo "If no option is passed the used UUIDs or PARTUUIDs are retrieved"
+	echo "and displayed only. No files are updated."
 	echo
 	echo "Usage: $0 [-u] device"
 	echo "-u: Create backup of files and update the UUIDs"
@@ -125,8 +129,6 @@ function usage() {
 #
 
 (( $# <= 0 )) && { usage; exit; }
-
-
 
 while getopts ":h :u" opt; do
    case "$opt" in
@@ -148,9 +150,9 @@ if [[ -z $1 ]]; then
 	exit 1
 fi
 
-if [[ $USER != "root" ]]; then
-	  echo "Call me as root"
-	  exit 127
+if (( $UID != 0 )); then
+	  echo "Call me as root or with sudo"
+	  exit 1
 fi
 
 device=$1
