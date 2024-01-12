@@ -31,10 +31,10 @@ readonly INSTALL_DIR="/usr/local/bin"
 MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"					# use linked script name if the link is used
 MYNAME=${MYSELF%.*}
 
-if (( $# > 1 )) && [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-?" || "$1" == "?" ]]; then
+if (( $# > 0 )) && [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-?" || "$1" == "?" ]]; then
 	echo "Purpose: Download any files from raspberryTools github repository."
-	echo "Syntax:  $MYSELF - Select files to download"
-	echo "		   $MYSELF install - Select files to download and install in /usr/local/bin"
+	echo "Syntax:  $MYSELF         - Select files to download"
+	echo "         $MYSELF install - Select files to download and install in /usr/local/bin"
 	exit 0
 fi
 
