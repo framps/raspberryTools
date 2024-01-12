@@ -1,7 +1,12 @@
 #!/bin/bash
 #######################################################################################################################
 #
-#  Convenient script to download raspberryTools to evaluate them and optionally to install them
+#  Convenient script to download raspberryTools to evaluate and optionally to install them
+#
+#	1) A list of all scripts in raspberryTools is presented an scripts to download can be selected
+#	2) Selected files are downloaded
+#	3) Now scripts can be tested
+#	4) If install option is used the selected tools are downloaded and installed in /usr/local/bin
 #
 #######################################################################################################################
 #
@@ -33,7 +38,7 @@ MYNAME=${MYSELF%.*}
 
 if (( $# > 0 )) && [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-?" || "$1" == "?" ]]; then
 	echo "Purpose: Download any files from raspberryTools github repository."
-	echo "Syntax:  $MYSELF         - Select files to download"
+	echo "Syntax:  $MYSELF         - Select files to download into testdirectory "
 	echo "         $MYSELF install - Select files to download and install in /usr/local/bin"
 	exit 0
 fi
@@ -47,7 +52,7 @@ if (( $# != 0 )); then
 else
 	fkt=""
 fi
-
+	
 if ! which jq &>/dev/null; then
 	echo "... Installing jq required by $MYNAME."
 	sudo apt install jq
@@ -81,7 +86,7 @@ if (( $HTTP_CODE != 200 )); then
 	exit 1
 fi
 
-files=( $(jq -r ".tree[].path" $jsonFile | egrep "*.sh") )
+files=( $(jq -r ".tree[].path" $jsonFile | egrep "*.sh" | grep -v $MYSELF) )
 
 i=0
 for f in ${files[@]}; do
@@ -91,6 +96,9 @@ done
 
 while :; do
 	read -p "Enter numbers of files to download separated by spaces > " nums
+	if [[ -z $nums ]]; then
+		exit
+	fi
 	if [[ ! $nums =~ ^[0-9]+([ ]+[0-9]+)?$ ]]; then
 		echo "Invalid input '$nums'"
 	else

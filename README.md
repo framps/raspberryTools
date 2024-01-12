@@ -3,7 +3,10 @@
 ## Note:
 There is a [very useful tools collection](https://forums.raspberrypi.com/viewtopic.php?t=196778) available, called usb-tools **Running Raspbian from USB Devices : Made Easy** which contains four very nice tools called usb-boot, sdc-boot, mbr2gpt and set-partuuid.
 
-# raspberryTools
+## Note:
+Use downloadRepoFiles.sh helper to select the tools you want to download and test. Optionally you can install them with downloadRepoFiles.
+Command to execute to start helper script: `curl -s -o downloadRepoFiles.sh https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh`
+
 Collection of some useful tools for Raspberry Pi. For sample outputs of the tools click the links.
 
 1. [raspiNetInfo.sh](#raspinetinfosh) - Collect network information for people who want to help in network problem determination and test for common network configuration errors
@@ -29,6 +32,8 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 11. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
 12. [raspiHandleKernels.sh](https://github.com/framps/raspberryTools/blob/master/raspiHandleKernels.sh) - Delete and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
+
+13. [downloadRepoFiles.sh](https://github.com/framps/raspberryTools/blob/master/downloadRepoFiles.sh) - Helper to select files from raspberryTools repository to download and test and optionally to install
 
 ## findRaspis.sh
 
