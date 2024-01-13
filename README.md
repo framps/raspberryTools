@@ -60,7 +60,6 @@ sudo ./syncUUIDs.sh  /dev/mmcblk0
 Check UUIDs (UUIDs are not OK) (Note: There is a mix of UUID and PARTUUID usage):
 
 ```
-sudo ./syncUUIDs.sh  /dev/mmcblk0
 sudo ./syncUUIDs.sh /dev/mmcblk0
 !!! PARTUUID 1aea473-02 should be updated to 18aea473-02 in /dev/mmcblk0p1/cmdline.txt
 !!! UUID 18aea473-01 should be updated to 5DF9-E225 in /dev/mmcblk0p2/etc/fstab 
