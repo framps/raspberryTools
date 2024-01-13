@@ -86,11 +86,11 @@ function updateUUIDinFstab() { # bootType uuid newUUID
     mount $rootPartition $MOUNTPOINT 2>/dev/null
 
     if (( ! fstabSaved )); then
-        echo "Creating fstab backup ${FSTAB}.bak on $rootPartition"
+        echo "--- Creating fstab backup ${FSTAB}.bak on $rootPartition"
         cp ${MOUNTPOINT}/${FSTAB} ${MOUNTPOINT}/${FSTAB}.bak
         fstabSaved=1
     fi
-    echo "Updating $1 $2 to $3 in $rootPartition/$FSTAB"
+    echo "--- Updating $1 $2 to $3 in $rootPartition/$FSTAB"
     if ! sed -i --follow-symlinks  "s/^$1=$2/$1=$3/" ${MOUNTPOINT}/${FSTAB}; then
         echo "??? Unable to update $rootPartition/$FSTAB"
         exit 1
@@ -103,10 +103,10 @@ function updateUUIDinCmdline() { # bootType uuid newUUID
         echo "!!! $1 $2 should be updated to $3 in $bootPartition/$CMDLINE"
         return
     fi
-    echo "Creating cmdline backup ${CMDLINE}.bak on $bootPartition"
+    echo "--- Creating cmdline backup ${CMDLINE}.bak on $bootPartition"
     mount $bootPartition $MOUNTPOINT 2>/dev/null
     cp ${MOUNTPOINT}/${CMDLINE} ${MOUNTPOINT}/${CMDLINE}.bak
-    echo "Updating $1 $2 to $3 in $bootPartition/cmdline.txt"
+    echo "--- Updating $1 $2 to $3 in $bootPartition/cmdline.txt"
     if ! sed -i  --follow-symlinks "s/$1=$2/$1=$3/" ${MOUNTPOINT}/${CMDLINE}; then
         echo "??? Unable to update $bootPartition/$CMDLINE"
         exit 1
@@ -115,18 +115,21 @@ function updateUUIDinCmdline() { # bootType uuid newUUID
 }
 
 function usage() {
-	echo "$MYSELF - $VERSION"
-    echo
-    echo "Synchronize UUIDs or PARTUUIDs in /etc/fstab and /boot/cmdline.txt"
-    echo "with existing UUIDs or PARTUUIDs of device partitions."
-    echo "If no option is passed the used UUIDs or PARTUUIDs are retrieved"
-    echo "and displayed only. No files are updated."
-    echo
-    echo "Usage: $0 [-u] device"
-    echo "-u: Create backup of files and update the UUIDs or PARTUUIDs"
-    echo "-v: Verbose output"
-    echo
-    echo "Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1"
+	cat <<- EOF
+	$MYSELF - $VERSION
+    
+    Synchronize UUIDs or PARTUUIDs in /etc/fstab and /boot/cmdline.txt
+    with existing UUIDs or PARTUUIDs of device partitions.
+    If no option is passed the used UUIDs or PARTUUIDs are retrieved
+    and displayed only. No files are updated.
+    
+    Usage: $0 [-uv] device
+    -u: Create backup of files and update the UUIDs and PARTUUIDs in
+        /etc/cmdline.txt and /etc/fstab
+    -v: Verbose output"
+    
+    Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1
+EOF
     exit 0
 }
 
@@ -154,12 +157,12 @@ done
 shift $(( $OPTIND - 1 ))
 
 if [[ -z $1 ]]; then
-    echo "Missing device to update UUIDs"
+    echo "??? Missing device to update UUIDs"
     exit 1
 fi
 
 if (( $UID != 0 )); then
-      echo "Call me as root or with sudo"
+      echo "--- Call me as root or with sudo"
       exit 1
 fi
 
@@ -182,33 +185,33 @@ case $device in
 esac
 
 if [[ ! -e $device ]]; then
-    echo "$device does not exist"
+    echo "??? $device does not exist"
     exit 1
 fi
 
 if [[ ! -b $device ]]; then
-    echo "$device is no blockdevice"
+    echo "??? $device is no blockdevice"
     exit 1
 fi
 
 if [[ ! -e $bootPartition ]]; then
-    echo "$bootPartition not found"
+    echo "??? $bootPartition not found"
     exit 1
 fi
 
 if [[ ! -e $rootPartition ]]; then
-    echo "$rootPartition not found"
+    echo "??? $rootPartition not found"
     exit 1
 fi
 
 if ! mount $bootPartition /mnt 2>/dev/null; then
-    echo "Unable to mount $bootPartition"
+    echo "??? Unable to mount $bootPartition"
     exit 1
 fi
 umount $bootPartition &>/dev/null
 
 if ! mount $rootPartition /mnt 2>/dev/null; then
-    echo "Unable to mount $rootPartition"
+    echo "??? Unable to mount $rootPartition"
     exit 1
 fi
 umount $rootPartition &>/dev/null
@@ -226,6 +229,20 @@ fstabRootUUID="$(cut -d= -f2 <<< "${fstab[1]}")"
 actualCmdlineRootUUID="$(parseBLKID ${rootPartition} $cmdlineRootType | cut -d= -f2)"
 actualFstabBootUUID="$(parseBLKID ${bootPartition} $fstabBootType | cut -d= -f2)"
 actualFstabRootUUID="$(parseBLKID ${rootPartition} $fstabRootType | cut -d= -f2)"
+
+if [[ -z $actualCmdlineRootUUID || \
+		-z $actualFstabBootUUID || \
+		-z $actualFstabRootUUID || \
+		-z $cmdlineRootType || \
+		-z $cmdlineRootUUID || \
+		-z $fstabBootType || \
+		-z $fstabBootUUID || \
+		-z $fstabRootType || \
+		-z $fstabRootUUID \
+	]]; then
+		echo "??? ASSERTION FAILED: Unable to collect required data"
+	exit 1
+fi	
 
 if (( $verbose )); then
 	echo "--- $cmdlineRootType $cmdlineRootUUID used in $bootPartition/cmdline"
