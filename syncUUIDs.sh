@@ -41,7 +41,14 @@ fstabSaved=0
 trap 'umount $MOUNTPOINT &>/dev/null' SIGINT SIGTERM EXIT
 
 function parseCmdline {
+
     mount $bootPartition $MOUNTPOINT 2>/dev/null
+
+   	if [[ ! -e ${MOUNTPOINT}/${CMDLINE} ]]; then
+        echo "??? Unable to find ${MOUNTPOINT}/${CMDLINE}"
+        exit 42
+	fi
+
     local rootTarget=$(grep -Eo "root=\S+=\S+" ${MOUNTPOINT}/${CMDLINE} | sed -E "s/root=//")
     umount $MOUNTPOINT 2>/dev/null
     echo "$rootTarget"
@@ -54,6 +61,11 @@ function parseFstab {
     local bootType rootType
 
     mount $rootPartition $MOUNTPOINT 2>/dev/null
+
+   	if [[ ! -e ${MOUNTPOINT}/${FSTAB} ]]; then
+        echo "??? Unable to find ${MOUNTPOINT}/${CMDLINE}"
+        exit 42
+	fi
 
     while read tgt mnt r; do
         case $mnt in
