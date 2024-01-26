@@ -29,6 +29,7 @@
 set -euo pipefail
 
 readonly VERSION="0.1.1"
+readonly GITREPO="https://github.com/framps/raspberryTools"
 readonly MYSELF=$(basename $0)
 
 readonly CMDLINE="cmdline.txt"
@@ -139,7 +140,7 @@ function updateUUIDinCmdline() { # bootType uuid newUUID
 function usage() {
 
 	cat <<- EOF
-	$MYSELF - $VERSION
+	$MYSELF - $VERSION ($GITREPO)
 
     Synchronize UUIDs or PARTUUIDs in /etc/fstab and /boot/cmdline.txt
     with existing UUIDs or PARTUUIDs of device partitions.
@@ -160,6 +161,8 @@ EOF
 #
 
 (( $# <= 0 )) && { usage; exit; }
+
+echo "$MYSELF $VERSION ($GITREPO)"
 
 while getopts ":h :u :v" opt; do
    case "$opt" in

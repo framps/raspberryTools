@@ -23,6 +23,8 @@
 set -euo pipefail
 
 VERSION=0.6
+GITREPO="https://github.com/framps/raspberryTools"
+
 MYSELF="$(basename "$0")"
 MYNAME=${MYSELF%.*}
 
@@ -54,7 +56,8 @@ INI_FILENAME=$HOME/.${MYNAME}
 
 if (( $# >= 1 )) && [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
 	cat << EOH
-	$MYSELF $VERSION
+	$MYSELF $VERSION ($GITREPO)
+	
 Usage:
 	$MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for Raspberries
 	$MYSELF <subnetmask>          Scan subnet for Raspberries
@@ -102,6 +105,7 @@ MY_MAC_REGEX=" (${MY_MAC_REGEX})"
 
 declare -A macAddress=()
 
+echo "$MYSELF $VERSION ($GITREPO)"
 echo "Scanning subnet $MY_NETWORK for Raspberries ..."
 
 # scan subnet for Raspberry macs

@@ -29,6 +29,7 @@
 set -eou pipefail
 
 readonly VERSION="v0.1"
+readonly GITREPO="https://github.com/framps/raspberryTools"
 
 readonly MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 readonly MYNAME=${MYSELF%.*}
@@ -39,7 +40,8 @@ readonly INITRD_DELETE_SED="s/^initrd\.img/linux-image/"
 readonly OS_RELEASE="/etc/os-release"
 
 function show_help() {
-	echo "$MYSELF -i [-e] | -u [-e] | -h | -? | -v"
+	echo "$MYNAME $VERSION ($GITREPO)"	
+	echo "Usage: $MYSELF -i [-e] | -u [-e] | -h | -? | -v"
 	echo "-e: deactivate dry run mode and modify system"
 	echo "-i: reinstall kernels deleted with option -u"
 	echo "-u: uninstall any unused kernels"

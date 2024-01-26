@@ -26,9 +26,13 @@
 #######################################################################################################################
 
 MYSELF=${0##*/}
+VERSION="0.1"
+GITREPO="https://github.com/framps/raspberryTools"
 
 function usage() {
     cat <<EOF
+$MYSELF $VERSION ($GITREPO)
+    
 Usage: $MYSELF [option]*
 
 -Options-
@@ -101,6 +105,8 @@ while (( "$#" )); do
   esac
 done
 
+
+echo "$MYSELF $VERSION ($GITREPO)"
 
 if (( $FULL )) ; then
     displayAndExec "tail -4 /proc/cpuinfo"  "CPUINFO"
