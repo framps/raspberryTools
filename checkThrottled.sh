@@ -75,12 +75,9 @@ for o in "${options[@]}"; do
    else
       echo ":-) Neither undervoltage nor throttling detected"
    fi
-   if [[ $t != "0x0" ]]; then
-		echo -n "NOTE: "
-		if [[ -z $o ]]; then
-			echo "Bits reset on boot only"
-		else
-			echo "Bits reset after call of this script"
-		fi
-	fi
+   if [[ -z $o ]]; then
+      echo "Bits reset on boot only"
+   else
+	  echo "Bits reset after call of this script"
+   fi
 done
