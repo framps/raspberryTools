@@ -22,7 +22,11 @@
 #
 #######################################################################################################################
 
-me=$(basename "$0")
+MYSELF=$(basename "$0")
+VERSION="0.1"
+GITREPO="https://github.com/framps/raspberryTools"
+
+echo "$MYSELF $VERSION ($GITREPO)"
 
 if (( $UID != 0 )); then
 	echo "Script has to be invoked as root. Use 'sudo $@'"

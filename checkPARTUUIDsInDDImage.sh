@@ -22,6 +22,12 @@
 #
 #######################################################################################################################
 
+MYSELF="$(basename "$0")"
+VERSION="0.1"
+GITREPO="https://github.com/framps/raspberryTools"
+
+echo "$MYSELF $VERSION ($GITREPO)"
+
 if [[ $USER != "root" ]]; then
         echo "Call me as root"
         exit 255

@@ -25,6 +25,12 @@
 #
 #######################################################################################################################
 
+MYSELF="$(basename "$0")"
+VERSION="0.1"
+GITREPO="https://github.com/framps/raspberryTools"
+
+echo "$MYSELF $VERSION ($GITREPO)"
+
 # Bits         0                       1                     2                       3
 m=( "Under-voltage detected" "Arm frequency capped" "Currently throttled" "Soft temperature limit active" \
 ""  ""  ""  ""  ""  ""  ""  ""  ""  ""  ""  "" \

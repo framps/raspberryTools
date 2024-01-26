@@ -36,6 +36,12 @@ SILENT=0
 WATCH_PID=""
 VERBOSE=0
 
+MYSELF="$(basename "$0")"
+VERSION="0.1"
+GITREPO="https://github.com/framps/raspberryTools"
+
+echo "$MYSELF $VERSION ($GITREPO)"
+
 function help() {
 	echo "Generate 100% CPU usage and measure CPU temperature."
 	echo "-i <CPU temperature watch interval in seconds>"
