@@ -1,12 +1,12 @@
 #!/bin/bash
 #######################################################################################################################
 #
-#  Convenient script to download raspberryTools to evaluate and optionally to install them
+#  Convenient script to download selected raspberryTools to evaluate and optionally to install them
 #
-#	1) A list of all scripts in raspberryTools is presented and scripts to download can be selected
+#	1) A list of all scripts in raspberryTools is presented and the scripts to download can be selected
 #	2) Selected files are downloaded into ./raspberryTools
-#	3) Now scripts can be tested (Don't forget to prefix commands with ./ )
-#	4) If install option is used the selected tools are downloaded and installed in /usr/local/bin
+#	3) Scripts can be tested (Don't forget to prefix commands with ./ )
+#	4) Then either delete ./raspberyTools directory or use option install to downloaded and install sleected tools into /usr/local/bin
 #
 #######################################################################################################################
 #
@@ -27,38 +27,38 @@
 #
 #######################################################################################################################
 
-set -uo pipefail
+set -euo pipefail
 
 readonly GITAPI_RESTURL_TREES="https://api.github.com/repos/framps/raspberryTools/git/trees/master?recursive=1"
 readonly GIT_DOWNLOAD_PREFIX="https://raw.githubusercontent.com/framps/raspberryTools/master"
 readonly INSTALL_DIR="/usr/local/bin"
 readonly TEST_DIR="$(pwd)/raspberryTools"
+readonly TEST_OPTION="-t"
+readonly INSTALL_OPTION="-i"
 
 MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"					# use linked script name if the link is used
 MYNAME=${MYSELF%.*}
 
-if (( $# > 0 )) && [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-?" || "$1" == "?" ]]; then
-	echo "Purpose: Download any files from raspberryTools github repository."
-	echo "Syntax:  $MYSELF         - Select files to download into $TEST_DIR"
-	echo "         $MYSELF install - Select files to download and install in /usr/local/bin"
-	echo "         $MYSELF cleanup - Delete $TEST_DIR"
+fkt=""
+if (( $# != 0 )); then
+	fkt="$1"
+fi
+
+if (( $# == 0 )) || [[ "$fkt" == "-h" || "$fkt" == "--help" || "$fkt" == "-?" || "$fkt" == "?" ]]; then
+	echo "Purpose: Download and test selected files from raspberryTools github repository."
+	echo "Syntax:  $MYSELF $TEST_OPTION      - Select files to download into $TEST_DIR"
+	echo "         $MYSELF $INSTALL_OPTION      - Select files to download and install into /usr/local/bin"
 	exit 0
 fi
 
 pwd=$PWD
 
 jsonFile=$(mktemp)
-
 trap "{ rm -f $jsonFile; }" SIGINT SIGTERM EXIT
 
-if (( $# != 0 )); then
-	if [[ $1 != "install" ]]; then
-		echo "Unknown option "$1""
-		exit 1
-	fi
-	fkt="$1"
-else
-	fkt=""
+if [[ ! $fkt =~ $TEST_OPTION|$INSTALL_OPTION ]]; then
+	echo "Unknown option "$fkt""
+	exit 1
 fi
 
 if ! which jq &>/dev/null; then
@@ -83,16 +83,9 @@ else
 fi
 
 rc=$?
-if (( $rc != 0 )); then
-	echo "??? Error retrieving repository contents from github. curl RC: $rc"
-	exit 1
-fi
+(( $rc != 0 )) &&  { echo "??? Error retrieving repository contents from github. curl RC: $rc"; exit 1; }
 
-if (( $HTTP_CODE != 200 )); then
-	echo "??? Error retrieving repository contents from github. HTTP response: $HTTP_CODE"
-	jq . $jsonFile
-	exit 1
-fi
+(( $HTTP_CODE != 200 )) && { echo "??? Error retrieving repository contents from github. HTTP response: $HTTP_CODE"; jq . $jsonFile; }
 
 files=( $(jq -r ".tree[].path" $jsonFile | egrep "*.sh" | grep -v $MYSELF) )
 
@@ -126,19 +119,22 @@ for i in $nums; do
 	echo "Downloading ${files[$i]} ..."
 	curl -s -o ${files[$i]} $GIT_DOWNLOAD_PREFIX/${files[$i]}
 	rc=$?
-	if (( $rc != 0 )); then
-		echo "??? Error downloading ${files[$i]}. curl RC: $rc"
-		exit 1
-	fi
+	(( $rc != 0 )) && { echo "??? $LINENO: Error downloading ${files[$i]}. curl RC: $rc"; exit 1; }
 	chmod +x ${files[$i]}
+	(( $? != 0 )) && { echo "??? $LINENO: Error chmod"; exit 1; }
 
-	if [[ "$fkt" == "install" ]]; then
+	if [[ "$fkt" == $INSTALL_OPTION ]]; then
 		echo "Installing ${files[$i]} into $INSTALL_DIR"
+		sudo chown root.root ${files[$i]}
+		(( $? != 0 )) && { echo "??? $LINENO: Error chown"; exit 1; }
+		sudo chmod 755 ${files[$i]}
+		(( $? != 0 )) && { echo "??? $LINENO: Error chmod"; exit 1; }
 		sudo mv ${files[$i]} $INSTALL_DIR
+		(( $? != 0 )) && { echo "??? $LINENO: Error mv"; exit 1; }
 	fi
 done
 
-if [[ "$fkt" == "install" ]]; then
+if [[ "$fkt" == $INSTALL_OPTION ]]; then
 	if [[ -d $TEST_DIR ]]; then
 		cd $TEST_DIR
 		if [[ -n $(ls $TEST_DIR) ]]; then
@@ -147,4 +143,7 @@ if [[ "$fkt" == "install" ]]; then
 		cd $pwd
 		rmdir $TEST_DIR
 	fi
+else
+	echo "Now change into $TEST_DIR and test raspberryTools."
+	echo "Don't forget the leading ./ for any command ;-)"
 fi
