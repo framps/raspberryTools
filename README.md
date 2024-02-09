@@ -4,7 +4,8 @@
 There is a [very useful tools collection](https://forums.raspberrypi.com/viewtopic.php?t=196778) available, called usb-tools **Running Raspbian from USB Devices : Made Easy** which contains four very nice tools called usb-boot, sdc-boot, mbr2gpt and set-partuuid.
 
 ## Note:
-Use downloadRepoFiles.sh helper to select the tools you want to download and test. Optionally you can install them with downloadRepoFiles.
+Use downloadRepoFiles.sh helper to select the tools you want to download and test. Optionally you can install them.
+
 Command to execute to start helper script: `curl -s -o downloadRepoFiles.sh https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh`
 
 Collection of some useful tools for Raspberry Pi. For sample outputs of the tools click the links.
@@ -62,8 +63,8 @@ Check UUIDs (UUIDs are not OK) (Note: There is a mix of UUID and PARTUUID usage)
 ```
 sudo ./syncUUIDs.sh /dev/mmcblk0
 !!! PARTUUID 1aea473-02 should be updated to 18aea473-02 in /dev/mmcblk0p1/cmdline.txt
-!!! UUID 18aea473-01 should be updated to 5DF9-E225 in /dev/mmcblk0p2/etc/fstab 
-!!! PARTUUID 18aea47-02 should be updated to 18aea473-02 in /dev/mmcblk0p2/etc/fstab 
+!!! UUID 18aea473-01 should be updated to 5DF9-E225 in /dev/mmcblk0p2/etc/fstab
+!!! PARTUUID 18aea47-02 should be updated to 18aea473-02 in /dev/mmcblk0p2/etc/fstab
 !!! Use option -u to update the incorrect UUIDs or PARTUUIDs
 ```
 
