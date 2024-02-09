@@ -3,9 +3,9 @@
 #
 #  Convenient script to download raspberryTools to evaluate and optionally to install them
 #
-#	1) A list of all scripts in raspberryTools is presented an scripts to download can be selected
-#	2) Selected files are downloaded
-#	3) Now scripts can be tested
+#	1) A list of all scripts in raspberryTools is presented and scripts to download can be selected
+#	2) Selected files are downloaded into ./raspberryTools
+#	3) Now scripts can be tested (Don't forget to prefix commands with ./ )
 #	4) If install option is used the selected tools are downloaded and installed in /usr/local/bin
 #
 #######################################################################################################################
@@ -27,21 +27,29 @@
 #
 #######################################################################################################################
 
-set -euo pipefail
+set -uo pipefail
 
 readonly GITAPI_RESTURL_TREES="https://api.github.com/repos/framps/raspberryTools/git/trees/master?recursive=1"
 readonly GIT_DOWNLOAD_PREFIX="https://raw.githubusercontent.com/framps/raspberryTools/master"
 readonly INSTALL_DIR="/usr/local/bin"
+readonly TEST_DIR="$(pwd)/raspberryTools"
 
 MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"					# use linked script name if the link is used
 MYNAME=${MYSELF%.*}
 
 if (( $# > 0 )) && [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-?" || "$1" == "?" ]]; then
 	echo "Purpose: Download any files from raspberryTools github repository."
-	echo "Syntax:  $MYSELF         - Select files to download into testdirectory "
+	echo "Syntax:  $MYSELF         - Select files to download into $TEST_DIR"
 	echo "         $MYSELF install - Select files to download and install in /usr/local/bin"
+	echo "         $MYSELF cleanup - Delete $TEST_DIR"
 	exit 0
 fi
+
+pwd=$PWD
+
+jsonFile=$(mktemp)
+
+trap "{ rm -f $jsonFile; }" SIGINT SIGTERM EXIT
 
 if (( $# != 0 )); then
 	if [[ $1 != "install" ]]; then
@@ -52,7 +60,7 @@ if (( $# != 0 )); then
 else
 	fkt=""
 fi
-	
+
 if ! which jq &>/dev/null; then
 	echo "... Installing jq required by $MYNAME."
 	sudo apt install jq
@@ -62,9 +70,9 @@ if ! which jq &>/dev/null; then
 	fi
 fi
 
-jsonFile=$(mktemp)
+[[ ! -d $TEST_DIR ]] && mkdir $TEST_DIR
 
-trap "rm -f $jsonFile" SIGINT SIGTERM EXIT
+cd $TEST_DIR
 
 echo "--- Available raspberyTools ---"
 TOKEN=""															# Personal token to get better rate limits
@@ -99,17 +107,18 @@ while :; do
 	if [[ -z $nums ]]; then
 		exit
 	fi
-	if [[ ! $nums =~ ^[0-9]+([ ]+[0-9]+)?$ ]]; then
+	if [[ ! $nums =~ ^[0-9]+([ ]+[0-9]+)*$ ]]; then
 		echo "Invalid input '$nums'"
 	else
 		break
 	fi
 done
 
+if [[ -z $nums ]]; then
+	exit 0
+fi
+
 for i in $nums; do
-	if [[ -z $nums ]]; then
-		break
-	fi
 	if (( $i < 0 || $i > ${#files[@]} )); then
 		echo "Skipping invalid number $i"
 		continue
@@ -124,7 +133,18 @@ for i in $nums; do
 	chmod +x ${files[$i]}
 
 	if [[ "$fkt" == "install" ]]; then
-		echo "Installing ${files[$i]} ..."
+		echo "Installing ${files[$i]} into $INSTALL_DIR"
 		sudo mv ${files[$i]} $INSTALL_DIR
 	fi
 done
+
+if [[ "$fkt" == "install" ]]; then
+	if [[ -d $TEST_DIR ]]; then
+		cd $TEST_DIR
+		if [[ -n $(ls $TEST_DIR) ]]; then
+			rm $TEST_DIR/*
+		fi
+		cd $pwd
+		rmdir $TEST_DIR
+	fi
+fi
