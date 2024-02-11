@@ -48,10 +48,10 @@ function parseCmdline {
 
     mount $bootPartition $MOUNTPOINT 2>/dev/null
 
-   	if [[ ! -e ${MOUNTPOINT}/${CMDLINE} ]]; then
+    if [[ ! -e ${MOUNTPOINT}/${CMDLINE} ]]; then
         echo "??? Unable to find ${MOUNTPOINT}/${CMDLINE}"
         exit 42
-	fi
+    fi
 
     local rootTarget=$(grep -Eo "root=\S+=\S+" ${MOUNTPOINT}/${CMDLINE} | sed -E "s/root=//")
     umount $MOUNTPOINT 2>/dev/null
@@ -111,7 +111,7 @@ function updateUUIDinFstab() { # bootType uuid newUUID
 
     if ! sed -i --follow-symlinks  "s/^$1=$2/$1=$3/" ${MOUNTPOINT}/${FSTAB}; then
         echo "??? Unable to update $rootPartition/$FSTAB"
-        exit 1
+        exit 42
     fi
     umount $MOUNTPOINT 2>/dev/null
 }
@@ -132,15 +132,15 @@ function updateUUIDinCmdline() { # bootType uuid newUUID
 
     if ! sed -i  --follow-symlinks "s/$1=$2/$1=$3/" ${MOUNTPOINT}/${CMDLINE}; then
         echo "??? Unable to update $bootPartition/$CMDLINE"
-        exit 1
+        exit 42
     fi
     umount $MOUNTPOINT 2>/dev/null
 }
 
 function usage() {
 
-	cat <<- EOF
-	$MYSELF - $VERSION ($GITREPO)
+   cat <<- EOF
+   $MYSELF - $VERSION ($GITREPO)
 
     Synchronize UUIDs or PARTUUIDs in /etc/fstab and /boot/cmdline.txt
     with existing UUIDs or PARTUUIDs of device partitions.
@@ -172,7 +172,7 @@ while getopts ":h :u :v" opt; do
         u) dryrun=0
            ;;
         v) verbose=1
-		   ;;
+         ;;
      \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
      :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
      *  ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
@@ -258,48 +258,48 @@ actualFstabBootUUID="$(parseBLKID ${bootPartition} $fstabBootType | cut -d= -f2)
 actualFstabRootUUID="$(parseBLKID ${rootPartition} $fstabRootType | cut -d= -f2)"
 
 if [[ -z $actualCmdlineRootUUID || \
-		-z $actualFstabBootUUID || \
-		-z $actualFstabRootUUID || \
-		-z $cmdlineRootType || \
-		-z $cmdlineRootUUID || \
-		-z $fstabBootType || \
-		-z $fstabBootUUID || \
-		-z $fstabRootType || \
-		-z $fstabRootUUID \
-	]]; then
-		echo "??? ASSERTION FAILED: Unable to collect required data"
-	exit 1
+      -z $actualFstabBootUUID || \
+      -z $actualFstabRootUUID || \
+      -z $cmdlineRootType || \
+      -z $cmdlineRootUUID || \
+      -z $fstabBootType || \
+      -z $fstabBootUUID || \
+      -z $fstabRootType || \
+      -z $fstabRootUUID \
+   ]]; then
+      echo "??? ASSERTION FAILED: Unable to collect required data"
+   exit 1
 fi
 
 if (( $verbose )); then
-	echo "--- $cmdlineRootType $cmdlineRootUUID used in $bootPartition/cmdline"
-	echo "--- $fstabBootType $fstabBootUUID used in $rootPartition/fstab"
-	echo "--- $fstabRootType $fstabRootUUID used in $rootPartition/fstab"
-	echo
+   echo "--- $cmdlineRootType $cmdlineRootUUID used in $bootPartition/cmdline"
+   echo "--- $fstabBootType $fstabBootUUID used in $rootPartition/fstab"
+   echo "--- $fstabRootType $fstabRootUUID used in $rootPartition/fstab"
+   echo
 fi
 
 
 if [[ $cmdlineRootUUID == $actualCmdlineRootUUID ]]; then
-    echo "--- Root $fstabRootType $actualFstabRootUUID already used in $bootPartition/$CMDLINE"
+   echo "--- Root $fstabRootType $actualFstabRootUUID already used in $bootPartition/$CMDLINE"
 else
-	updateUUIDinCmdline $cmdlineRootType $cmdlineRootUUID $actualCmdlineRootUUID
-    mismatchDetected=1
+   updateUUIDinCmdline $cmdlineRootType $cmdlineRootUUID $actualCmdlineRootUUID
+   mismatchDetected=1
 fi
 
 if [[ $fstabBootUUID == $actualFstabBootUUID ]]; then
-    echo "--- Boot $fstabBootType $actualFstabBootUUID already used in $rootPartition/$FSTAB"
+   echo "--- Boot $fstabBootType $actualFstabBootUUID already used in $rootPartition/$FSTAB"
 else
-	updateUUIDinFstab $fstabBootType $fstabBootUUID $actualFstabBootUUID
-    mismatchDetected=1
+   updateUUIDinFstab $fstabBootType $fstabBootUUID $actualFstabBootUUID
+   mismatchDetected=1
 fi
 
 if [[ $fstabRootUUID == $actualFstabRootUUID ]]; then
-    echo "--- Root $fstabRootType $actualFstabRootUUID already used in $rootPartition/$FSTAB"
+   echo "--- Root $fstabRootType $actualFstabRootUUID already used in $rootPartition/$FSTAB"
 else
-	updateUUIDinFstab $fstabRootType $fstabRootUUID $actualFstabRootUUID
-    mismatchDetected=1
+   updateUUIDinFstab $fstabRootType $fstabRootUUID $actualFstabRootUUID
+   mismatchDetected=1
 fi
 
 if (( $mismatchDetected && dryrun)); then
-    echo "!!! Use option -u to update the incorrect UUIDs or PARTUUIDs"
+   echo "!!! Use option -u to update the incorrect UUIDs or PARTUUIDs"
 fi
