@@ -4,7 +4,7 @@
 #   Search for mac addresses used by Raspberries iwhich are defined on
 #   https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
 #
-#   Copyright (C) 2021-2022 framp at linux-tips-and-tricks dot de
+#   Copyright (C) 2021-2024 framp at linux-tips-and-tricks dot de
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
