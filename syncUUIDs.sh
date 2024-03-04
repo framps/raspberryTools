@@ -150,7 +150,7 @@ function usage() {
 
     Usage: $0 [-uv] device
     -u: Create backup of files and update the UUIDs and PARTUUIDs in
-        /boot/cmdline.txt and /etc/fstab
+        /boot/cmdline.txt or /boot/firmware/cmdline.txt and /etc/fstab
     -v: Verbose output"
 
     Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1
