@@ -143,7 +143,8 @@ function usage() {
    $MYSELF - $VERSION ($GITREPO)
 
     Synchronize UUIDs or PARTUUIDs in /etc/fstab and /boot/cmdline.txt
-    with existing UUIDs or PARTUUIDs of device partitions.
+    or /boot/firmware/cmdline.txt with existing UUIDs or PARTUUIDs
+    of device partitions.
     If no option is passed the used UUIDs or PARTUUIDs are retrieved
     and displayed only. No files are updated.
 
