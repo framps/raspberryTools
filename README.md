@@ -24,17 +24,13 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 7. [findRaspis.sh](#findraspissh) - Scan the local net for Raspberries and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname
 
-8. [smsRelay.py](#smsrelaypy) - Receives all SMS and forwards them to an eMail. UMTS stick and python2 required. Depends on Python2 and therefore is outdated. Use smstools and eventhandler file smsevent instead.
+8. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
 
-9. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
+9. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs or PARTUUIDs used on the device partitions. Option -u will synchronize the files. Useful when an image was cloned to another device and fails during boot.
 
-10. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs or PARTUUIDs used on the device partitions. Option -u will synchronize the files. Useful when an image was cloned to another device and fails during boot.
+10. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
-11. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
-
-12. [raspiHandleKernels.sh](https://github.com/framps/raspberryTools/blob/master/raspiHandleKernels.sh) - Delete and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
-
-13. [downloadRepoFiles.sh](https://github.com/framps/raspberryTools/blob/master/downloadRepoFiles.sh) - Helper to select files from raspberryTools repository to download and test and optionally to install
+11. [raspiHandleKernels.sh](https://github.com/framps/raspberryTools/blob/master/raspiHandleKernels.sh) - Delete and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
 
 ## findRaspis.sh
 
@@ -155,26 +151,6 @@ LTW of /dev/md0: 596.31 GiB
 ```
 sudo retrieveTBW.sh -a
 TBW of sda: 1.56 TiB
-```
-
-## smsRelay.py
-
-Sample eMail relayed for a `*ping` SMS
-
-```
-Dear SMSRelayUser
-
-I just received following SMS from +4947114712 for +4947144715 which I forward to you:
-
---- START SMS ---
-*ping
----  END SMS  ---
-
-Hope you enjoy my service.
-
-Regards
-
-Your SMS relay server on smsrelay.dummy.com
 ```
 
 ## raspiNetInfo.sh
