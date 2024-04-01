@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #######################################################################################################################
 #
 # 	 Find all ESP sensors in local network
@@ -25,9 +24,12 @@
 
 set -euo pipefail
 
-VERSION=0.6
+VERSION=0.7
+GITREPO="https://github.com/framps/raspberryTools"
+
 MYSELF="$(basename "$0")"
 MYNAME=${MYSELF%.*}
+S_OPTIONARGS="imhd"
 
 # check for required commands and required bash version
 
@@ -58,8 +60,9 @@ if (( $# >= 1 )) && [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
 	cat << EOH
 	$MYSELF $VERSION
 Usage:
-	$MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for ESPs
-	$MYSELF <subnetmask>          Scan subnet for ESPs
+	$MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for ESPs sorted by IPs
+	$MYSELF -n <subnetmask>       Scan subnet for ESPs
+	$MYSELF -s [i|m|h|d]	      Sort for IPs, Macs, Hostnames or description, Default: IP
 	$MYSELF -h | -? | --help      Show this help text
 
 Defaults:
@@ -67,10 +70,10 @@ Defaults:
 	Mac regex:  $DEFAULT_MAC_REGEX
 
 Example:
-	$MYSELF 192.168.179.0/24
+	$MYSELF -n 192.168.179.0/24 -s m
 
 Init file $INI_FILENAME can be used to customize the mac address scan and descriptions.
-First optional line can be the regex for the macs to scan. See default above for an example.
+First optional line can be the regex for the macs to scan. See default below for an example.
 All following lines can contain a mac and a description separated by a space to add a meaningful
 description to the system which owns this mac. Otherwise the hostname discovered will used as the description.
 
@@ -83,18 +86,27 @@ EOH
 	exit 0
 fi
 
-# read options
+set +e
+sortType="$(grep -o "\-s [$S_OPTIONARGS]" <<< "$@")"
+set -e
+[[ -z $sortType ]] && sortType="-s i"
 
-MY_NETWORK=${1:-$DEFAULT_SUBNETMASK}
+set +e
+network="$(grep -E -o '\-n \S+' <<< "$@")"
+set -e
+if [[ -z $network ]]; then
+	network="$DEFAULT_SUBNETMASK"
+else
+	network=$(cut -f2 -d" " <<< $network)
+fi
 
 # read property file with mac regexes
 
 MY_MAC_REGEX="$DEFAULT_MAC_REGEX"
 
 if [[ -f "$INI_FILENAME" ]]; then
-	MY_MAC_REGEX_FROM_INI="$(head -n 1 "$INI_FILENAME" | cut -f 2 -d " ")"
+	MY_MAC_REGEX_FROM_INI="$(head -n 1 "$INI_FILENAME" | awk '{print $2}')"
 	if [[ -z "$MY_MAC_REGEX_FROM_INI" ]]; then
-		echo "Using Mac Regex from $INI_FILENAME"
 		MY_MAC_REGEX="$(head -n 1 "$INI_FILENAME")"
 	fi
 fi
@@ -104,26 +116,26 @@ MY_MAC_REGEX=" (${MY_MAC_REGEX})"
 
 declare -A macAddress=()
 
-echo "Scanning subnet $MY_NETWORK for ESPs ..."
+echo "$MYSELF $VERSION ($GITREPO)"
+echo "Scanning subnet $network for ESPs ..."
 
 # scan subnet for ESP macs
 
 # 192.168.0.12             ether   dc:a6:32:8f:28:fd   C                     wlp3s0 -
 while read -r ip dummy mac rest; do
 	macAddress["$ip"]="$mac"
-done < <(nmap -sP "$MY_NETWORK" &>/dev/null; arp -n | grep -Ei " $MY_MAC_REGEX")
+done < <(nmap -sP "$network" &>/dev/null; arp -n | grep -Ei " $MY_MAC_REGEX")
+
+tmp=$(mktemp)
 
 # retrieve and print hostnames
 
 if (( ${#macAddress[@]} > 0 )); then
 
-	printf "\n%-15s %-17s %s\n" "IP address" "Mac address" "Hostname (Description)"
+	maxHostnameLen=0
+	maxDescriptionLen=0
 
-	IFS=$'\n'
-	sorted=($(sort -t . -k 3,3n -k 4,4n <<< "${!macAddress[*]}"))
-	unset IFS
-
-	for ip in "${sorted[@]}"; do
+	for ip in ${!macAddress[@]}; do
 		set +e
 		h="$(host "$ip")"
 		rc=$?
@@ -132,7 +144,6 @@ if (( ${#macAddress[@]} > 0 )); then
 		if (( ! rc )); then
 			# 12.0.168.192.in-addr.arpa domain name pointer asterix.
 			read -r arpa dummy dummy dummy host rest <<< "$h"
-			: "$arpa" "$dummy" # suppress shellcheck warning
 			host=${host::-1} # delete trailing "."
 		fi
 
@@ -147,12 +158,34 @@ if (( ${#macAddress[@]} > 0 )); then
 			set -e
 			if (( ! rc )); then
 				hostDescription="$(cut -f 2- -d ' ' <<< "$hostDescription" | sed 's/^ *//; s/ *$//')"
-				host="${host} ($hostDescription)"
+			else
+				hostDescription=""
 			fi
 		fi
 
-		printf "%-15s %17s %s\n" "$ip" "${macAddress[$ip]}" "$host"
+		(( maxHostnameLen < ${#host} )) && maxHostnameLen=${#host}
+		(( maxDescriptionLen < ${#hostDescription} )) && maxDescriptionLen=${#hostDescription}
+
+		printf "%s %s %s %s\n" "$ip" "${macAddress[$ip]}" "$host" "$hostDescription" >> $tmp
 	done
+
+	printf "\n%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "IP address" "Mac address" "Hostname" "Description"	
+
+	sort=$(cut -f 2 -d " " <<< "$sortType")
+	if [[ $sort == "i" ]]; then
+		sortCmd="sort -t . -k 1,1n -k 2,2n -k 3,3n -k 4,4n"
+	else
+		key=$(grep -aob "$sort" <<< "$S_OPTIONARGS"| grep -oE '[0-9]+')
+		((key++))
+		sortCmd="sort -k $key"
+	fi
+
+	while read -r ip mac host desc ; do
+		printf "%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "$ip" "$mac" "$host" "$desc"
+	done < <($sortCmd $tmp)
+
 else
 	echo "No ESPs found with mac regex $MY_MAC_REGEX"
 fi
+
+rm $tmp

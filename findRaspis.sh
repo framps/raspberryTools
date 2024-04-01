@@ -1,24 +1,29 @@
 #!/bin/bash
+#######################################################################################################################
+#
 #   Find all existing Raspberries in local subnet
 #
-#   Search for mac addresses used by Raspberries iwhich are defined on
+#   Search for mac addresses used by Raspberries which are defined on
 #   https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
 #
-#   Copyright (C) 2021-2024 framp at linux-tips-and-tricks dot de
+#######################################################################################################################
 #
-#   This program is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
+#    Copyright (c) 2021-2024 framp at linux-tips-and-tricks dot de
 #
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-#   You should have received a copy of the GNU General Public License
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#######################################################################################################################
 
 set -euo pipefail
 
@@ -27,6 +32,7 @@ GITREPO="https://github.com/framps/raspberryTools"
 
 MYSELF="$(basename "$0")"
 MYNAME=${MYSELF%.*}
+S_OPTIONARGS="imhd"
 
 # check for required commands and required bash version
 
@@ -86,7 +92,7 @@ EOH
 fi
 
 set +e
-sortType="$(grep -o '\-s [imhd]' <<< "$@")"
+sortType="$(grep -o "\-s [$S_OPTIONARGS]" <<< "$@")"
 set -e
 [[ -z $sortType ]] && sortType="-s i"
 
@@ -143,7 +149,6 @@ if (( ${#macAddress[@]} > 0 )); then
 		if (( ! rc )); then
 			# 12.0.168.192.in-addr.arpa domain name pointer asterix.
 			read -r arpa dummy dummy dummy host rest <<< "$h"
-			: "$arpa" "$dummy" # suppress shellcheck warning
 			host=${host::-1} # delete trailing "."
 		fi
 
@@ -163,24 +168,23 @@ if (( ${#macAddress[@]} > 0 )); then
 			fi
 		fi
 
-		(( maxHostnameLen < ${#host} )) &&	maxHostnameLen=${#host}
-		(( maxDescriptionLen < ${#hostDescription} )) &&	maxDescriptionLen=${#hostDescription}
+		(( maxHostnameLen < ${#host} )) && maxHostnameLen=${#host}
+		(( maxDescriptionLen < ${#hostDescription} )) && maxDescriptionLen=${#hostDescription}
 
 		printf "%s %s %s %s\n" "$ip" "${macAddress[$ip]}" "$host" "$hostDescription" >> $tmp
 	done
 
 	printf "\n%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "IP address" "Mac address" "Hostname" "Description"	
 
-set -x
 	sort=$(cut -f 2 -d " " <<< "$sortType")
 	if [[ $sort == "i" ]]; then
 		sortCmd="sort -t . -k 1,1n -k 2,2n -k 3,3n -k 4,4n"
 	else
-		key=$(grep -aob "$sort" <<< "imhd"| grep -oE '[0-9]+')
-		((key++)) &&
+		key=$(grep -aob "$sort" <<< "$S_OPTIONARGS"| grep -oE '[0-9]+')
+		((key++))
 		sortCmd="sort -k $key"
 	fi
-set +x
+
 	while read -r ip mac host desc ; do
 		printf "%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "$ip" "$mac" "$host" "$desc"
 	done < <($sortCmd $tmp)
