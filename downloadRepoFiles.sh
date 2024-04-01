@@ -96,7 +96,7 @@ for f in ${files[@]}; do
 done
 
 while :; do
-	read -p "Enter numbers of files to download separated by spaces > " nums
+	read -u 0 -p "Enter numbers of files to download separated by spaces > " nums
 	if [[ -z $nums ]]; then
 		exit
 	fi
