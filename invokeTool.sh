@@ -42,6 +42,7 @@ fi
 
 branch="master"
 targetFilename="$1"
+shift
 
 downloadURL="$GITHUBREPODOWNLOAD/$branch/$targetFilename"
 
