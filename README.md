@@ -32,6 +32,8 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 11. [raspiHandleKernels.sh](https://github.com/framps/raspberryTools/blob/master/raspiHandleKernels.sh) - Delete and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
 
+12. [findSensors.sh](#findsensorsssh) - Scan the local net for ESP sensors and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname
+
 ## findRaspis.sh
 
 ```
@@ -42,6 +44,23 @@ IP address      Mac address       Hostname (Description)
 192.168.0.8     b8:27:eb:b4:e8:74 troubadix (Networking server)
 192.168.0.10    b8:27:eb:3c:94:90 idefix (Homeautomation server)
 192.168.0.12    dc:a6:32:8f:28:fd asterix (LAN server)
+```
+## findSensors.sh
+
+```
+findSensors.sh
+Scanning subnet 192.168.0.0/24 for ESPs ...
+
+IP address      Mac address       Hostname (Description)
+192.168.0.101   24:62:ab:f3:04:74 sensor3.fritz.box (brightness)
+192.168.0.108   24:a1:60:3d:46:1d sensor51.fritz.box (Roof)
+192.168.0.109   48:3f:da:ab:00:4c sensor52.fritz.box (1st floor)
+192.168.0.123   10:52:1c:5d:5c:ac ESPGW1.fritz.box (ESPNow gateway)
+192.168.0.126   a4:cf:12:f5:a4:ff sensor10.fritz.box (development room)
+192.168.0.143   24:a1:60:3b:87:e0 sensor50.fritz.box (2nd floor)
+192.168.0.144   10:52:1c:02:44:d7 sensor15.fritz.box (basement)
+192.168.0.161   a4:cf:12:f4:d9:e4 sensor9.fritz.box (living room)
+192.168.0.165   e0:98:06:86:2a:71 sensor12.fritz.box (IT room)
 ```
 
 ## syncUUIDs.sh
