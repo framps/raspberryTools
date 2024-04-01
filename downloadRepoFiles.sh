@@ -6,7 +6,13 @@
 #	1) A list of all scripts in raspberryTools is presented and the scripts to download can be selected
 #	2) Selected files are downloaded into ./raspberryTools
 #	3) Scripts can be tested (Don't forget to prefix commands with ./ )
-#	4) Then either delete ./raspberyTools directory or use option install to downloaded and install sleected tools into /usr/local/bin
+#	4) Then either delete ./raspberyTools directory or use option install to downloaded and install selected tools into /usr/local/bin
+#
+#   There is no need to download this script. Just use following oneliner
+#
+#      curl -o install -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash install -t; rm install
+#   or 
+#      curl -o install -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash install -i; rm install
 #
 #######################################################################################################################
 #
@@ -95,8 +101,13 @@ for f in ${files[@]}; do
 	(( i++ )) && true
 done
 
+fktDesc="download into $TEST_DIR"
+if [[ "$fkt" == $INSTALL_OPTION ]]; then
+	fktDesc="install into $INSTALL_DIR"
+fi	
+
 while :; do
-	read -u 0 -p "Enter numbers of files to download separated by spaces > " nums
+	read -p "Enter numbers of files to $fktDesc separated by spaces > " nums
 	if [[ -z $nums ]]; then
 		exit
 	fi
