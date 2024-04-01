@@ -8,13 +8,6 @@
 #	3) Scripts can be tested (Don't forget to prefix commands with ./ )
 #	4) Then either delete ./raspberyTools directory or use option install to downloaded and install sleected tools into /usr/local/bin
 #
-#       You don't have to download the script. To download and invoke invoke the installation script use either
-#          curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh | bash -s -- -t
-#	to download selected scripts into a directory to test them 
-#       and
-#          curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh | bash -s -- -i
-#       to download selected scripts and install them in /usr/local/bin
-#
 #######################################################################################################################
 #
 #    Copyright (c) 2024 framp at linux-tips-and-tricks dot de

@@ -72,7 +72,7 @@ Example:
 	$MYSELF -n 192.168.179.0/24 -s m
 
 Init file $INI_FILENAME can be used to customize the mac address scan and descriptions.
-First optional line can be the regex for the macs to scan. See default above for an example.
+First optional line can be the regex for the macs to scan. See default below for an example.
 All following lines can contain a mac and a description separated by a space to add a meaningful
 description to the system which owns this mac. Otherwise the hostname discovered will used as the description.
 
@@ -86,9 +86,9 @@ EOH
 fi
 
 set +e
-sortType="$(grep -o '\-t [imhd]' <<< "$@")"
+sortType="$(grep -o '\-s [imhd]' <<< "$@")"
 set -e
-[[ -z $sortType ]] && sortType="-t i"
+[[ -z $sortType ]] && sortType="-s i"
 
 set +e
 network="$(grep -E -o '\-n \S+' <<< "$@")"
@@ -104,9 +104,8 @@ fi
 MY_MAC_REGEX="$DEFAULT_MAC_REGEX"
 
 if [[ -f "$INI_FILENAME" ]]; then
-	MY_MAC_REGEX_FROM_INI="$(head -n 1 "$INI_FILENAME" | cut -f 2 -d " ")"
-	if [[ -n "$MY_MAC_REGEX_FROM_INI" ]]; then
-		echo "Using Mac Regex from $INI_FILENAME"
+	MY_MAC_REGEX_FROM_INI="$(head -n 1 "$INI_FILENAME" | awk '{print $2}')"
+	if [[ -z "$MY_MAC_REGEX_FROM_INI" ]]; then
 		MY_MAC_REGEX="$(head -n 1 "$INI_FILENAME")"
 	fi
 fi
@@ -132,14 +131,10 @@ tmp=$(mktemp)
 
 if (( ${#macAddress[@]} > 0 )); then
 
-	IFS=$'\n'
-	sorted=($(sort -t . -k 3,3n -k 4,4n <<< "${!macAddress[*]}"))
-	unset IFS
-
 	maxHostnameLen=0
 	maxDescriptionLen=0
 
-	for ip in "${sorted[@]}"; do
+	for ip in ${!macAddress[@]}; do
 		set +e
 		h="$(host "$ip")"
 		rc=$?
@@ -174,15 +169,21 @@ if (( ${#macAddress[@]} > 0 )); then
 		printf "%s %s %s %s\n" "$ip" "${macAddress[$ip]}" "$host" "$hostDescription" >> $tmp
 	done
 
-	printf "\n%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "IP address" "Mac address" "Hostname" "Description"
+	printf "\n%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "IP address" "Mac address" "Hostname" "Description"	
 
+set -x
 	sort=$(cut -f 2 -d " " <<< "$sortType")
-	key=$(grep -aob "$sort" <<< "imhd"| grep -oE '[0-9]+')
-	((key++))
-
+	if [[ $sort == "i" ]]; then
+		sortCmd="sort -t . -k 1,1n -k 2,2n -k 3,3n -k 4,4n"
+	else
+		key=$(grep -aob "$sort" <<< "imhd"| grep -oE '[0-9]+')
+		((key++)) &&
+		sortCmd="sort -k $key"
+	fi
+set +x
 	while read -r ip mac host desc ; do
 		printf "%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "$ip" "$mac" "$host" "$desc"
-	done < <(sort -k $key $tmp)
+	done < <($sortCmd $tmp)
 
 else
 	echo "No Raspberries found with mac regex $MY_MAC_REGEX"
