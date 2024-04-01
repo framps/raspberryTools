@@ -22,7 +22,7 @@
 
 set -euo pipefail
 
-VERSION=0.6
+VERSION=0.7
 GITREPO="https://github.com/framps/raspberryTools"
 
 MYSELF="$(basename "$0")"
@@ -59,8 +59,9 @@ if (( $# >= 1 )) && [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
 	$MYSELF $VERSION ($GITREPO)
 
 Usage:
-	$MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for Raspberries
-	$MYSELF <subnetmask>          Scan subnet for Raspberries
+	$MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for Raspberries sorted by IP
+	$MYSELF -n <subnetmask>       Scan subnet for Raspberries
+	$MYSELF -s [i|m|h|d]	         Sort for IPs, Macs, Hostnames or description, Default: IP
 	$MYSELF -h | -? | --help      Show this help text
 
 Defaults:
@@ -68,7 +69,7 @@ Defaults:
 	Mac regex:  $DEFAULT_MAC_REGEX
 
 Example:
-	$MYSELF 192.168.179.0/24
+	$MYSELF -n 192.168.179.0/24 -s m
 
 Init file $INI_FILENAME can be used to customize the mac address scan and descriptions.
 First optional line can be the regex for the macs to scan. See default above for an example.
@@ -84,9 +85,19 @@ EOH
 	exit 0
 fi
 
-# read options
+set +e
+sortType="$(grep -o '\-t [imhd]' <<< "$@")"
+set -e
+[[ -z $sortType ]] && sortType="-t i"
 
-MY_NETWORK=${1:-$DEFAULT_SUBNETMASK}
+set +e
+network="$(grep -E -o '\-n \S+' <<< "$@")"
+set -e
+if [[ -z $network ]]; then
+	network="$DEFAULT_SUBNETMASK"
+else
+	network=$(cut -f2 -d" " <<< $network)
+fi
 
 # read property file with mac regexes
 
@@ -106,24 +117,27 @@ MY_MAC_REGEX=" (${MY_MAC_REGEX})"
 declare -A macAddress=()
 
 echo "$MYSELF $VERSION ($GITREPO)"
-echo "Scanning subnet $MY_NETWORK for Raspberries ..."
+echo "Scanning subnet $network for Raspberries ..."
 
 # scan subnet for Raspberry macs
 
 # 192.168.0.12             ether   dc:a6:32:8f:28:fd   C                     wlp3s0 -
 while read -r ip dummy mac rest; do
 	macAddress["$ip"]="$mac"
-done < <(nmap -sP "$MY_NETWORK" &>/dev/null; arp -n | grep -Ei " $MY_MAC_REGEX")
+done < <(nmap -sP "$network" &>/dev/null; arp -n | grep -Ei " $MY_MAC_REGEX")
+
+tmp=$(mktemp)
 
 # retrieve and print hostnames
 
 if (( ${#macAddress[@]} > 0 )); then
 
-	printf "\n%-15s %-17s %s\n" "IP address" "Mac address" "Hostname (Description)"
-
 	IFS=$'\n'
 	sorted=($(sort -t . -k 3,3n -k 4,4n <<< "${!macAddress[*]}"))
 	unset IFS
+
+	maxHostnameLen=0
+	maxDescriptionLen=0
 
 	for ip in "${sorted[@]}"; do
 		set +e
@@ -149,12 +163,29 @@ if (( ${#macAddress[@]} > 0 )); then
 			set -e
 			if (( ! rc )); then
 				hostDescription="$(cut -f 2- -d ' ' <<< "$hostDescription" | sed 's/^ *//; s/ *$//')"
-				host="${host} ($hostDescription)"
+			else
+				hostDescription=""
 			fi
 		fi
 
-		printf "%-15s %17s %s\n" "$ip" "${macAddress[$ip]}" "$host"
+		(( maxHostnameLen < ${#host} )) &&	maxHostnameLen=${#host}
+		(( maxDescriptionLen < ${#hostDescription} )) &&	maxDescriptionLen=${#hostDescription}
+
+		printf "%s %s %s %s\n" "$ip" "${macAddress[$ip]}" "$host" "$hostDescription" >> $tmp
 	done
+
+	printf "\n%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "IP address" "Mac address" "Hostname" "Description"
+
+	sort=$(cut -f 2 -d " " <<< "$sortType")
+	key=$(grep -aob "$sort" <<< "imhd"| grep -oE '[0-9]+')
+	((key++))
+
+	while read -r ip mac host desc ; do
+		printf "%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "$ip" "$mac" "$host" "$desc"
+	done < <(sort -k $key $tmp)
+
 else
 	echo "No Raspberries found with mac regex $MY_MAC_REGEX"
 fi
+
+rm $tmp
