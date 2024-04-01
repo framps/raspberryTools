@@ -32,7 +32,7 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 11. [raspiHandleKernels.sh](https://github.com/framps/raspberryTools/blob/master/raspiHandleKernels.sh) - Delete and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
 
-12. [findSensors.sh](#findsensorsssh) - Scan the local net for ESP sensors and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname
+12. [findSensors.sh](#findsensors.sh) - Scan the local net for ESP sensors and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname
 
 ## findRaspis.sh
 

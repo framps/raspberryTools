@@ -4,16 +4,10 @@
 #
 #  Download any file available on raspberyyTools github repository into current directory
 #
-#  Example to download latest raspiBackup.sh from master branch:
-#  curl -s https://raw.githubusercontent.com/framps/raspiBackup/master/scripts/raspiBackupDownloadFromGit.sh | bash -s -- master
+#  Example to download syncUUIDs tool
+#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- syncUUIDs.sh /dev/sda
 #
-#  Example to download latest raspiBackupWrapper.sh from master branch:
-#  curl -s https://raw.githubusercontent.com/framps/raspiBackup/master/scripts/raspiBackupDownloadFromGit.sh | bash -s -- master helper/raspiBackupWrapper.sh
-#
-#  Example to download latest raspiBackupInstallUI.sh from beta branch:
-#  curl -s https://raw.githubusercontent.com/framps/raspiBackup/master/scripts/raspiBackupDownloadFromGit.sh | bash -s -- master beta/raspiBackupInstallUI.sh
-#
-#  Visit http://www.linux-tips-and-tricks.de/raspiBackup for latest code and other details
+
 #
 #######################################################################################################################
 #
@@ -67,8 +61,4 @@ echo "--- Download finished successfully"
 
 trap - SIGINT SIGTERM EXIT
 
-if [[ "$targetFilename" == *\.sh ]]; then
-	chmod +x "$targetFilename"
-fi
-
-echo "--- Invoke $targetFilename with \`.$targetFilename\` now"
+bash $targetFilename "$@"
