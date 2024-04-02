@@ -68,7 +68,7 @@ IP address      Mac address       Hostname (Description)
 
 Check UUIDs (UUIDs are OK):
 ```
-sudo ./syncUUIDs.sh  /dev/mmcblk0
+sudo syncUUIDs.sh  /dev/mmcblk0
 --- Root PARTUUID 18aea473-02 already used in /dev/mmcblk0p1/cmdline.txt
 --- Boot PARTUUID 18aea473-01 already used in /dev/mmcblk0p2/etc/fstab
 --- Root PARTUUID 18aea473-02 already used in /dev/mmcblk0p2/etc/fstab
@@ -77,7 +77,7 @@ sudo ./syncUUIDs.sh  /dev/mmcblk0
 Check UUIDs (UUIDs are not OK) (Note: There is a mix of UUID and PARTUUID usage):
 
 ```
-sudo ./syncUUIDs.sh /dev/mmcblk0
+sudo syncUUIDs.sh /dev/mmcblk0
 !!! PARTUUID 1aea473-02 should be updated to 18aea473-02 in /dev/mmcblk0p1/cmdline.txt
 !!! UUID 18aea473-01 should be updated to 5DF9-E225 in /dev/mmcblk0p2/etc/fstab
 !!! PARTUUID 18aea47-02 should be updated to 18aea473-02 in /dev/mmcblk0p2/etc/fstab
@@ -87,7 +87,7 @@ sudo ./syncUUIDs.sh /dev/mmcblk0
 Update UUIDs (UUIDs are not OK):
 
 ```
-sudo ./syncUUIDs.sh  -u /dev/mmcblk0
+sudo syncUUIDs.sh  -u /dev/mmcblk0
 --- Creating cmdline backup cmdline.txt.bak on /dev/mmcblk0p1
 --- Updating PARTUUID 1aea473-02 to 18aea473-02 in /dev/mmcblk0p1/cmdline.txt
 --- Creating fstab backup etc/fstab.bak on /dev/mmcblk0p2
@@ -97,7 +97,7 @@ sudo ./syncUUIDs.sh  -u /dev/mmcblk0
 
 Check if update was successfull :
 ```
-sudo ./syncUUIDs.sh /dev/mmcblk0
+sudo syncUUIDs.sh /dev/mmcblk0
 --- Root PARTUUID 18aea473-02 already used in /dev/mmcblk0p1/cmdline.txt
 --- Boot UUID 5DF9-E225 already used in /dev/mmcblk0p2/etc/fstab
 --- Root PARTUUID 18aea473-02 already used in /dev/mmcblk0p2/etc/fstab
@@ -105,12 +105,12 @@ sudo ./syncUUIDs.sh /dev/mmcblk0
 
 Use PARTUUID in fstab now:
 ```
-sudo ./syncUUIDs.sh -u /dev/mmcblk0
+sudo syncUUIDs.sh -u /dev/mmcblk0
 --- Root PARTUUID 18aea473-02 already used in /dev/mmcblk0p1/cmdline.txt
 --- Creating fstab backup etc/fstab.bak on /dev/mmcblk0p2
 --- Updating PARTUUID 5DF9-E225 to 18aea473-01 in /dev/mmcblk0p2/etc/fstab
 --- Root PARTUUID 18aea473-02 already used in /dev/mmcblk0p2/etc/fstab
-sudo ./syncUUIDs.sh /dev/mmcblk0
+sudo syncUUIDs.sh /dev/mmcblk0
 --- Root PARTUUID 18aea473-02 already used in /dev/mmcblk0p1/cmdline.txt
 --- Boot PARTUUID 18aea473-01 already used in /dev/mmcblk0p2/etc/fstab
 --- Root PARTUUID 18aea473-02 already used in /dev/mmcblk0p2/etc/fstab
