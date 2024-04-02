@@ -25,15 +25,15 @@ Collection of some useful tools for Raspberry Pi. For sample outputs of the tool
 
 7. [findRaspis.sh](#findraspissh) - Scan the local net for Raspberries and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname
 
-8. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
+8. [findSensors.sh](#findsensorssh) - Scan the local net for ESP sensors and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname
 
-9. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs or PARTUUIDs used on the device partitions. Option -u will synchronize the files. Useful when an image was cloned to another device and fails during boot.
+9. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
 
-10. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
+10. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs or PARTUUIDs used on the device partitions. Option -u will synchronize the files. Useful when an image was cloned to another device and fails during boot.
 
-11. [raspiHandleKernels.sh](https://github.com/framps/raspberryTools/blob/master/raspiHandleKernels.sh) - Delete and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
+11. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
-12. [findSensors.sh](#findSensors.sh) - Scan the local net for ESP sensors and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname
+12. [raspiHandleKernels.sh](https://github.com/framps/raspberryTools/blob/master/raspiHandleKernels.sh) - Delete and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
 
 ## findRaspis.sh
 
