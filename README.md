@@ -6,7 +6,7 @@ There is a [very useful tools collection](https://forums.raspberrypi.com/viewtop
 ## Note:
 Use invokeTool.sh to download and call a tool immediately. Example: `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- findSensors.sh -s m` will download and call findSensors.sh with argument `-s m`.
 
-Or use downloadRepoFiles.sh helper to select multiple tools you want to download and test first. Optionally you can install them with option `-i`.
+Or use downloadRepoFiles.sh to select multiple tools you want to download and test first. Optionally you can install them later with option `-i`.
 Command to download and execute downloadRepoFiles.sh: `curl -s -o downloadRepoFiles.sh https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh`
 
 Collection of some useful tools for Raspberry Pi. For sample outputs of the tools click the links.
