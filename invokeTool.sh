@@ -2,12 +2,10 @@
 
 #######################################################################################################################
 #
-#  Download any file available on raspberyyTools github repository into current directory
+#  Download and invoke any tool available on raspberyyTools github repository
 #
-#  Example to download syncUUIDs tool
-#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- syncUUIDs.sh /dev/sda
-#
-
+#  Example to execute findSensors and sort the result according their mac addresses
+#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- findSensors.sh -s m
 #
 #######################################################################################################################
 #
@@ -36,7 +34,7 @@ GITHUBREPODOWNLOAD="https://raw.githubusercontent.com/framps/raspberryTools"
 if [[ -z "$1" || "$1" == "-h" || "$1" == "--help" || "$1" == "-?" || "$1" == "?" ]]; then
 	echo "Purpose: Download any file from raspberryTools github repository."
 	echo "Syntax:  $MYSELF fileName"
-	echo "Example: $MYSELF syncUUIDs.sh"
+	echo "Example: $MYSELF findSensors.sh -s m"
 	exit 1
 fi
 
@@ -57,9 +55,8 @@ if (( $rc != 0 )); then
 	echo "??? Does $targetFilename exist in repository $GITHUBREPO?"
 	exit 1
 fi
-
 echo "--- Download finished successfully"
 
-trap - SIGINT SIGTERM EXIT
+echo "--- Invoking $targetFilename ..."
 
 bash $targetFilename "$@"

@@ -4,9 +4,9 @@
 There is a [very useful tools collection](https://forums.raspberrypi.com/viewtopic.php?t=196778) available, called usb-tools **Running Raspbian from USB Devices : Made Easy** which contains four very nice tools called usb-boot, sdc-boot, mbr2gpt and set-partuuid.
 
 ## Note:
-Use downloadRepoFiles.sh helper to select the tools you want to download and test. Optionally you can install them.
-
-Command to execute to start helper script: `curl -s -o downloadRepoFiles.sh https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh`
+Use invokeTool.sh to download and call a tool immediately. Example: `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- findSensors.sh -s m` will download and call findSensors.sh with argument `-s m`.
+Or use downloadRepoFiles.sh helper to select multiple tools you want to download and test first. Optionally you can install them with option `-i`.
+Command to download and execute downloadRepoFiles.sh: `curl -s -o downloadRepoFiles.sh https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh`
 
 Collection of some useful tools for Raspberry Pi. For sample outputs of the tools click the links.
 
