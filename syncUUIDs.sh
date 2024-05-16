@@ -3,8 +3,8 @@
 #######################################################################################################################
 #
 #   Check and optionally update /boot/cmdline.txt and /etc/fstab on a device with installed RaspbianOS
-#   with the actual UUIDs/PARTUUIDs of the device. Useful if a cloned RaspbianOS fails to boot because
-#   of UUID/PARTUUID mismatch.
+#   with the actual UUIDs/PARTUUIDs/LABELs of the partitions. Useful if a cloned RaspbianOS fails to boot because
+#   of UUID/PARTUUID/LABEL mismatch.
 #
 #   Copyright (C) 2022-2024 framp at linux-tips-and-tricks dot de
 #
@@ -139,13 +139,13 @@ function usage() {
    cat <<- EOF
    $MYSELF - $VERSION ($GITREPO)
 
-    Synchronize UUIDs or PARTUUIDs in /etc/fstab and /boot/cmdline.txt
-    with existing UUIDs or PARTUUIDs of device partitions.
-    If no option is passed the used UUIDs or PARTUUIDs are retrieved
+    Synchronize UUIDs, PARTUUIDs or LABELs in /etc/fstab and /boot/cmdline.txt
+    with existing UUIDs, PARTUUIDs or LABELs of device partitions.
+    If no option is passed the used UUIDs, PARTUUIDs or LABELs are retrieved
     and displayed only. No files are updated.
 
     Usage: $0 [-uv] device
-    -u: Create backup of files and update the UUIDs and PARTUUIDs in
+    -u: Create backup of files and update the UUIDs, PARTUUIDs or LABELs in
         /boot/cmdline.txt and /etc/fstab
     -v: Be verbose
 
