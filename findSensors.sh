@@ -161,6 +161,8 @@ if (( ${#macAddress[@]} > 0 )); then
 			else
 				hostDescription=""
 			fi
+		else
+			hostDescription="n/a"
 		fi
 
 		(( maxHostnameLen < ${#host} )) && maxHostnameLen=${#host}
