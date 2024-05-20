@@ -36,6 +36,8 @@ For sample outputs of the tools click the links.
 
 12. [raspiHandleKernels.sh](https://github.com/framps/raspberryTools/blob/master/raspiHandleKernels.sh) - Delete and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
 
+13. [switchOS.sh](https://github.com/framps/raspberryTools/blob/master/switchOS.sh) - Switch the OS to boot from if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
+
 ## findRaspis.sh
 
 ```
