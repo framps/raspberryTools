@@ -80,12 +80,12 @@ function check4Bookworm() {
 
 function do_uninstall() {
 
-	local unusedKernels="$(ls -1 /boot | grep -v -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo "{}")"
+	local unusedKernels="$(ls -1 /boot | grep -v "$(uname -r)" | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo "{}")"
 	if [[ -z "$unusedKernels" ]]; then
 		error "No unused kernels detected"
 		exit 1
 	fi
-	local keptKernels="$(ls -1 /boot | grep -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo "{}")"
+	local keptKernels="$(ls -1 /boot | grep "$(uname -r)" | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo "{}")"
 	if [[ -z "$keptKernels" ]]; then
 		error "No kernels will be kept"
 		exit 1
@@ -120,11 +120,11 @@ function do_uninstall() {
 		fi
 
 		info "Saving $numUnusedKernels unused kernel names in /boot/$DELETED_KERNELS_FILENAME"
-		ls -1 /boot | grep -v -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo -e "{}" >> $DELETED_KERNELS_FILENAME; sudo mv $DELETED_KERNELS_FILENAME /boot
+		ls -1 /boot | grep -v "$(uname -r)" | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs -I {} echo -e "{}" >> $DELETED_KERNELS_FILENAME; sudo mv $DELETED_KERNELS_FILENAME /boot
 		(( $? )) && { error "Failure collecting kernels"; exit 42; }
 
 		info "Removing $numUnusedKernels unused kernels"
-		ls -1 /boot | grep -v -E $(uname -r) | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs sudo apt -y remove
+		ls -1 /boot | grep -v "$(uname -r)" | grep -E "$INITRD_GREP_REGEX" | sed "$INITRD_DELETE_SED" | xargs sudo apt -y remove
 		(( $? )) && { error "Failure removing kernels"; exit 42; }
 		set -e
 	fi
