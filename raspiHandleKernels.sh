@@ -28,7 +28,7 @@
 
 set -eou pipefail
 
-readonly VERSION="v0.1"
+readonly VERSION="v0.1.1"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 readonly MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
