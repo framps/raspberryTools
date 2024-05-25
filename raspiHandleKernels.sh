@@ -133,8 +133,8 @@ function do_uninstall() {
 function do_install() {
 
 	if [[ ! -e /boot/$DELETED_KERNELS_FILENAME ]]; then
-		error "Missing /boot/$DELETED_KERNELS_FILENAME to reinstall unused kernels"
-		exit 42
+		info "No unused kernels found"
+		exit 0
 	fi
 	
 	local numUnusedKernels=$(wc -l /boot/$DELETED_KERNELS_FILENAME | cut -f 1 -d ' ')
@@ -145,11 +145,20 @@ function do_install() {
 			echo "$line"
 		done < /boot/$DELETED_KERNELS_FILENAME
 	else
+		local errorOccured=0
 		info "Installing $numUnusedKernels unused kernels"
 		echo "$(</boot/$DELETED_KERNELS_FILENAME)"
 		while IFS= read -r line; do
-			sudo apt install $line
+			sudo apt -y install $line
+			set +e
+			(( errorOccured |= $? ))
+			set -e
 		done < /boot/$DELETED_KERNELS_FILENAME
+		if (( ! errorOccured )); then
+			sudo rm /boot/$DELETED_KERNELS_FILENAME
+		else
+			error "Errors occured when installing kernels" 
+		fi
 	fi
 }
 
