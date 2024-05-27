@@ -136,7 +136,7 @@ for i in $nums; do
 
 	if [[ "$fkt" == $INSTALL_OPTION ]]; then
 		echo "Installing ${files[$i]} into $INSTALL_DIR"
-		sudo chown root.root ${files[$i]}
+		sudo chown root:root ${files[$i]}
 		(( $? != 0 )) && { echo "??? $LINENO: Error chown"; exit 1; }
 		sudo chmod 755 ${files[$i]}
 		(( $? != 0 )) && { echo "??? $LINENO: Error chmod"; exit 1; }
