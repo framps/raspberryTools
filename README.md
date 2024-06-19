@@ -1,5 +1,9 @@
 ![](https://img.shields.io/github/last-commit/framps/raspberryTools.svg?style=flat)
 
+***
+If you like my work and want me to be able to keep improving it, please sponsor me on [GitHub](https://github.com/sponsors/framps).
+***
+
 # Note
 There is a [very useful tools collection](https://forums.raspberrypi.com/viewtopic.php?t=196778) available, called usb-tools **Running Raspbian from USB Devices : Made Easy** which contains four very nice tools called usb-boot, sdc-boot, mbr2gpt and set-partuuid.
 
