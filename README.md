@@ -1,4 +1,5 @@
 ![](https://img.shields.io/github/last-commit/framps/raspberryTools.svg?style=flat)
+![](https://img.shields.io/github/stars/framps/raspberryTools?style=flat)
 
 ***
 If you like my work and want me to be able to keep improving it, please sponsor me on [GitHub](https://github.com/sponsors/framps).
