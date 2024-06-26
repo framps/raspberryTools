@@ -2,7 +2,7 @@
 ![](https://img.shields.io/github/stars/framps/raspberryTools?style=flat)
 
 ***
-If you like my work and want me to be able to keep improving it, please sponsor me on [GitHub](https://github.com/sponsors/framps).
+If you like my work and want me to be able to keep improving it, please sponsor me on [GitHub](https://github.com/sponsors/framps) or visit [this page](https://www.linux-tips-and-tricks.de/en/donations) which lists alternate ways to donate.
 ***
 
 ### Note
