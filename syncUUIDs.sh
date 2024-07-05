@@ -46,23 +46,34 @@ mismatchDetected=0
 fstabSaved=0
 
 function cleanup() {
-	umount $MOUNTPOINT &>/dev/null || true
-	if [[ -e $LOG_FILE ]]; then
-		cat $LOG_FILE
-		rm $LOG_FILE
-	fi
+   umount $MOUNTPOINT &>/dev/null || true
+   if [[ -e $LOG_FILE ]]; then
+      cat $LOG_FILE
+      rm $LOG_FILE || true
+   fi
 }
 
 function error() {
-	echo "??? $1" >> $LOG_FILE
-	exit 1
+   echo "??? $1" >> $LOG_FILE
+   exit 1
 }
 
-trap 'cleanup' SIGINT SIGTERM EXIT
+function err() {
+   echo "??? Unexpected error occured"
+   local i=0
+   local FRAMES=${#BASH_LINENO[@]}
+   for ((i=FRAMES-2; i>=0; i--)); do
+      echo '  File' \"${BASH_SOURCE[i+1]}\", line ${BASH_LINENO[i]}, in ${FUNCNAME[i+1]}
+      sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i+1]}"
+   done
+}
+
+trap 'cleanup' SIGINT SIGTERM SIGHUP EXIT
+trap 'err' ERR
 
 function parseCmdline {
 
-    mount $bootPartition $MOUNTPOINT 2>/dev/null
+    mount ${bootPartition} $MOUNTPOINT 2>/dev/null
 
     if [[ ! -e ${MOUNTPOINT}/${CMDLINE} ]]; then
         error "Unable to find ${MOUNTPOINT}/${CMDLINE}"
@@ -72,8 +83,8 @@ function parseCmdline {
     umount $MOUNTPOINT 2>/dev/null
 
     if [[ -z $rootTarget ]]; then
-		error "Parsing of ${CMDLINE} for '${ROOT_TARGET}' failed"
-	 fi
+      error "Parsing of ${CMDLINE} for '${ROOT_TARGET}' failed"
+    fi
     echo "$rootTarget"
 }
 
@@ -102,25 +113,25 @@ function parseFstab {
     umount $MOUNTPOINT 2>/dev/null
 
     if [[ -z $bootTgt ]]; then
-		error "Parsing of /${FSTAB} for '$BOOT' or '$BOOT_FIRMWARE' failed"
-	 fi
+      error "Parsing of /${FSTAB} for '$BOOT' or '$BOOT_FIRMWARE' failed"
+    fi
 
     if [[ -z $rootTgt ]]; then
-		error "Parsing of /${FSTAB} for '$ROOT' failed"
-	 fi
+      error "Parsing of /${FSTAB} for '$ROOT' failed"
+    fi
 
     echo "$bootTgt $rootTgt"
 }
 
-function parseBLKID {   # device uuidType
+function parseBLKID {   # device uuid/poartuuid/label
     local blkid="$(blkid $1 -o udev | grep "ID_FS_${2}=")"
     if [[ -z $blkid ]]; then
-		error "Parsing of blkid $1 for filesystem type $2 failed"
-	 fi
+      error "Parsing of blkid $1 for filesystem type $2 failed"
+    fi
     echo $blkid
 }
 
-function updateUUIDinFstab() { # bootType uuid newUUID
+function updateFstab() { # bootType uuid newUUID
 
     if (( $dryrun )); then
         echo "!!! $1 $2 should be updated to $3 in $rootPartition/$FSTAB "
@@ -143,7 +154,7 @@ function updateUUIDinFstab() { # bootType uuid newUUID
     umount $MOUNTPOINT 2>/dev/null
 }
 
-function updateUUIDinCmdline() { # bootType uuid newUUID
+function updateCmdline() { # bootType uuid newUUID
 
     if (( $dryrun )); then
         echo "!!! $1 $2 should be updated to $3 in $bootPartition/${CMDLINE}"
@@ -208,7 +219,7 @@ done
 shift $(( $OPTIND - 1 ))
 
 if [[ -z $1 ]]; then
-    echo "??? Missing device to update UUIDs"
+    echo "??? Missing device to update UUIDs, PARTUUIDs or LABELs"
     exit 1
 fi
 
@@ -258,9 +269,9 @@ if [[ ! -e $rootPartition ]]; then
 fi
 
 if (( $verbose )); then
-	echo "... bootPartition: $bootPartition"
-	echo "... rootPartition: $rootPartition"
-	echo
+   echo "... bootPartition: $bootPartition"
+   echo "... rootPartition: $rootPartition"
+   echo
 fi
 
 if ! mount $bootPartition /mnt 2>/dev/null; then
@@ -304,40 +315,40 @@ if [[ -z $actualCmdlineRootUUID || \
 fi
 
 if (( $verbose )); then
-	echo "... $fstabBootType on $bootPartition: $actualFstabBootUUID"
-	echo "... $fstabRootType on $rootPartition: $actualFstabRootUUID"
-	echo
-	echo "... Boot $fstabBootType used in fstab: $fstabBootUUID"
-	echo "... Root $fstabRootType used in fstab: $fstabRootUUID"
-	echo "... Root $cmdlineRootType used in cmdline: $cmdlineRootUUID"
-	echo
+   echo "... $fstabBootType on $bootPartition: $actualFstabBootUUID"
+   echo "... $fstabRootType on $rootPartition: $actualFstabRootUUID"
+   echo
+   echo "... Boot $fstabBootType used in fstab: $fstabBootUUID"
+   echo "... Root $fstabRootType used in fstab: $fstabRootUUID"
+   echo "... Root $cmdlineRootType used in cmdline: $cmdlineRootUUID"
+   echo
 fi
 
 if [[ $cmdlineRootUUID == $actualCmdlineRootUUID ]]; then
    echo "--- Root $fstabRootType $actualFstabRootUUID already used in $bootPartition/$CMDLINE"
 else
-   updateUUIDinCmdline $cmdlineRootType $cmdlineRootUUID $actualCmdlineRootUUID
+   updateCmdline $cmdlineRootType $cmdlineRootUUID $actualCmdlineRootUUID
    mismatchDetected=1
 fi
 
 if [[ $fstabBootUUID == $actualFstabBootUUID ]]; then
    echo "--- Boot $fstabBootType $actualFstabBootUUID already used in $rootPartition/$FSTAB"
 else
-   updateUUIDinFstab $fstabBootType $fstabBootUUID $actualFstabBootUUID
+   updateFstab $fstabBootType $fstabBootUUID $actualFstabBootUUID
    mismatchDetected=1
 fi
 
 if [[ $fstabRootUUID == $actualFstabRootUUID ]]; then
    echo "--- Root $fstabRootType $actualFstabRootUUID already used in $rootPartition/$FSTAB"
 else
-   updateUUIDinFstab $fstabRootType $fstabRootUUID $actualFstabRootUUID
+   updateFstab $fstabRootType $fstabRootUUID $actualFstabRootUUID
    mismatchDetected=1
 fi
 
 if (( $mismatchDetected && dryrun)); then
-   echo "!!! Use option -u to update the incorrect UUIDs or PARTUUIDs"
+   echo "!!! Use option -u to update the incorrect UUIDs, PARTUUIDs or LABELs"
 fi
 
 if (( ! $mismatchDetected && ! dryrun)); then
-   echo "--- No UUIDs or PARTUUIDs updated"
+   echo "--- No incorrect UUIDs, PARTUUIDs or LABELs detected"
 fi
