@@ -68,6 +68,18 @@ function err() {
    done
 }
 
+function isSupportedSystem() {
+
+	local MODELPATH=/sys/firmware/devicetree/base/model
+	local RPI_ISSUE=/etc/rpi-issue
+
+	[[ ! -e $MODELPATH ]] && return 1
+	! grep -q -i "raspberry" $MODELPATH && return 1
+	[[ ! -e $RPI_ISSUE ]] && return 1
+	
+	return 0
+}
+
 trap 'cleanup' SIGINT SIGTERM SIGHUP EXIT
 trap 'err' ERR
 
@@ -247,6 +259,11 @@ case $device in
         echo "Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1"
         exit 1
 esac
+
+if ! isSupportedSystem; then
+    echo "??? $MYSELF supports Raspberries running RasbianOS only"
+    exit 1
+fi    
 
 if [[ ! -e $device ]]; then
     echo "??? $device does not exist"
