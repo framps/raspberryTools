@@ -25,13 +25,19 @@
 
 set -euo pipefail
 
-readonly VERSION="0.1.1"
+readonly VERSION="0.2"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 readonly MYSELF=$(basename $0)
+readonly MYNAME=${MYSELF##*/}
 
 readonly CMDLINE="cmdline.txt"
 readonly FSTAB="etc/fstab"
 readonly MOUNTPOINT="/mnt"
+readonly BOOT="/boot"
+readonly BOOT_FIRMWARE="/boot/firmware"
+readonly ROOT="/"
+readonly ROOT_TARGET="root="
+readonly LOG_FILE="$MYNAME.log"
 
 dryrun=1                # default, enable update with option -u
 verbose=0
@@ -39,41 +45,55 @@ verbose=0
 mismatchDetected=0
 fstabSaved=0
 
-trap 'umount $MOUNTPOINT &>/dev/null' SIGINT SIGTERM EXIT
+function cleanup() {
+	umount $MOUNTPOINT &>/dev/null || true
+	if [[ -e $LOG_FILE ]]; then
+		cat $LOG_FILE
+		rm $LOG_FILE
+	fi
+}
+
+function error() {
+	echo "??? $1" >> $LOG_FILE
+	exit 1
+}
+
+trap 'cleanup' SIGINT SIGTERM EXIT
 
 function parseCmdline {
 
     mount $bootPartition $MOUNTPOINT 2>/dev/null
 
     if [[ ! -e ${MOUNTPOINT}/${CMDLINE} ]]; then
-        echo "??? Unable to find ${MOUNTPOINT}/${CMDLINE}"
-        exit 42
+        error "Unable to find ${MOUNTPOINT}/${CMDLINE}"
     fi
 
-    local rootTarget=$(grep -Eo "root=\S+=\S+" ${MOUNTPOINT}/${CMDLINE} | sed -E "s/root=//")
+    local rootTarget=$(grep -Eo "${ROOT_TARGET}\S+=\S+" ${MOUNTPOINT}/${CMDLINE} | sed -E "s/${ROOT_TARGET}//")
     umount $MOUNTPOINT 2>/dev/null
+
+    if [[ -z $rootTarget ]]; then
+		error "Parsing of ${CMDLINE} for '${ROOT_TARGET}' failed"
+	 fi
     echo "$rootTarget"
 }
 
 function parseFstab {
 
     local tgt mnt
-    local bootTgt rootTgt
-    local bootType rootType
+    local bootTgt="" rootTgt=""
 
     mount $rootPartition $MOUNTPOINT 2>/dev/null
 
     if [[ ! -e ${MOUNTPOINT}/${FSTAB} ]]; then
-        echo "??? Unable to find ${MOUNTPOINT}/${CMDLINE}"
-        exit 42
+        error "??? Unable to find ${MOUNTPOINT}/${CMDLINE}"
     fi
 
     while read tgt mnt r; do
         case $mnt in
-            /boot | /boot/firmware)
+            $BOOT | $BOOT_FIRMWARE)
                 bootTgt=$tgt
                 ;;
-            /)
+            $ROOT)
                 rootTgt=$tgt
                 ;;
         esac
@@ -81,11 +101,22 @@ function parseFstab {
 
     umount $MOUNTPOINT 2>/dev/null
 
+    if [[ -z $bootTgt ]]; then
+		error "Parsing of /${FSTAB} for '$BOOT' or '$BOOT_FIRMWARE' failed"
+	 fi
+
+    if [[ -z $rootTgt ]]; then
+		error "Parsing of /${FSTAB} for '$ROOT' failed"
+	 fi
+
     echo "$bootTgt $rootTgt"
 }
 
 function parseBLKID {   # device uuidType
     local blkid="$(blkid $1 -o udev | grep "ID_FS_${2}=")"
+    if [[ -z $blkid ]]; then
+		error "Parsing of blkid $1 for filesystem type $2 failed"
+	 fi
     echo $blkid
 }
 
@@ -107,8 +138,7 @@ function updateUUIDinFstab() { # bootType uuid newUUID
     echo "--- Updating $1 $2 to $3 in $rootPartition/$FSTAB"
 
     if ! sed -i "s/^$1=$2/$1=$3/" ${MOUNTPOINT}/${FSTAB}; then
-        echo "??? Unable to update $rootPartition/$FSTAB"
-        exit 42
+        error "??? Unable to update $rootPartition/$FSTAB"
     fi
     umount $MOUNTPOINT 2>/dev/null
 }
@@ -128,8 +158,7 @@ function updateUUIDinCmdline() { # bootType uuid newUUID
     echo "--- Updating $1 $2 to $3 in $bootPartition/${CMDLINE}"
 
     if ! sed -i  --follow-symlinks "s/$1=$2/$1=$3/" ${MOUNTPOINT}/${CMDLINE}; then
-        echo "??? Unable to update $bootPartition/$CMDLINE"
-        exit 42
+        error "??? Unable to update $bootPartition/$CMDLINE"
     fi
     umount $MOUNTPOINT 2>/dev/null
 }
@@ -184,7 +213,7 @@ if [[ -z $1 ]]; then
 fi
 
 if (( $UID != 0 )); then
-      echo "--- Call me as root or with sudo"
+      echo "--- Please call $MYSELF as root or with sudo"
       exit 1
 fi
 
@@ -226,6 +255,12 @@ fi
 if [[ ! -e $rootPartition ]]; then
     echo "??? $rootPartition not found"
     exit 1
+fi
+
+if (( $verbose )); then
+	echo "... bootPartition: $bootPartition"
+	echo "... rootPartition: $rootPartition"
+	echo
 fi
 
 if ! mount $bootPartition /mnt 2>/dev/null; then
