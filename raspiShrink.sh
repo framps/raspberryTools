@@ -105,6 +105,9 @@ fi
 
 #fdisk -l "$imageFile"
 
+currentSize=$(ls -lh $imageFile | cut -f 5 -d ' ')
+echo "CurrentSize: $currentSize"
+
 loopDevice=$(losetup --show -f --partscan $imageFile)
 
 minimumSize=$(resize2fs -P ${loopDevice}p2 2>/dev/null | egrep -o "[0-9]+")
@@ -113,7 +116,7 @@ blockSize=$(tune2fs -l ${loopDevice}p2 | egrep -i "block size" | cut -f 2 -d ':'
 
 minimumSizeInBytes=$((minimumSize * $blockSize))
 
-echo "MinimumSizeInBytes: $(bytesToHuman $minimumSizeInBytes)"
+echo "MinimumSize: $(bytesToHuman $minimumSizeInBytes)"
 
 exit
 
