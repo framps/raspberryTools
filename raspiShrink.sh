@@ -30,13 +30,90 @@ readonly GITREPO="https://github.com/framps/raspberryTools"
 readonly MYSELF=$(basename $0)
 readonly MYNAME=${MYSELF##*/}
 
+loopDevice=""
+
+function err() {
+   echo "??? Unexpected error occured"
+   local i=0
+   local FRAMES=${#BASH_LINENO[@]}
+   for ((i=FRAMES-2; i>=0; i--)); do
+      echo '  File' \"${BASH_SOURCE[i+1]}\", line ${BASH_LINENO[i]}, in ${FUNCNAME[i+1]}
+      sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i+1]}"
+   done
+}
+
+# Borrowed from http://unix.stackexchange.com/questions/44040/a-standard-tool-to-convert-a-byte-count-into-human-kib-mib-etc-like-du-ls1
+
+function bytesToHuman() {
+	local b d s S
+	local sign=1
+	b=${1:-0}; d=''; s=0; S=(Bytes {K,M,G,T,E,P,Y,Z}iB)
+	if (( b < 0 )); then
+		sign=-1
+		(( b=-b ))
+	fi
+	while ((b > 1024)); do
+		d="$(printf ".%02d" $((b % 1024 * 100 / 1024)))"
+		b=$((b / 1024))
+		let s++
+	done
+	if (( sign < 0 )); then
+		(( b=-b ))
+	fi
+	echo "$b$d ${S[$s]}"
+}
+
+function cleanup() {
+   if [[ -n $loopDevice ]]; then
+		losetup -D $loopDevice
+   fi
+}
+
+function usage() {
+
+   cat <<- EOF
+   $MYSELF - $VERSION ($GITREPO)
+
+    Shrink a Rasperry image as small as possible
+
+    Usage: $0 image
+EOF
+}
+
+function error() {
+   echo "??? $1"
+   exit 1
+}
+
+trap 'err' ERR
+trap 'cleanup' SIGINT SIGTERM SIGHUP EXIT
+
+(( $# <= 0 )) && { usage; exit; }
+
+if (( $UID != 0 )); then
+      echo "--- Please call $MYSELF as root or with sudo"
+      exit 1
+fi
+
+echo "$MYSELF $VERSION ($GITREPO)"
+
 imageFile="$1"
 
-fdisk -l "imageFile"
+if [[ ! -f $imageFile ]]; then
+	error "$imageFile not found"
+fi	
+
+#fdisk -l "$imageFile"
 
 loopDevice=$(losetup --show -f --partscan $imageFile)
 
-minimumSize=$(resize2fs -P ${loopDevice}p2)
+minimumSize=$(resize2fs -P ${loopDevice}p2 2>/dev/null | egrep -o "[0-9]+")
+
+blockSize=$(tune2fs -l ${loopDevice}p2 | egrep -i "block size" | cut -f 2 -d ':')
+
+minimumSizeInBytes=$((minimumSize * $blockSize))
+
+echo "MinimumSizeInBytes: $(bytesToHuman $minimumSizeInBytes)"
 
 exit
 
