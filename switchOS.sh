@@ -37,7 +37,7 @@ readonly BOOTORDER2="${BOOTORDER1:1:1}${BOOTORDER1:0:1}"
 
 readonly MODELPATH=/sys/firmware/devicetree/base/model
 
-if ! -e $MODELPATH && ! grep -q -i "raspberry" $MODELPATH; then
+if ! [[ -e $MODELPATH ]] || ! grep -q -i "raspberry" $MODELPATH; then
 	echo "$MYNAME works on Raspberries only"
 	exit 1
 fi
