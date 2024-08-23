@@ -40,7 +40,11 @@ readonly INITRD_DELETE_SED="s/^initrd\.img/linux-image/"
 readonly OS_RELEASE="/etc/os-release"
 
 function show_help() {
-	echo "$MYNAME $VERSION ($GITREPO)"	
+	echo "$MYNAME $VERSION ($GITREPO)"
+	echo
+	echo "Check for unnecessary kernels for the existing Raspberry hardware."
+	echo "Optionally delete and save installed kernels for later reinstallation or reinstall the previously deleted kernels"
+	echo
 	echo "Usage: $MYSELF -i [-e] | -u [-e] | -h | -? | -v"
 	echo "-e: deactivate dry run mode and modify system"
 	echo "-i: reinstall kernels deleted with option -u"
