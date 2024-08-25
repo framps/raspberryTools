@@ -74,10 +74,8 @@ function check4Pi() {
 
 function do_uninstall() {
 
-	set +u
-	local availableKernels="$(dpkg --list | grep -E "^ii\s+linux-image" | awk '{ print $2 }')"
+	local availableKernels="$(dpkg --list | awk '/^ii[[:space:]]+linux-image/ { print $2 }')"
 	local usedKernel="$(uname -a | awk '{ print "linux-image-" $3 }')"
-	set -u
 
 	local unusedKernels="$(grep -v "$usedKernel" <<< "$availableKernels" | xargs -I {} echo "{}")"
 	if [[ -z "$unusedKernels" ]]; then
