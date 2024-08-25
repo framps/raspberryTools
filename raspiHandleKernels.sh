@@ -72,14 +72,6 @@ function check4Pi() {
 	dpkg --print-architecture | grep -q -E "arm(hf|64)"
 }
 
-function check4Bookworm() {
-	if [[ -e $OS_RELEASE ]]; then
-		grep -qi '^VERSION_CODENAME=bookworm' $OS_RELEASE
-		return
-	fi
-	return 1
-}
-
 function do_uninstall() {
 
 	set +u
@@ -172,11 +164,6 @@ function do_install() {
 
 if ! check4Pi; then
 	error "No RaspberryPi detected"
-	exit 1
-fi
-
-if ! check4Bookworm; then
-	error "No Bookworm detected"
 	exit 1
 fi
 
