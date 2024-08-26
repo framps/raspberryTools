@@ -9,7 +9,7 @@
 #
 #######################################################################################################################
 #
-#    Copyright (c) 2023 framp at linux-tips-and-tricks dot de
+#    Copyright (c) 2023,2024 framp at linux-tips-and-tricks dot de
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,14 +28,12 @@
 
 set -eou pipefail
 
-readonly VERSION="v0.2.0"
+readonly VERSION="v0.2.1"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 readonly MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 readonly MYNAME=${MYSELF%.*}
 readonly DELETED_KERNELS_FILENAME="$MYNAME.krnl"
-
-readonly OS_RELEASE="/etc/os-release"
 
 function show_help() {
 	echo "$MYNAME $VERSION ($GITREPO)"
@@ -169,29 +167,33 @@ MODE_INSTALL=0
 MODE_UNINSTALL=0
 MODE_EXECUTE=0
 
-while getopts ":ehiuv?" opt; do
+if (( $# == 0 )); then
+	MODE_UNINSTALL=1
+else
+	while getopts ":ehiuv?" opt; do
 
-    case "$opt" in
-		e) MODE_EXECUTE=1
-			;;
-		h|\?)
-			show_help
-			exit 0
-			;;
-		i) MODE_INSTALL=1
-			;;
-		u) MODE_UNINSTALL=1
-			;;
-		v) echo "$MYSELF $VERSION"
-			exit 0
-			;;
-		*) echo "Unknown option $opt"
-			show_help
-			exit 1
-			;;
-    esac
+		case "$opt" in
+			e) MODE_EXECUTE=1
+				;;
+			h|\?)
+				show_help
+				exit 0
+				;;
+			i) MODE_INSTALL=1
+				;;
+			u) MODE_UNINSTALL=1
+				;;
+			v) echo "$MYSELF $VERSION"
+				exit 0
+				;;
+			*) echo "Unknown option $opt"
+				show_help
+				exit 1
+				;;
+		esac
 
-done
+	done
+fi
 
 if (( $MODE_INSTALL )); then
 	do_install
