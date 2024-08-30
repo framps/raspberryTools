@@ -67,7 +67,7 @@ fi
 pwd=$PWD
 
 jsonFile=$(mktemp)
-trap "{ rm -f $jsonFile; rm $MYSELF;}" SIGINT SIGTERM EXIT
+trap "{ rm -f $jsonFile; }" SIGINT SIGTERM EXIT
 
 if [[ ! $fkt =~ $TEST_OPTION|$INSTALL_OPTION ]]; then
 	echo "Unknown option "$fkt""
