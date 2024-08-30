@@ -35,6 +35,9 @@
 
 set -euo pipefail
 
+readonly VERSION="v0.1.2"
+readonly GITREPO="https://github.com/framps/raspberryTools"
+
 readonly GITAPI_RESTURL_TREES="https://api.github.com/repos/framps/raspberryTools/git/trees/master?recursive=1"
 readonly GIT_DOWNLOAD_PREFIX="https://raw.githubusercontent.com/framps/raspberryTools/master"
 readonly INSTALL_DIR="/usr/local/bin"
@@ -44,6 +47,8 @@ readonly INSTALL_OPTION="-i"
 
 MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"					# use linked script name if the link is used
 MYNAME=${MYSELF%.*}
+
+echo "$MYSELF $VERSION ($GITREPO)"
 
 fkt=""
 if (( $# != 0 )); then
