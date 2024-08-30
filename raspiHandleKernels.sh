@@ -36,7 +36,7 @@ readonly MYNAME=${MYSELF%.*}
 readonly DELETED_KERNELS_FILENAME="$MYNAME.krnl"
 
 function show_help() {
-	echo "$MYNAME $VERSION ($GITREPO)"
+	echo "$MYSELF $VERSION ($GITREPO)"
 	echo
 	echo "Check for unnecessary kernels for the existing Raspberry hardware."
 	echo "Optionally delete and save installed kernels for later reinstallation or reinstall the previously deleted kernels"
