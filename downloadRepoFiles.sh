@@ -10,9 +10,11 @@
 #
 #   There is no need to download this script. Just use following oneliner
 #
-#      curl -o install -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash install -t; rm install
+#      curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh | bash -s -- -t
+#         to download any script into a testdirectory without installing it in /usr/local/bin
 #   or 
-#      curl -o install -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash install -i; rm install
+#      curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh | bash -s -- -i
+#         to download and install any script into /usr/local/bin
 #
 #######################################################################################################################
 #
@@ -35,7 +37,7 @@
 
 set -euo pipefail
 
-readonly VERSION="v0.1.2"
+readonly VERSION="v0.1.3"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 readonly GITAPI_RESTURL_TREES="https://api.github.com/repos/framps/raspberryTools/git/trees/master?recursive=1"
@@ -65,7 +67,7 @@ fi
 pwd=$PWD
 
 jsonFile=$(mktemp)
-trap "{ rm -f $jsonFile; }" SIGINT SIGTERM EXIT
+trap "{ rm -f $jsonFile; rm $MYSELF;}" SIGINT SIGTERM EXIT
 
 if [[ ! $fkt =~ $TEST_OPTION|$INSTALL_OPTION ]]; then
 	echo "Unknown option "$fkt""
