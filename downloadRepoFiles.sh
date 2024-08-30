@@ -93,7 +93,7 @@ rc=$?
 
 (( $HTTP_CODE != 200 )) && { echo "??? Error retrieving repository contents from github. HTTP response: $HTTP_CODE"; jq . $jsonFile; }
 
-files=( $(jq -r ".tree[].path" $jsonFile | egrep '*.sh' | grep -v $MYSELF) )
+files=( $(jq -r ".tree[].path" $jsonFile | egrep '\.sh' | grep -v $MYSELF) )
 
 i=0
 for f in ${files[@]}; do
