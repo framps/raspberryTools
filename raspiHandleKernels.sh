@@ -1,1 +1,1 @@
-raspiraspiHandleUnusedKernels.sh
+raspiHandleUnusedKernels.sh
