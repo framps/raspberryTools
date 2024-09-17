@@ -28,7 +28,7 @@
 
 set -eou pipefail
 
-readonly VERSION="v0.2.2"
+readonly VERSION="v0.2.3"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 readonly MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
@@ -77,7 +77,8 @@ function do_uninstall() {
 
 	local unusedKernels="$(grep -v "$usedKernel" <<< "$availableKernels" | xargs -I {} echo "{}")"
 	if [[ -z "$unusedKernels" ]]; then
-		error "No unused kernels detected"
+		info "$usedKernel used only"
+		info "No unused kernels detected"
 		exit 1
 	fi
 
@@ -87,7 +88,7 @@ function do_uninstall() {
 		exit 1
 	fi
 
-	info "Following kernel will be kept"
+	info "Following kernel is used and will be kept"
 	echo "$keptKernel"
 
 	local numUnusedKernels="$(wc -l <<< "$unusedKernels")"
@@ -123,6 +124,8 @@ function do_uninstall() {
 		echo "$unusedKernels" | xargs sudo apt -y remove
 		(( $? )) && { error "Failure removing kernels"; exit 42; }
 		set -e
+	else
+		info "Use option -ue to uninstall unused kernels"
 	fi
 }
 
@@ -140,6 +143,7 @@ function do_install() {
 		while IFS= read -r line; do
 			echo "$line"
 		done < /boot/$DELETED_KERNELS_FILENAME
+		info "Use option -ie to install the unused kernels"
 	else
 		local errorOccured=0
 		info "Installing $numUnusedKernels unused kernels"
