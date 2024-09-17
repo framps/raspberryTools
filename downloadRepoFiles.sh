@@ -114,7 +114,9 @@ if [[ "$fkt" == $INSTALL_OPTION ]]; then
 fi	
 
 while :; do
-	read -p "Enter numbers of files to $fktDesc separated by spaces > " nums
+	nums=""
+	echo -n "Enter numbers of files to $fktDesc separated by spaces and terminate input with ENTER followed by CTRL D > "
+	nums=$(< /dev/stdin)
 	if [[ -z $nums ]]; then
 		exit
 	fi
