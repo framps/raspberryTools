@@ -116,8 +116,10 @@ fi
 while :; do
 	nums=""
 	echo -n "Enter numbers of files to $fktDesc separated by spaces and terminate input with ENTER followed by CTRL D > "
+	set +e
 	#nums=$(< /dev/stdin)
 	nums=$(cat /dev/stdin)
+	set -e
 	if [[ -z $nums ]]; then
 		exit
 	fi
