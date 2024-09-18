@@ -10,10 +10,10 @@
 #
 #   There is no need to download this script. Just use following oneliner
 #
-#      curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh | bash -s -- -t
+#      curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh -o downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -t
 #         to download any script into a testdirectory without installing it in /usr/local/bin
 #   or
-#      curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh | bash -s -- -i
+#      curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh -o downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -i
 #         to download and install any script into /usr/local/bin
 #
 #######################################################################################################################
@@ -115,11 +115,7 @@ fi
 
 while :; do
 	nums=""
-	echo -n "Enter numbers of files to $fktDesc separated by spaces and terminate input with ENTER followed by CTRL D > "
-	set +e
-	#nums=$(< /dev/stdin)
-	nums=$(cat /dev/stdin)
-	set -e
+	read -p "Enter numbers of files to $fktDesc separated by spaces > " nums
 	if [[ -z $nums ]]; then
 		exit
 	fi
