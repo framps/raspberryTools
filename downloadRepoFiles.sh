@@ -12,7 +12,7 @@
 #
 #      curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh | bash -s -- -t
 #         to download any script into a testdirectory without installing it in /usr/local/bin
-#   or 
+#   or
 #      curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh | bash -s -- -i
 #         to download and install any script into /usr/local/bin
 #
@@ -111,12 +111,13 @@ done
 fktDesc="download into $TEST_DIR"
 if [[ "$fkt" == $INSTALL_OPTION ]]; then
 	fktDesc="install into $INSTALL_DIR"
-fi	
+fi
 
 while :; do
 	nums=""
 	echo -n "Enter numbers of files to $fktDesc separated by spaces and terminate input with ENTER followed by CTRL D > "
-	nums=$(< /dev/stdin)
+	#nums=$(< /dev/stdin)
+	nums=$(cat /dev/stdin)
 	if [[ -z $nums ]]; then
 		exit
 	fi
