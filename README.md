@@ -42,9 +42,136 @@ For sample outputs of the tools click the links.
 
 11. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
-12. [raspiHandleKernels.sh](https://github.com/framps/raspberryTools/blob/master/raspiHandleKernels.sh) - Delete and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
+12. [raspiHandleKernels.sh](#raspiHandleKernels.sh) - Uninstall and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
 
 13. [switchOS.sh](https://github.com/framps/raspberryTools/blob/master/switchOS.sh) - Switch the OS boot device if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
+
+## raspiHandleKernels.sh
+
+Display unused kernels
+```
+raspiHandleKernels.sh v0.2.4 (https://github.com/framps/raspberryTools)
+--- Following kernel is used
+linux-image-6.6.31+rpt-rpi-v8
+--- Following 3 kernels are not required and can be uninstalled to speed up system updates
+--- Note the kernel names are saved in /boot/raspiHandleKernels.krnl and thus can be reinstalled if hardware changes
+linux-image-6.6.31+rpt-rpi-2712
+linux-image-rpi-2712
+linux-image-rpi-v8
+--- Use option -e to uninstall 3 unused kernels
+```
+
+Uninstall unused kernels
+```
+./raspiHandleKernels.sh -e
+raspiHandleKernels.sh v0.2.4 (https://github.com/framps/raspberryTools)
+--- Following kernel is used
+linux-image-6.6.31+rpt-rpi-v8
+--- Following 3 kernels are not required and can be uninstalled to speed up system updates
+--- Note the kernel names are saved in /boot/raspiHandleKernels.krnl and thus can be reinstalled if hardware changes
+linux-image-6.6.31+rpt-rpi-2712
+linux-image-rpi-2712
+linux-image-rpi-v8
+--- Are you sure to uninstall all 3 unused kernels ? (y/N) y
+--- Do you have a backup ? (y/N) y
+--- Saving 3 unused kernel names in /boot/raspiHandleKernels.krnl
+--- Removing 3 unused kernels
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages will be REMOVED:
+  linux-image-6.6.31+rpt-rpi-2712 linux-image-rpi-2712 linux-image-rpi-v8
+0 upgraded, 0 newly installed, 3 to remove and 1 not upgraded.
+After this operation, 33.0 MB disk space will be freed.
+(Reading database ... 55838 files and directories currently installed.)
+Removing linux-image-rpi-2712 (1:6.6.31-1+rpt1) ...
+Removing linux-image-6.6.31+rpt-rpi-2712 (1:6.6.31-1+rpt1) ...
+/etc/kernel/postrm.d/initramfs-tools:
+update-initramfs: Deleting /boot/initrd.img-6.6.31+rpt-rpi-2712
+/etc/kernel/postrm.d/z50-raspi-firmware:
+removed '/boot/firmware/kernel_2712.img'
+removed '/boot/firmware/initramfs_2712'
+Removing linux-image-rpi-v8 (1:6.6.31-1+rpt1) ...
+
+```
+
+Display kernels which will be reinstalled
+```
+./raspiHandleKernels.sh
+raspiHandleKernels.sh v0.2.4 (https://github.com/framps/raspberryTools)
+--- Following 3 unused kernels can be reinstalled
+linux-image-6.6.31+rpt-rpi-2712
+linux-image-rpi-2712
+linux-image-rpi-v8
+--- Use option -e to reinstall 3 unused kernels
+```
+
+Reinstall unused kernels
+```
+./raspiHandleKernels.sh -e
+raspiHandleKernels.sh v0.2.4 (https://github.com/framps/raspberryTools)
+--- Following 3 unused kernels can be reinstalled
+linux-image-6.6.31+rpt-rpi-2712
+linux-image-rpi-2712
+linux-image-rpi-v8
+--- Are you sure to reinstall all 3 unused kernels ? (y/N) y
+--- Installing 3 unused kernels
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ySuggested packages:
+  linux-doc-6.6 debian-kernel-handbook
+The following NEW packages will be installed:
+  linux-image-6.6.31+rpt-rpi-2712
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 29.4 MB of archives.
+After this operation, 32.9 MB of additional disk space will be used.
+Get:1 http://archive.raspberrypi.com/debian bookworm/main arm64 linux-image-6.6.31+rpt-rpi-2712 arm64 1:6.6.31-1+rpt1 [29.4 MB]
+Fetched 29.4 MB in 3s (10.5 MB/s)                           
+Selecting previously unselected package linux-image-6.6.31+rpt-rpi-2712.
+(Reading database ... 53260 files and directories currently installed.)
+Preparing to unpack .../linux-image-6.6.31+rpt-rpi-2712_1%3a6.6.31-1+rpt1_arm64.deb ...
+Unpacking linux-image-6.6.31+rpt-rpi-2712 (1:6.6.31-1+rpt1) ...
+Setting up linux-image-6.6.31+rpt-rpi-2712 (1:6.6.31-1+rpt1) ...
+/etc/kernel/postinst.d/initramfs-tools:
+update-initramfs: Generating /boot/initrd.img-6.6.31+rpt-rpi-2712
+'/boot/initrd.img-6.6.31+rpt-rpi-2712' -> '/boot/firmware/initramfs_2712'
+/etc/kernel/postinst.d/z50-raspi-firmware:
+'/boot/vmlinuz-6.6.31+rpt-rpi-2712' -> '/boot/firmware/kernel_2712.img'
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  linux-image-rpi-2712
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 1,432 B of archives.
+After this operation, 13.3 kB of additional disk space will be used.
+Get:1 http://archive.raspberrypi.com/debian bookworm/main arm64 linux-image-rpi-2712 arm64 1:6.6.31-1+rpt1 [1,432 B]
+Fetched 1,432 B in 0s (8,335 B/s)                
+Selecting previously unselected package linux-image-rpi-2712.
+(Reading database ... 55832 files and directories currently installed.)
+Preparing to unpack .../linux-image-rpi-2712_1%3a6.6.31-1+rpt1_arm64.deb ...
+Unpacking linux-image-rpi-2712 (1:6.6.31-1+rpt1) ...
+Setting up linux-image-rpi-2712 (1:6.6.31-1+rpt1) ...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  linux-image-rpi-v8
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 1,428 B of archives.
+After this operation, 13.3 kB of additional disk space will be used.
+Get:1 http://archive.raspberrypi.com/debian bookworm/main arm64 linux-image-rpi-v8 arm64 1:6.6.31-1+rpt1 [1,428 B]
+Fetched 1,428 B in 0s (8,847 B/s)              
+Selecting previously unselected package linux-image-rpi-v8.
+(Reading database ... 55835 files and directories currently installed.)
+Preparing to unpack .../linux-image-rpi-v8_1%3a6.6.31-1+rpt1_arm64.deb ...
+Unpacking linux-image-rpi-v8 (1:6.6.31-1+rpt1) ...
+Setting up linux-image-rpi-v8 (1:6.6.31-1+rpt1) ...
+```
+
+
+
 
 ## findRaspis.sh
 
