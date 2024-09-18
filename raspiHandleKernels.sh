@@ -2,10 +2,10 @@
 
 #######################################################################################################################
 #
-# 	 This script deletes unused kernels on a Raspberry Pi running bookworm with option -u and
-#	 creates a file /boot/raspiHandleKernels.krnl in order to be able to reinstall the deleted kernels with option -i
+# 	 This script uninstalls unused kernels on a Raspberry Pi running bookworm with option -u and
+#	 creates a file /boot/raspiHandleKernels.krnl with the uninstalled kernels in order to be able to reinstall them again with option -i
 #
-#	 Use option -e to execute the updates on the system. Otherwise it's just a dry run.
+#	 Use option -e to update the system. Otherwise it's just a dry run.
 #
 #######################################################################################################################
 #
@@ -28,7 +28,7 @@
 
 set -eou pipefail
 
-readonly VERSION="v0.2.3"
+readonly VERSION="v0.2.4"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 readonly MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
@@ -36,17 +36,21 @@ readonly MYNAME=${MYSELF%.*}
 readonly DELETED_KERNELS_FILENAME="$MYNAME.krnl"
 
 function show_help() {
-	echo "$MYSELF $VERSION ($GITREPO)"
-	echo
-	echo "Check for unnecessary kernels for the existing Raspberry hardware."
-	echo "Optionally delete and save installed kernels for later reinstallation or reinstall the previously deleted kernels"
-	echo
-	echo "Usage: $MYSELF -i [-e] | -u [-e] | -h | -? | -v"
-	echo "-e: deactivate dry run mode and modify system"
-	echo "-i: reinstall kernels deleted with option -u"
-	echo "-u: uninstall any unused kernels"
-	echo "-h: display this help"
-	echo "-v: display version"
+	cat << EOH
+$MYSELF $VERSION ($GITREPO)
+
+Check for unnecessary kernels for the actual Raspberry hardware.
+Optionally uninstall and save installed kernels for later reinstallation to speed up system updates
+or
+reinstall the previously uninstalled kernels if the image is used on a different Raspberry hardware
+
+Usage: $MYSELF -i [-e] | -u [-e] | -h | -? | -v
+-e: deactivate dry run mode and modify system
+-i: reinstall kernels deleted with option -u
+-u: uninstall any unused kernels
+-h: display this help
+-v: display version
+EOH
 }
 
 function info() {
@@ -77,9 +81,11 @@ function do_uninstall() {
 
 	local unusedKernels="$(grep -v "$usedKernel" <<< "$availableKernels" | xargs -I {} echo "{}")"
 	if [[ -z "$unusedKernels" ]]; then
-		info "$usedKernel used only"
-		info "No unused kernels detected"
-		exit 1
+		info "$usedKernel installed only"
+		if [[ ! -e /boot/$DELETED_KERNELS_FILENAME ]]; then
+			info "/boot/$DELETED_KERNELS_FILENAME not found to reinstall unused kernels"
+			exit 1
+		fi
 	fi
 
 	local keptKernel="$(grep "$usedKernel" <<< "$availableKernels" | xargs -I {} echo "{}")"
@@ -88,24 +94,25 @@ function do_uninstall() {
 		exit 1
 	fi
 
-	info "Following kernel is used and will be kept"
+	info "Following kernel is used"
 	echo "$keptKernel"
 
 	local numUnusedKernels="$(wc -l <<< "$unusedKernels")"
 
-	info "Following $numUnusedKernels unused kernels will be deleted"
+	info "Following $numUnusedKernels kernels are not required and can be uninstalled to speed up system updates"
+	info "Note the kernel names are saved in /boot/$DELETED_KERNELS_FILENAME and thus can be reinstalled if hardware changes"
 	echo "$unusedKernels"
 
 	if (( $MODE_EXECUTE )); then
 
 		local answer
 
-		read -p "Are you sure to delete all $numUnusedKernels unused kernels ? (y/N) " answer
+		read -p "--- Are you sure to uninstall all $numUnusedKernels unused kernels ? (y/N) " answer
 		if ! yesNo "$answer"; then
 			exit 1
 		fi
 
-		read -p "Do you have a backup ? (y/N) " answer
+		read -p "--- Do you have a backup ? (y/N) " answer
 		if ! yesNo "$answer"; then
 			exit 1
 		fi
@@ -125,29 +132,32 @@ function do_uninstall() {
 		(( $? )) && { error "Failure removing kernels"; exit 42; }
 		set -e
 	else
-		info "Use option -ue to uninstall unused kernels"
+		info "Use option -e to uninstall $numUnusedKernels unused kernels"
 	fi
 }
 
 function do_install() {
 
 	if [[ ! -e /boot/$DELETED_KERNELS_FILENAME ]]; then
-		info "No unused kernels found"
-		exit 0
+		info "/boot/$DELETED_KERNELS_FILENAME not found to reinstall unused kernels"
+		exit 1
 	fi
 
 	local numUnusedKernels=$(wc -l /boot/$DELETED_KERNELS_FILENAME | cut -f 1 -d ' ')
 
+	info "Following $numUnusedKernels unused kernels can be reinstalled"
+	echo "$(</boot/$DELETED_KERNELS_FILENAME)"
+
 	if (( ! $MODE_EXECUTE )); then
-		info "Following $numUnusedKernels unused kernels will be installed"
-		while IFS= read -r line; do
-			echo "$line"
-		done < /boot/$DELETED_KERNELS_FILENAME
-		info "Use option -ie to install the unused kernels"
+		info "Use option -e to reinstall $numUnusedKernels unused kernels"
 	else
+		read -p "--- Are you sure to reinstall all $numUnusedKernels unused kernels ? (y/N) " answer
+		if ! yesNo "$answer"; then
+			exit 1
+		fi
+
 		local errorOccured=0
 		info "Installing $numUnusedKernels unused kernels"
-		echo "$(</boot/$DELETED_KERNELS_FILENAME)"
 		while IFS= read -r line; do
 			sudo apt -y install $line
 			set +e
@@ -157,54 +167,45 @@ function do_install() {
 		if (( ! errorOccured )); then
 			sudo rm /boot/$DELETED_KERNELS_FILENAME
 		else
-			error "Errors occured when installing kernels"
+			error "Errors occured when reinstalling kernels"
 		fi
 	fi
 }
 
 echo "$MYSELF $VERSION ($GITREPO)"
 
+MODE_INSTALL=1 # 0 for uninstall
+MODE_EXECUTE=0 # modify system
+
+MODE_INSTALL=$( [[ ! -e /boot/$DELETED_KERNELS_FILENAME ]]; echo $? )
+
+while getopts ":ehv?" opt; do
+
+	case "$opt" in
+		e) MODE_EXECUTE=1
+			;;
+		h|\?)
+			show_help
+			exit 0
+			;;
+		v) echo "$MYSELF $VERSION"
+			exit 0
+			;;
+		*) echo "Unknown option $opt"
+			show_help
+			exit 1
+			;;
+	esac
+
+done
+
 if ! check4Pi; then
 	error "No RaspberryPi detected"
 	exit 1
 fi
 
-MODE_INSTALL=0
-MODE_UNINSTALL=0
-MODE_EXECUTE=0
-
-if (( $# == 0 )); then
-	MODE_UNINSTALL=1
-else
-	while getopts ":ehiuv?" opt; do
-
-		case "$opt" in
-			e) MODE_EXECUTE=1
-				;;
-			h|\?)
-				show_help
-				exit 0
-				;;
-			i) MODE_INSTALL=1
-				;;
-			u) MODE_UNINSTALL=1
-				;;
-			v) echo "$MYSELF $VERSION"
-				exit 0
-				;;
-			*) echo "Unknown option $opt"
-				show_help
-				exit 1
-				;;
-		esac
-
-	done
-fi
-
 if (( $MODE_INSTALL )); then
 	do_install
-elif (( $MODE_UNINSTALL )); then
+else 
 	do_uninstall
-else
-	show_help
 fi
