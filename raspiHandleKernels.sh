@@ -5,7 +5,7 @@
 # 	 This script uninstalls unused kernels on a Raspberry Pi running bookworm with option -u and
 #	 creates a file /boot/raspiHandleKernels.krnl with the uninstalled kernels in order to be able to reinstall them again
 #
-#	 Unless option -e is not used there is no modification on the system done
+#	 Unless option -e is used there is no modification on the system done
 #
 #######################################################################################################################
 #
