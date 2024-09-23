@@ -70,14 +70,14 @@ function err() {
 
 function isSupportedSystem() {
 
-	local MODELPATH=/sys/firmware/devicetree/base/model
-	local RPI_ISSUE=/etc/rpi-issue
+    local MODELPATH=/sys/firmware/devicetree/base/model
+    local RPI_ISSUE=/etc/rpi-issue
 
-	[[ ! -e $MODELPATH ]] && return 1
-	! grep -q -i "raspberry" $MODELPATH && return 1
-	[[ ! -e $RPI_ISSUE ]] && return 1
-	
-	return 0
+    [[ ! -e $MODELPATH ]] && return 1
+    ! grep -q -i "raspberry" $MODELPATH && return 1
+    [[ ! -e $RPI_ISSUE ]] && return 1
+    
+    return 0
 }
 
 trap 'cleanup' SIGINT SIGTERM SIGHUP EXIT
@@ -198,7 +198,7 @@ and displayed only. No files are updated.
 
 Usage: $0 [-uv] device
 -u: Create backup of files and update the UUIDs, PARTUUIDs or LABELs in
-	/boot/cmdline.txt and /etc/fstab
+    /boot/cmdline.txt and /etc/fstab
 -v: Be verbose
 
 Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1
