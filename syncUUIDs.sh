@@ -188,20 +188,20 @@ function updateCmdline() { # bootType uuid newUUID
 
 function usage() {
 
-   cat <<- EOF
-   $MYSELF - $VERSION ($GITREPO)
+   cat << EOF
+$MYSELF - $VERSION ($GITREPO)
 
-    Synchronize UUIDs, PARTUUIDs or LABELs in /etc/fstab and /boot/cmdline.txt
-    with existing UUIDs, PARTUUIDs or LABELs of device partitions.
-    If no option is passed the used UUIDs, PARTUUIDs or LABELs are retrieved
-    and displayed only. No files are updated.
+Synchronize UUIDs, PARTUUIDs or LABELs in /etc/fstab and /boot/cmdline.txt
+with existing UUIDs, PARTUUIDs or LABELs of device partitions.
+If no option is passed the used UUIDs, PARTUUIDs or LABELs are retrieved
+and displayed only. No files are updated.
 
-    Usage: $0 [-uv] device
-    -u: Create backup of files and update the UUIDs, PARTUUIDs or LABELs in
-        /boot/cmdline.txt and /etc/fstab
-    -v: Be verbose
+Usage: $0 [-uv] device
+-u: Create backup of files and update the UUIDs, PARTUUIDs or LABELs in
+	/boot/cmdline.txt and /etc/fstab
+-v: Be verbose
 
-    Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1
+Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1
 EOF
 }
 
