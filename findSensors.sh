@@ -24,7 +24,7 @@
 
 set -euo pipefail
 
-VERSION=0.7
+VERSION=0.7.1
 GITREPO="https://github.com/framps/raspberryTools"
 
 MYSELF="$(basename "$0")"
@@ -50,19 +50,21 @@ fi
 
 # define defaults
 
+# See https://www.ipchecktool.com/tool/macfinder for MACs
+
 DEFAULT_SUBNETMASK="192.168.0.0/24"
-DEFAULT_MAC_REGEX="10:52:1C|24:62:AB|24:6f:28|24:A1:60|3C:61:05|3C:71:BF|48:3F:DA|A4:CF:12|BC:DD:C2|CC:50:E3|E0:98:06|E8:DB:84|F4:CF:A2|FC:F5:C4"
-INI_FILENAME=$HOME/.${MYNAME}
+DEFAULT_MAC_REGEX="10:52:1C|24:62:AB|24:6f:28|24:A1:60|3C:61:05|3C:71:BF|48:3F:DA|A4:CF:12|BC:DD:C2|CC:50:E3|E0:98:06|E8:DB:84|EC:64:C9|F4:CF:A2|FC:F5:C4"
+INI_FILENAME=/usr/local/etc/${MYNAME}.conf
 
 # help text
 
 if (( $# >= 1 )) && [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
 	cat << EOH
-	$MYSELF $VERSION
+	$MYSELF $VERSION ($GITREPO)
 Usage:
 	$MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for ESPs sorted by IPs
 	$MYSELF -n <subnetmask>       Scan subnet for ESPs
-	$MYSELF -s [i|m|h|d]	      Sort for IPs, Macs, Hostnames or description, Default: IP
+	$MYSELF -s [i|m|h|d]          Sort for IPs, Macs, Hostnames or description, Default: IP
 	$MYSELF -h | -? | --help      Show this help text
 
 Defaults:
@@ -153,7 +155,7 @@ if (( ${#macAddress[@]} > 0 )); then
 
 		if [[ -f "$INI_FILENAME" ]]; then
 			set +e
-			hostDescription="$(grep "${macAddress[$ip]}" "$INI_FILENAME")"
+			hostDescription="$(grep -i "${macAddress[$ip]}" "$INI_FILENAME")"
 			rc=$?
 			set -e
 			if (( ! rc )); then
