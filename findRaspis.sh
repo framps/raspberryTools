@@ -27,7 +27,7 @@
 
 set -euo pipefail
 
-VERSION=0.7
+VERSION=0.7.1
 GITREPO="https://github.com/framps/raspberryTools"
 
 MYSELF="$(basename "$0")"
@@ -37,13 +37,13 @@ S_OPTIONARGS="imhd"
 # check for required commands and required bash version
 
 if ! command -v nmap COMMAND &> /dev/null; then
-    echo "Missing required program nmap."
-    exit 255
+	echo "Missing required program nmap."
+	exit 255
 fi
 
 if ! command -v host COMMAND &> /dev/null; then
-    echo "Missing required program host."
-    exit 255
+	echo "Missing required program host."
+	exit 255
 fi
 
 if (( BASH_VERSINFO[0] < 4 )); then
@@ -53,10 +53,12 @@ fi
 
 # define defaults
 
+# See https://www.ipchecktool.com/tool/macfinder for MACs
+
 DEFAULT_SUBNETMASK="192.168.0.0/24"
 DEFAULT_MAC_REGEX="28:cd:c1|b8:27:eb|d8:3a:dd|dc:a6:32|e4:5f:01"
 # see https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
-INI_FILENAME=$HOME/.${MYNAME}
+INI_FILENAME=/usr/local/etc/${MYNAME}.conf
 
 # help text
 
@@ -158,7 +160,7 @@ if (( ${#macAddress[@]} > 0 )); then
 
         if [[ -f "$INI_FILENAME" ]]; then
             set +e
-            hostDescription="$(grep "${macAddress[$ip]}" "$INI_FILENAME")"
+            hostDescription="$(grep -i "${macAddress[$ip]}" "$INI_FILENAME")"
             rc=$?
             set -e
             if (( ! rc )); then
