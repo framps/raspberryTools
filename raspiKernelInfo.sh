@@ -8,7 +8,7 @@
 #
 ####################################################################################################
 #
-#    Copyright (c) 2023 framp at linux-tips-and-tricks dot de
+#    Copyright (c) 2023-2024 framp at linux-tips-and-tricks dot de
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #######################################################################################################################
 
 MYSELF=${0##*/}
-VERSION="0.1"
+VERSION="0.2"
 GITREPO="https://github.com/framps/raspberryTools"
 
 function usage() {
@@ -123,7 +123,10 @@ if [[ -f /etc/rpi-issue ]]; then
 	displayAndExec "cat /etc/rpi-issue ; echo -e \"($(extractStageDescription))\""  "ORIGINAL IMAGE"
 fi
 
-[[ -f /boot/config.txt ]] && displayAndExec "grep arm_64bit /boot/config.txt"  "64 BIT SET IN CONFIG?"
+configFile="/boot/config.txt"
+[[ -f /boot/firmware/config.txt ]] && configFile="/boot/firmware/config.txt"
+
+[[ -f $configFile ]] && displayAndExec "grep arm_64bit $configFile"  "64 BIT SET IN CONFIG?"
 displayAndExec "getconf LONG_BIT"  "SOFTWARE BITS"
 displayAndExec "dpkg --print-architecture"  "SOFTWARE ARCH"
 displayAndExec "uname -a"  "SYSTEM INFORMATION"
