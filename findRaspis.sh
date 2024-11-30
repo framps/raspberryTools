@@ -56,7 +56,7 @@ fi
 # See https://www.ipchecktool.com/tool/macfinder for MACs
 
 DEFAULT_SUBNETMASK="192.168.0.0/24"
-DEFAULT_MAC_REGEX="28:cd:c1|b8:27:eb|d8:3a:dd|dc:a6:32|e4:5f:01"
+DEFAULT_MAC_REGEX="28:cd:c1|2c:cf:67|b8:27:eb|d8:3a:dd|dc:a6:32|e4:5f:01"
 # see https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
 INI_FILENAME=/usr/local/etc/${MYNAME}.conf
 
