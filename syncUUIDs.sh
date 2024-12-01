@@ -220,7 +220,11 @@ function randomizePartitions() {
 	e2fsck -y -f $rootPartition
 	tune2fs -U "$newUUID" $rootPartition
 
+	sync
+	sleep 3
 	partprobe $device
+	sleep 3
+	udevadm settle
 }
 
 function usage() {
