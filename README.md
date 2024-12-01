@@ -38,7 +38,8 @@ For sample outputs of the tools click the links.
 
 9. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
 
-10. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs, PARTUUIDs or LABELs used on the device partitions. Option -u will synchronize the files. Useful when an image was cloned to another device and fails during boot.
+10. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs, PARTUUIDs or LABELs used on the device partitions. Option -u (update) will synchronize the files. Useful when an image was cloned to another device and fails during boot because of missing updates in /boot/cmdline.txt and /etc/fstab.
+With option -n (new) new UUIDs and PARTUUIDs are created on a device and /boot/cmdline.txt and /etc/fstab updated accordingly. Useful if somebody uses dd to clone a system to have the clone and the original in parallel mounted on a system.
 
 11. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
@@ -252,6 +253,33 @@ sudo syncUUIDs.sh /dev/mmcblk0
 --- Root PARTUUID 18aea473-02 already used in /dev/mmcblk0p1/cmdline.txt
 --- Boot PARTUUID 18aea473-01 already used in /dev/mmcblk0p2/etc/fstab
 --- Root PARTUUID 18aea473-02 already used in /dev/mmcblk0p2/etc/fstab
+```
+
+Generate new UUIDs and PARTUUIDs
+```
+sudo syncUUIDs.sh -n /dev/sda
+syncUUIDs.sh 0.3 (https://github.com/framps/raspberryTools)
+!!! Creating new UUID and PARTUUID on /dev/sda. Are you sure? (y|N) y
+--- Creating new PARTUUID 856f0aa3 on /dev/sda
+--- Creating new UUID D0D0-1BF8 on /dev/sda1
+4+0 records in
+4+0 records out
+4 bytes copied, 0.0035762 s, 1.1 kB/s
+--- Creating new UUID f685cb4a-b320-4d81-8dd4-a7e0943e0b7c on /dev/sda2
+e2fsck 1.47.0 (5-Feb-2023)
+Pass 1: Checking inodes, blocks, and sizes
+Pass 2: Checking directory structure
+Pass 3: Checking directory connectivity
+Pass 4: Checking reference counts
+Pass 5: Checking group summary information
+/dev/sda2: 61814/452480 files (0.1% non-contiguous), 505485/1808384 blocks
+tune2fs 1.47.0 (5-Feb-2023)
+Setting the UUID on this filesystem could take some time.
+Proceed anyway (or wait 5 seconds to proceed) ? (y,N) <proceeding>
+!!! PARTUUID cc5fd38e-02 should be updated to 856f0aa3-02 in /dev/sda1/cmdline.txt
+!!! PARTUUID cc5fd38e-01 should be updated to 856f0aa3-01 in /dev/sda2/etc/fstab 
+!!! PARTUUID cc5fd38e-02 should be updated to 856f0aa3-02 in /dev/sda2/etc/fstab 
+!!! Use option -u to update the incorrect UUIDs, PARTUUIDs or LABELs
 ```
 
 ## checkThrottled.sh
