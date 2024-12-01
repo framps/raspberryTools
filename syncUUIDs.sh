@@ -238,9 +238,9 @@ If no option is passed the used UUIDs, PARTUUIDs or LABELs are retrieved
 and displayed only. No files are updated.
 
 Create new UUIDs and PARTUUIDs on device partitions and update 
-/etc/fstab and /boot/cmdline.txt
+/etc/fstab and /boot/cmdline.txt. 
 
-Usage: $0 [-nuv] device
+Usage: $0 [-n | -u]? [-v]? device
 -n: Create new random UUIDs and PARTUUIDs and sync 
     /boot/cmdline.txt and /etc/fstab afterwards
 -u: Create backup of files and update the UUIDs, PARTUUIDs or LABELs in
