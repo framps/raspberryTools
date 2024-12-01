@@ -85,7 +85,7 @@ trap 'cleanup' SIGINT SIGTERM SIGHUP EXIT
 trap 'err' ERR
 
 function isMounted() {
-	grep -qs "$1" /proc/mounts
+    grep -qs "$1" /proc/mounts
 }
 
 function parseCmdline {
@@ -193,38 +193,38 @@ function updateCmdline() { # bootType uuid newUUID
 
 function randomizePartitions() {
 
-	local answer
-	
+    local answer
+    
     echo -n "!!! Creating new UUID and PARTUUID on $device. Are you sure? (y|N) "
     
-	read answer
+    read answer
 
-	answer=${answer:0:1}	# first char only
-	answer=${answer:-"n"}	# set default no
+    answer=${answer:0:1}    # first char only
+    answer=${answer:-"n"}   # set default no
 
-	if [[ $answer != "y"  ]]; then
-		exit 1
-	fi
-	
-	local newPARTUUID=$(od -A n -t x -N 4 /dev/urandom | tr -d " ")
+    if [[ $answer != "y"  ]]; then
+        exit 1
+    fi
+    
+    local newPARTUUID=$(od -A n -t x -N 4 /dev/urandom | tr -d " ")
     echo "--- Creating new PARTUUID $newPARTUUID on $device"
-	echo -ne "x\ni\n0x$newPARTUUID\nr\nw\nq\n" | fdisk "$device" &> /dev/null
-	
-	local newUUID="$(od -A n -t x -N 4 /dev/urandom | tr -d " " | sed -r 's/(.{4})/\1-/')"
-	newUUID="${newUUID^^*}"
-	echo "--- Creating new UUID $newUUID on $bootPartition"
-	printf "\x${newUUID:7:2}\x${newUUID:5:2}\x${newUUID:2:2}\x${newUUID:0:2}" | dd bs=1 seek=67 count=4 conv=notrunc of=$bootPartition # 39 for fat16, 67 for fat32
+    echo -ne "x\ni\n0x$newPARTUUID\nr\nw\nq\n" | fdisk "$device" &> /dev/null
+    
+    local newUUID="$(od -A n -t x -N 4 /dev/urandom | tr -d " " | sed -r 's/(.{4})/\1-/')"
+    newUUID="${newUUID^^*}"
+    echo "--- Creating new UUID $newUUID on $bootPartition"
+    printf "\x${newUUID:7:2}\x${newUUID:5:2}\x${newUUID:2:2}\x${newUUID:0:2}" | dd bs=1 seek=67 count=4 conv=notrunc of=$bootPartition # 39 for fat16, 67 for fat32
 
-	newUUID="$(</proc/sys/kernel/random/uuid)"
+    newUUID="$(</proc/sys/kernel/random/uuid)"
     echo "--- Creating new UUID $newUUID on $rootPartition"
-	e2fsck -y -f $rootPartition
-	tune2fs -U "$newUUID" $rootPartition
+    e2fsck -y -f $rootPartition
+    tune2fs -U "$newUUID" $rootPartition
 
-	sync
-	sleep 3
-	partprobe $device
-	sleep 3
-	udevadm settle
+    sync
+    sleep 3
+    partprobe $device
+    sleep 3
+    udevadm settle
 }
 
 function usage() {
@@ -242,7 +242,7 @@ Create new UUIDs and PARTUUIDs on device partitions and update
 
 Usage: $0 [-nuv] device
 -n: Create new random UUIDs and PARTUUIDs and sync 
-	/boot/cmdline.txt and /etc/fstab afterwards
+    /boot/cmdline.txt and /etc/fstab afterwards
 -u: Create backup of files and update the UUIDs, PARTUUIDs or LABELs in
     /boot/cmdline.txt and /etc/fstab
 -v: Be verbose
@@ -267,8 +267,8 @@ while getopts ":h :n :u :v" opt; do
         u) dryrun=0
            ;;
         n) randomize=1
-		   dryrun=0
-		   ;;
+           dryrun=0
+           ;;
         v) verbose=1
          ;;
      \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
@@ -335,15 +335,15 @@ if [[ ! -e $rootPartition ]]; then
 fi
 
 if (( randomize )); then
-	if isMounted $bootPartition; then
-		error "$bootPartition mounted. No update possible."
-		exit 1
-	fi
+    if isMounted $bootPartition; then
+        error "$bootPartition mounted. No update possible."
+        exit 1
+    fi
 
-	if isMounted $rootPartition; then
-		error "$rootPartition mounted. No update possible."
-		exit 1
-	fi
+    if isMounted $rootPartition; then
+        error "$rootPartition mounted. No update possible."
+        exit 1
+    fi
 fi
 
 if (( $verbose )); then
@@ -403,7 +403,7 @@ if (( $verbose )); then
 fi
 
 if (( randomize )); then
-	randomizePartitions
+    randomizePartitions
 fi
 
 actualCmdlineRootUUID="$(parseBLKID ${rootPartition} $cmdlineRootType | cut -d= -f2)"
