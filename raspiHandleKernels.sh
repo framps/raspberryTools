@@ -2,14 +2,12 @@
 
 #######################################################################################################################
 #
-#    This script uninstalls unused kernels on a Raspberry Pi running bookworm with option -u and
-#    creates a file /boot/raspiHandleKernels.krnl with the uninstalled kernels in order to be able to reinstall them again
-#
-#    Unless option -e is used there is no modification on the system done
+#    This script uninstalls unused kernels on a Raspberry Pi running bookworm with option -u to speed up apt updates and
+#    reinstalls the uninstalled kernels with option -r if the system should be run on a different Raspberry Pi HW
 #
 #######################################################################################################################
 #
-#    Copyright (c) 2023,2024 framp at linux-tips-and-tricks dot de
+#    Copyright (c) 2023-2025 framp at linux-tips-and-tricks dot de
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,28 +26,29 @@
 
 set -eou pipefail
 
-readonly VERSION="v0.2.4"
+readonly VERSION="v0.3.0"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 readonly MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 readonly MYNAME=${MYSELF%.*}
 readonly DELETED_KERNELS_FILENAME="$MYNAME.krnl"
+readonly VARLIBDIR="/var/lib/raspiHandleKernels"
+readonly VARLIB_DELETED_KERNELS_FILENAME="$VARLIBDIR/$MYNAME.krnl"
 
 function show_help() {
     cat << EOH
 $MYSELF $VERSION ($GITREPO)
 
-Check for unnecessary kernels for the actual Raspberry hardware.
-Optionally uninstall and save installed kernels for later reinstallation to speed up system updates
-or
-reinstall the previously uninstalled kernels if the image is used on a different Raspberry hardware
+* List unused and unnecessary kernels for the actual Raspberry hardware (-l)
+* Uninstall unused kernels to speed up system updates and save which kernels are uninstalled for later reininstallation
+* Reinstall the previously uninstalled kernels if the image should be used on different Raspberry hardware
 
-Usage: $MYSELF -i [-e] | -u [-e] | -h | -? | -v
--e: deactivate dry run mode and modify system
--i: reinstall kernels deleted with option -u
--u: uninstall any unused kernels
--h: display this help
--v: display version
+Usage: $MYSELF -u | r | -? | -h | -v
+	Default: List List kernels which can be uninstalled or reinstalled
+-r: Reinstall uninstalled kernels
+-u: Uninstall unused kernels
+-h: Display this help
+-v: Display version
 EOH
 }
 
@@ -82,8 +81,8 @@ function do_uninstall() {
     local unusedKernels="$(grep -v "$usedKernel" <<< "$availableKernels" | xargs -I {} echo "{}")"
     if [[ -z "$unusedKernels" ]]; then
         info "$usedKernel installed only"
-        if [[ ! -e /boot/$DELETED_KERNELS_FILENAME ]]; then
-            info "/boot/$DELETED_KERNELS_FILENAME not found to reinstall unused kernels"
+        if [[ ! -e $VARLIB_DELETED_KERNELS_FILENAME ]]; then
+            info "$VARLIB_DELETED_KERNELS_FILENAME not found to reinstall unused kernels"
             exit 1
         fi
     fi
@@ -99,57 +98,72 @@ function do_uninstall() {
 
     local numUnusedKernels="$(wc -l <<< "$unusedKernels")"
 
-    info "Following $numUnusedKernels kernels are not required and can be uninstalled to speed up system updates"
-    info "Note the kernel names are saved in /boot/$DELETED_KERNELS_FILENAME and thus can be reinstalled if hardware changes"
-    echo "$unusedKernels"
+	if [[ -z "$unusedKernels" ]]; then
+		info "No unused kernels found"
+	else
+		info "Following $numUnusedKernels kernels are not required and can be uninstalled to speed up system updates"
+		info "Note the kernel names are saved in $VARLIB_DELETED_KERNELS_FILENAME and can be reinstalled if hardware changes"
+		echo "$unusedKernels"
 
-    if (( $MODE_EXECUTE )); then
+		if (( $MODE_EXECUTE )); then
 
-        local answer
+			local answer
 
-        read -p "--- Are you sure to uninstall all $numUnusedKernels unused kernels ? (y/N) " answer
-        if ! yesNo "$answer"; then
-            exit 1
-        fi
+			read -p "--- Are you sure to uninstall all $numUnusedKernels unused kernels ? (y/N) " answer
+			if ! yesNo "$answer"; then
+				exit 1
+			fi
 
-        read -p "--- Do you have a backup ? (y/N) " answer
-        if ! yesNo "$answer"; then
-            exit 1
-        fi
+			read -p "--- Do you have a backup ? (y/N) " answer
+			if ! yesNo "$answer"; then
+				exit 1
+			fi
 
-        set +e
-        if [[ -e /boot/$DELETED_KERNELS_FILENAME ]]; then
-            sudo rm /boot/$DELETED_KERNELS_FILENAME
-            (( $? )) && { error "Failure deleting /boot/$DELETED_KERNELS_FILENAME"; exit 42; }
-        fi
+			set +e
+			if [[ ! -d $VARLIBDIR ]]; then
+				sudo mkdir $VARLIBDIR
+			fi
 
-        info "Saving $numUnusedKernels unused kernel names in /boot/$DELETED_KERNELS_FILENAME"
-        echo "$unusedKernels" >> $DELETED_KERNELS_FILENAME; sudo mv $DELETED_KERNELS_FILENAME /boot
-        (( $? )) && { error "Failure collecting kernels"; exit 42; }
+			readonly DELETED_KERNELS_TEMP=$(mktemp)
+			
+			if [[ -e $VARLIB_DELETED_KERNELS_FILENAME ]]; then
+				sudo cp $VARLIB_DELETED_KERNELS_FILENAME $DELETED_KERNELS_TEMP
+				(( $? )) && { error "Copying $VARLIB_DELETED_KERNELS_FILENAME"; exit 42; }
+			fi
 
-        info "Removing $numUnusedKernels unused kernels"
-        echo "$unusedKernels" | xargs sudo apt -y remove
-        (( $? )) && { error "Failure removing kernels"; exit 42; }
-        set -e
-    else
-        info "Use option -e to uninstall $numUnusedKernels unused kernels"
-    fi
+			info "Adding $numUnusedKernels unused kernel names in $VARLIB_DELETED_KERNELS_FILENAME"
+			echo "$unusedKernels" >> $DELETED_KERNELS_TEMP; 
+			(( $? )) && { error "Failure collecting kernels"; exit 42; }
+
+			sort $DELETED_KERNELS_TEMP | uniq | sudo tee $VARLIB_DELETED_KERNELS_FILENAME > /dev/null
+			(( $? )) && { error "Failure sorting kernels"; exit 42; }
+
+			rm $DELETED_KERNELS_TEMP &>/dev/null
+			
+			info "Removing $numUnusedKernels unused kernels"
+			echo "$unusedKernels" | xargs sudo apt -y remove
+			(( $? )) && { error "Failure removing kernels"; exit 42; }
+			set -e
+		else
+			info "Use option -u to uninstall $numUnusedKernels unused kernels"
+		fi
+	fi
 }
 
 function do_install() {
 
-    if [[ ! -e /boot/$DELETED_KERNELS_FILENAME ]]; then
-        info "/boot/$DELETED_KERNELS_FILENAME not found to reinstall unused kernels"
+    if [[ ! -e $VARLIB_DELETED_KERNELS_FILENAME ]]; then
+        info "$VARLIB_DELETED_KERNELS_FILENAME not found to reinstall unused kernels"
         exit 1
     fi
 
-    local numUnusedKernels=$(wc -l /boot/$DELETED_KERNELS_FILENAME | cut -f 1 -d ' ')
+    local numUnusedKernels=$(wc -l $VARLIB_DELETED_KERNELS_FILENAME | cut -f 1 -d ' ')
 
     info "Following $numUnusedKernels unused kernels can be reinstalled"
-    echo "$(</boot/$DELETED_KERNELS_FILENAME)"
+    echo "$(<$VARLIB_DELETED_KERNELS_FILENAME)"
 
     if (( ! $MODE_EXECUTE )); then
-        info "Use option -e to reinstall $numUnusedKernels unused kernels"
+        info "Use option -i to reinstall $numUnusedKernels unused kernels"
     else
         read -p "--- Are you sure to reinstall all $numUnusedKernels unused kernels ? (y/N) " answer
         if ! yesNo "$answer"; then
@@ -163,9 +177,17 @@ function do_install() {
             set +e
             (( errorOccured |= $? ))
             set -e
-        done < /boot/$DELETED_KERNELS_FILENAME
+            sudo apt-mark auto $line            
+            set +e
+            (( errorOccured |= $? ))
+            set -e
+        done < $VARLIB_DELETED_KERNELS_FILENAME
         if (( ! errorOccured )); then
-            sudo rm /boot/$DELETED_KERNELS_FILENAME
+			info "Deleting $VARLIB_DELETED_KERNELS_FILENAME"
+            sudo rm $VARLIB_DELETED_KERNELS_FILENAME
+			(( $? )) && { error "Failure removing $VARLIB_DELETED_KERNELS_FILENAME"; exit 42; }
+			sudo rmdir $VARLIBDIR
+			(( $? )) && { error "Failure removing $VARLIB"; exit 42; }			
         else
             error "Errors occured when reinstalling kernels"
         fi
@@ -177,13 +199,17 @@ echo "$MYSELF $VERSION ($GITREPO)"
 MODE_INSTALL=1 # 0 for uninstall
 MODE_EXECUTE=0 # modify system
 
-MODE_INSTALL=$( [[ ! -e /boot/$DELETED_KERNELS_FILENAME ]]; echo $? )
+MODE_INSTALL=$( [[ ! -e $VARLIB_DELETED_KERNELS_FILENAME ]]; echo $? )
 
-while getopts ":ehv?" opt; do
+while getopts ":uhrv?" opt; do
 
     case "$opt" in
-        e) MODE_EXECUTE=1
-            ;;
+        u) MODE_EXECUTE=1
+		   MODE_INSTALL=0
+			;;
+		r) MODE_EXECUTE=1
+		   MODE_INSTALL=1
+			;;
         h|\?)
             show_help
             exit 0
