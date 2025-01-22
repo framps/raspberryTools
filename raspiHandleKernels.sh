@@ -38,17 +38,31 @@ readonly MYNAME=${MYSELF%.*}
 readonly VARLIBDIR="/var/lib/raspiHandleKernels"
 readonly VARLIB_DELETED_KERNELS_FILENAME="$VARLIBDIR/$MYNAME.krnl"
 
+#shellcheck disable=SC2155
+# (warning): Declare and assign separately to avoid masking return values.
+readonly DELETED_KERNELS_TEMP=$(mktemp)
+
+declare -r PS4='|${LINENO}> \011${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+
 function err() {
+   set +e
    echo "??? Unexpected error occured"
    local i=0
    local FRAMES=${#BASH_LINENO[@]}
    for ((i=FRAMES-2; i>=0; i--)); do
-      echo '  File' \"${BASH_SOURCE[i+1]}\", line ${BASH_LINENO[i]}, in ${FUNCNAME[i+1]}
+      echo '  File' \""${BASH_SOURCE[i+1]}"\", line "${BASH_LINENO[i]}", in "${FUNCNAME[i+1]}"
       sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i+1]}"
    done
 }
 
+function cleanup() {
+	if [[ -f "$DELETED_KERNELS_TEMP" ]]; then
+		rm "$DELETED_KERNELS_TEMP" &>/dev/null
+	fi
+}	
+
 trap 'err' ERR
+trap 'cleanup' SIGINT SIGTERM SIGHUP EXIT
 
 function show_help() {
     cat << EOH
@@ -95,7 +109,9 @@ function do_uninstall() {
     availableKernels="$(dpkg --list | awk '/^ii[[:space:]]+linux-image/ { print $2 }')"
     usedKernel="$(uname -a | awk '{ print "linux-image-" $3 }')"
 
+	set +e
     unusedKernels="$(grep -v "$usedKernel" <<< "$availableKernels" | xargs -I {} echo "{}")"
+    set -e
     if [[ -z "$unusedKernels" ]]; then
         info "$usedKernel installed only"
         if [[ ! -e "$VARLIB_DELETED_KERNELS_FILENAME" ]]; then
@@ -106,11 +122,11 @@ function do_uninstall() {
 
 	set +e
     keptKernel="$(grep "$usedKernel" <<< "$availableKernels" | xargs -I {} echo "{}")"
+    set -e
     if [[ -z "$keptKernel" ]]; then
         error "No kernel will be kept"
         exit 1
     fi
-    set -e
 
     info "Following kernel is used"
     echo "$keptKernel"
@@ -138,14 +154,9 @@ function do_uninstall() {
 				exit 1
 			fi
 
-			set +e
 			if [[ ! -d "$VARLIBDIR" ]]; then
 				sudo mkdir "$VARLIBDIR"
 			fi
-
-			#shellcheck disable=SC2155
-			# (warning): Declare and assign separately to avoid masking return values.
-			readonly DELETED_KERNELS_TEMP=$(mktemp)
 			
 			if [[ -e "$VARLIB_DELETED_KERNELS_FILENAME" ]]; then
 				sudo cp "$VARLIB_DELETED_KERNELS_FILENAME" "$DELETED_KERNELS_TEMP"
@@ -166,11 +177,11 @@ function do_uninstall() {
 			info "Removing $numUnusedKernels unused kernels"
 			echo "$unusedKernels" | xargs sudo apt -y remove
 			(( $? )) && { error "Failure removing kernels"; exit 42; }
-			set -e
 		else
 			info "Use option -u to uninstall $numUnusedKernels unused kernels"
 		fi
 	fi
+	return 0
 }
 
 function do_install() {
@@ -217,6 +228,7 @@ function do_install() {
             error "Errors occured when reinstalling kernels"
         fi
     fi
+    return 0
 }
 
 echo "$MYSELF $VERSION ($GITREPO)"
