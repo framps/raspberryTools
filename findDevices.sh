@@ -1,14 +1,16 @@
 #!/bin/bash
 #######################################################################################################################
 #
-#   Find all existing Raspberries in local subnet
+#   Find all existing Raspberries or ESPs in local subnet
 #
 #   Search for mac addresses used by Raspberries which are defined on
 #   https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
+#   or ESPs
+#   https://udger.com/resources/mac-address-vendor-detail?name=espressif_inc
 #
 #######################################################################################################################
 #
-#    Copyright (c) 2021-2025 framp at linux-tips-and-tricks dot de
+#    Copyright (c) 2025 framp at linux-tips-and-tricks dot de
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,7 +29,7 @@
 
 set -euo pipefail
 
-VERSION=0.7.2
+VERSION=0.1.0
 GITREPO="https://github.com/framps/raspberryTools"
 
 MYSELF="$(basename "$0")"
@@ -55,61 +57,93 @@ fi
 
 # See https://www.ipchecktool.com/tool/macfinder for MACs
 
+readonly DEVICE_RASPBERRY="Raspberries"
+readonly DEVICE_ESP="ESPs"
+
 DEFAULT_SUBNETMASK="192.168.0.0/24"
-DEFAULT_MAC_REGEX="28:cd:c1|2c:cf:67|b8:27:eb|d8:3a:dd|dc:a6:32|e4:5f:01"
+DEFAULT_MAC_REGEX_RASPBERRIES="28:cd:c1|2c:cf:67|b8:27:eb|d8:3a:dd|dc:a6:32|e4:5f:01"
 # see https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
-INI_FILENAME=/usr/local/etc/${MYNAME}.conf
+DEFAULT_MAC_REGEX_ESPS="10:52:1C|24:62:AB|24:6f:28|24:A1:60|3C:61:05|3C:71:BF|48:3F:DA|A4:CF:12|BC:DD:C2|CC:50:E3|E0:98:06|E8:DB:84|EC:64:C9|F4:CF:A2|FC:F5:C4"
+# see https://udger.com/resources/mac-address-vendor-detail?name=espressif_inc
 
 # help text
 
-if (( $# >= 1 )) && [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
-    cat << EOH
+function usage() {
+	cat << EOH
 $MYSELF $VERSION ($GITREPO)
 
 Usage:
-    $MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for Raspberries sorted by IP
+    $MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for Raspberries or ESPs sorted by IP
     $MYSELF -n <subnetmask>       Scan subnet for Raspberries
+    $MYSELF -d [e|r]  	          Devices to search for, either Raspberries (r) or ESPs (e) (Default: Raspberries)
     $MYSELF -s [i|m|h|d]          Sort for IPs, Macs, Hostnames or description, Default: IP
-    $MYSELF -h | -? | --help      Show this help text
+    $MYSELF -h | -? | --help      Show this help text 
 
 Defaults:
     Subnetmask: $DEFAULT_SUBNETMASK
-    Mac regex:  $DEFAULT_MAC_REGEX
+    Mac regex for Raspberries: $DEFAULT_MAC_REGEX_RASPBERRIES
+    Initfilename for Raspberries: /usr/local/etc/${MYNAME}_raspberries.conf
+    Mac regex for ESPs: $DEFAULT_MAC_REGEX_ESPS
+    Initfilename for ESPs: /usr/local/etc/${MYNAME}_raspberries.conf
 
 Example:
     $MYSELF -n 192.168.179.0/24 -s m
 
-Init file $INI_FILENAME can be used to customize the mac address scan and descriptions.
+Init file can be used to customize the mac address scan and descriptions.
 First optional line can be the regex for the macs to scan. See default below for an example.
 All following lines can contain a mac and a description separated by a space to add a meaningful
 description to the system which owns this mac. Otherwise the hostname discovered will used as the description.
 
-Example file contents for $INI_FILENAME:
+Example file contents for init file:
     b8:27:eb|dc:a6:32|e4:5f:01
     b8:27:eb:b8:27:eb VPN Server
     b8:27:eb:b8:28:eb Web Server
 
 EOH
-    exit 0
-fi
+}
 
-set +e
-sortType="$(grep -o "\-s [$S_OPTIONARGS]" <<< "$@")"
-set -e
-[[ -z $sortType ]] && sortType="-s i"
+sortType=""
+device=""
+network=""
 
-set +e
-network="$(grep -E -o '\-n \S+' <<< "$@")"
-set -e
-if [[ -z $network ]]; then
-    network="$DEFAULT_SUBNETMASK"
+while getopts ":h :n: :d: :s:" opt; do
+   case "$opt" in
+        h) usage
+           exit 0
+           ;;
+        n) network=${OPTARG}
+           ;;
+        d) device=${OPTARG}
+           if [[ ! "$device" =~ [e|r] ]]; then
+				echo "Unknown parameter $OPTARG for option -d"
+				exit 1;
+			fi
+           ;;
+        s) sortType=${OPTARG}
+           if [[ ! "$sortType" =~ [i|m|h|d] ]]; then
+				echo "Unknown parameter $OPTARG for option -"
+				exit 1;
+			fi
+           ;;
+     \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
+     :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+     *  ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+    esac
+done
+
+: "${sortType:=i}"
+: "${network:=$DEFAULT_SUBNETMASK}"
+if [[ -z $device ]]; then
+	MY_MAC_REGEX="$DEFAULT_MAC_REGEX_RASPBERRIES"
+	INI_FILENAME=/usr/local/etc/${MYNAME}_raspberries.conf
+	DEVICES=$DEVICE_RASPBERRY
 else
-    network=$(cut -f2 -d" " <<< "$network")
+	MY_MAC_REGEX="$DEFAULT_MAC_REGEX_ESPS"
+	INI_FILENAME=/usr/local/etc/${MYNAME}_esps.conf
+	DEVICES=$DEVICE_ESP
 fi
 
 # read property file with mac regexes
-
-MY_MAC_REGEX="$DEFAULT_MAC_REGEX"
 
 if [[ -f "$INI_FILENAME" ]]; then
     MY_MAC_REGEX_FROM_INI="$(head -n 1 "$INI_FILENAME" | awk '{print $2}')"
@@ -124,7 +158,7 @@ MY_MAC_REGEX=" (${MY_MAC_REGEX})"
 declare -A macAddress=()
 
 echo "$MYSELF $VERSION ($GITREPO)"
-echo "Scanning subnet $network for Raspberries ..."
+echo "Scanning subnet $network for $DEVICES ..."
 
 # scan subnet for Raspberry macs
 
@@ -196,7 +230,7 @@ if (( ${#macAddress[@]} > 0 )); then
     done < <($sortCmd "$tmp")
 
 else
-    echo "No Raspberries found with mac regex $MY_MAC_REGEX"
+    echo "No $DEVICES found with mac regex $MY_MAC_REGEX"
 fi
 
 rm "$tmp"

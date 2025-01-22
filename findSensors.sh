@@ -24,7 +24,7 @@
 
 set -euo pipefail
 
-VERSION=0.7.1
+VERSION=0.7.2
 GITREPO="https://github.com/framps/raspberryTools"
 
 MYSELF="$(basename "$0")"
@@ -99,7 +99,7 @@ set -e
 if [[ -z $network ]]; then
 	network="$DEFAULT_SUBNETMASK"
 else
-	network=$(cut -f2 -d" " <<< $network)
+	network=$(cut -f2 -d" " <<< "$network")
 fi
 
 # read property file with mac regexes
@@ -137,7 +137,7 @@ if (( ${#macAddress[@]} > 0 )); then
 	maxHostnameLen=0
 	maxDescriptionLen=0
 
-	for ip in ${!macAddress[@]}; do
+	for ip in "${!macAddress[@]}"; do
 		set +e
 		h="$(host "$ip")"
 		rc=$?
@@ -145,6 +145,8 @@ if (( ${#macAddress[@]} > 0 )); then
 		host=""
 		if (( ! rc )); then
 			# 12.0.168.192.in-addr.arpa domain name pointer asterix.
+			#shellcheck disable=SC2034
+            #(warning): arpa appears unused. Verify use (or export if used externally).
 			read -r arpa dummy dummy dummy host rest <<< "$h"
 			host=${host::-1} # delete trailing "."
 		fi
@@ -170,7 +172,7 @@ if (( ${#macAddress[@]} > 0 )); then
 		(( maxHostnameLen < ${#host} )) && maxHostnameLen=${#host}
 		(( maxDescriptionLen < ${#hostDescription} )) && maxDescriptionLen=${#hostDescription}
 
-		printf "%s %s %s %s\n" "$ip" "${macAddress[$ip]}" "$host" "$hostDescription" >> $tmp
+		printf "%s %s %s %s\n" "$ip" "${macAddress[$ip]}" "$host" "$hostDescription" >> "$tmp"
 	done
 
 	printf "\n%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "IP address" "Mac address" "Hostname" "Description"	
@@ -186,10 +188,10 @@ if (( ${#macAddress[@]} > 0 )); then
 
 	while read -r ip mac host desc ; do
 		printf "%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "$ip" "$mac" "$host" "$desc"
-	done < <($sortCmd $tmp)
+	done < <($sortCmd "$tmp")
 
 else
 	echo "No ESPs found with mac regex $MY_MAC_REGEX"
 fi
 
-rm $tmp
+rm "$tmp"
