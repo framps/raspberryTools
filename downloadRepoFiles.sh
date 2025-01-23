@@ -18,7 +18,7 @@
 #
 #######################################################################################################################
 #
-#    Copyright (c) 2024 framp at linux-tips-and-tricks dot de
+#    Copyright (c) 2024-2025 framp at linux-tips-and-tricks dot de
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,12 +37,14 @@
 
 set -euo pipefail
 
-readonly VERSION="v0.1.3"
+readonly VERSION="v0.1.5"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 readonly GITAPI_RESTURL_TREES="https://api.github.com/repos/framps/raspberryTools/git/trees/master?recursive=1"
 readonly GIT_DOWNLOAD_PREFIX="https://raw.githubusercontent.com/framps/raspberryTools/master"
 readonly INSTALL_DIR="/usr/local/bin"
+#shellcheck disable=SC2155 
+# (warning): Declare and assign separately to avoid masking return values
 readonly TEST_DIR="$(pwd)/raspberryTools"
 readonly TEST_OPTION="-t"
 readonly INSTALL_OPTION="-i"
@@ -67,10 +69,10 @@ fi
 pwd=$PWD
 
 jsonFile=$(mktemp)
-trap "{ rm -f $jsonFile; }" SIGINT SIGTERM EXIT
+trap '{ rm -f $jsonFile; }' SIGINT SIGTERM EXIT
 
 if [[ ! $fkt =~ $TEST_OPTION|$INSTALL_OPTION ]]; then
-	echo "Unknown option "$fkt""
+	echo "Unknown option \"$fkt\""
 	exit 1
 fi
 
@@ -83,39 +85,41 @@ if ! which jq &>/dev/null; then
 	fi
 fi
 
-[[ ! -d $TEST_DIR ]] && mkdir $TEST_DIR
+[[ ! -d "$TEST_DIR" ]] && mkdir "$TEST_DIR"
 
-cd $TEST_DIR
+cd "$TEST_DIR"
 
 echo "--- Available raspberyTools ---"
 TOKEN=""															# Personal token to get better rate limits
 if [[ -n $TOKEN ]]; then
-	HTTP_CODE="$(curl -sq -w "%{http_code}" -o $jsonFile -H "Authorization: token $TOKEN" -s $GITAPI_RESTURL_TREES)"
+	HTTP_CODE="$(curl -sq -w "%{http_code}" -o "$jsonFile" -H "Authorization: token $TOKEN" -s "$GITAPI_RESTURL_TREES")"
 else
-	HTTP_CODE="$(curl -sq -w "%{http_code}" -o $jsonFile -s $GITAPI_RESTURL_TREES)"
+	HTTP_CODE="$(curl -sq -w "%{http_code}" -o "$jsonFile" -s "$GITAPI_RESTURL_TREES")"
 fi
 
 rc=$?
-(( $rc != 0 )) &&  { echo "??? Error retrieving repository contents from github. curl RC: $rc"; exit 1; }
+(( rc != 0 )) &&  { echo "??? Error retrieving repository contents from github. curl RC: $rc"; exit 1; }
 
-(( $HTTP_CODE != 200 )) && { echo "??? Error retrieving repository contents from github. HTTP response: $HTTP_CODE"; jq . $jsonFile; }
+(( HTTP_CODE != 200 )) && { echo "??? Error retrieving repository contents from github. HTTP response: $HTTP_CODE"; jq . "$jsonFile"; }
 
-files=( $(jq -r ".tree[].path" $jsonFile | egrep '\.sh' | grep -v $MYSELF) )
+#shellcheck disable=SC2207 
+# (warning): Prefer mapfile or read -a to split command output (or quote to avoid splitting).
+files=( $(jq -r ".tree[].path" "$jsonFile" | grep -E '\.sh' | grep -v "$MYSELF") )
 
 i=0
-for f in ${files[@]}; do
+for f in "${files[@]}"; do
 	echo "$i: $f"
 	(( i++ )) && true
 done
 
 fktDesc="download into $TEST_DIR"
-if [[ "$fkt" == $INSTALL_OPTION ]]; then
+if [[ "$fkt" == "$INSTALL_OPTION" ]]; then
 	fktDesc="install into $INSTALL_DIR"
 fi
 
 while :; do
 	nums=""
-	read -p "Enter numbers of files to $fktDesc separated by spaces > " nums
+	read -r -p "Enter numbers of files to $fktDesc separated by spaces > " nums
 	if [[ -z $nums ]]; then
 		exit
 	fi
@@ -131,38 +135,43 @@ if [[ -z $nums ]]; then
 fi
 
 for i in $nums; do
-	if (( $i < 0 || $i > ${#files[@]} )); then
+	if (( i < 0 || i > ${#files[@]} )); then
 		echo "Skipping invalid number $i"
 		continue
 	fi
 	echo "Downloading ${files[$i]} ..."
-	curl -s -o ${files[$i]} $GIT_DOWNLOAD_PREFIX/${files[$i]}
-	rc=$?
-	(( $rc != 0 )) && { echo "??? $LINENO: Error downloading ${files[$i]}. curl RC: $rc"; exit 1; }
-	chmod +x ${files[$i]}
-	(( $? != 0 )) && { echo "??? $LINENO: Error chmod"; exit 1; }
+	if ! curl -s -o "${files[$i]}" "$GIT_DOWNLOAD_PREFIX/${files[$i]}"; then
+		{ echo "??? $LINENO: Error downloading ${files[$i]}. curl RC: $rc"; exit 1; }
+	fi
+	if ! chmod +x "${files[$i]}"; then
+		{ echo "??? $LINENO: Error chmod"; exit 1; }
+	fi
 
-	if [[ "$fkt" == $INSTALL_OPTION ]]; then
+	if [[ "$fkt" == "$INSTALL_OPTION" ]]; then
 		echo "Installing ${files[$i]} into $INSTALL_DIR"
-		sudo chown root:root ${files[$i]}
-		(( $? != 0 )) && { echo "??? $LINENO: Error chown"; exit 1; }
-		sudo chmod 755 ${files[$i]}
-		(( $? != 0 )) && { echo "??? $LINENO: Error chmod"; exit 1; }
-		sudo mv ${files[$i]} $INSTALL_DIR
-		(( $? != 0 )) && { echo "??? $LINENO: Error mv"; exit 1; }
+		if ! chown root:root "${files[$i]}"; then
+			{ echo "??? $LINENO: Error chown"; exit 1; }
+		fi
+		if ! chmod 755 "${files[$i]}"; then
+			{ echo "??? $LINENO: Error chmod"; exit 1; }
+		fi
+		if ! sudo mv "${files[$i]}" "$INSTALL_DIR"; then
+			{ echo "??? $LINENO: Error mv"; exit 1; }
+		fi
 	fi
 done
 
-if [[ "$fkt" == $INSTALL_OPTION ]]; then
-	if [[ -d $TEST_DIR ]]; then
-		cd $TEST_DIR
-		if [[ -n $(ls $TEST_DIR) ]]; then
-			rm $TEST_DIR/*
+if [[ "$fkt" == "$INSTALL_OPTION" ]]; then
+	if [[ -d "$TEST_DIR" ]]; then
+		cd "$TEST_DIR"
+		if [[ -n $(ls "$TEST_DIR") ]]; then
+			rm "$TEST_DIR/*"
 		fi
-		cd $pwd
-		rmdir $TEST_DIR
+		cd "$pwd"
+		rmdir "$TEST_DIR"
 	fi
 else
-	echo "Now change into $TEST_DIR and test raspberryTools."
+	cd "$TEST_DIR"
+	echo "Now test raspberryTools."
 	echo "Don't forget the leading ./ for any command ;-)"
 fi

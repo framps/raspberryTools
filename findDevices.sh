@@ -84,7 +84,7 @@ $MYSELF $VERSION ($GITREPO)
 Usage:
     $MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for Raspberries or ESPs sorted by IP
     $MYSELF -n <subnetmask>       Scan subnet for Raspberries
-    $MYSELF -d [e|r]  	          Devices to search for, either Raspberries ($RASPBERRY) or ESPs ($ESP) (Default: $RASPBERRY)
+    $MYSELF -d [e|r]              Devices to search for, either Raspberries ($RASPBERRY) or ESPs ($ESP) (Default: $RASPBERRY)
     $MYSELF -s [i|m|h|d]          Sort for IPs, Macs, Hostnames or description, Default: IP
     $MYSELF -h | -? | --help      Show this help text 
 
@@ -115,8 +115,8 @@ EOH
 tmp=""
 
 function cleanup() {
-	if [[ -f $tmp ]]; then
-		rm $tmp &>/dev/null
+	if [[ -f "$tmp" ]]; then
+		rm "$tmp" &>/dev/null
 	fi
 }
 
@@ -125,7 +125,7 @@ function err() {
    local i=0
    local FRAMES=${#BASH_LINENO[@]}
    for ((i=FRAMES-2; i>=0; i--)); do
-      echo '  File' \"${BASH_SOURCE[i+1]}\", line ${BASH_LINENO[i]}, in ${FUNCNAME[i+1]}
+      echo '  File' \""${BASH_SOURCE[i+1]}\"", line ${BASH_LINENO[i]}, in "${FUNCNAME[i+1]}"
       sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i+1]}"
    done
    exit
@@ -204,6 +204,8 @@ if (( ${#macAddress[@]} > 0 )); then
     for ip in "${!macAddress[@]}"; do
 		host=""
 		if h="$(host "$ip")"; then
+			#shellcheck disable=SC2034
+			# (warning): arpa appears unused. Verify use (or export if used externally).
 			read -r arpa dummy dummy dummy host rest <<< "$h"
 			host=${host::-1} # delete trailing "."
 		else
