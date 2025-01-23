@@ -26,12 +26,14 @@
 
 DEBUG=0                       # if 1 just echo commands, if 0 execute commands
 
-(( $DEBUG )) && EXEC="echo"
+(( DEBUG )) && EXEC="echo"
 
 # retrieve router IP
 
 function getRouterIP() {
-   echo "$(/sbin/ip route show to 0/0 | /usr/bin/awk '{ print $3 }' | /usr/bin/head -1l)"
+	local routerIP
+	routerIP="$(/sbin/ip route show to 0/0 | /usr/bin/awk '{ print $3 }' | /usr/bin/head -1l)"
+	echo "$routerIP"
 }
 
 # restart network interface
@@ -64,7 +66,7 @@ function isValidIP() { # IP
 IP=$(getRouterIP)                            # retrieve router IP
 if isValidIP "$IP"; then                     # valid router IP found ?
                                              # yes
-   if ! /bin/ping -c2 $IP > /dev/null; then  # can router be pinged ?
+   if ! /bin/ping -c2 "$IP" > /dev/null; then  # can router be pinged ?
                                              # no
       netRestart                             # restart interface
       IP=$(getRouterIP)                      # retrieve router IP after restart
