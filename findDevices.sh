@@ -36,6 +36,8 @@ MYSELF="$(basename "$0")"
 MYNAME=${MYSELF%.*}
 S_OPTIONARGS="imhd"
 
+declare -r PS4='|${LINENO}> \011${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+
 # check for required commands and required bash version
 
 if ! command -v nmap COMMAND &> /dev/null; then
@@ -55,17 +57,24 @@ fi
 
 # define defaults
 
+readonly INI_FILENAME=/usr/local/etc/${MYNAME}.conf
+readonly DEFAULT_SUBNETMASK="192.168.0.0/24"
+readonly DEFAULT_DEVICE="r"
+readonly RASPBERRY="r"
+readonly ESP="e"
+
+declare -A DEVICE_NAME=(
+			[$RASPBERRY]="Raspberries"
+			[$ESP]="ESPs"
+			)
+
 # See https://www.ipchecktool.com/tool/macfinder for MACs
-
-readonly DEVICE_RASPBERRY="Raspberries"
-readonly DEVICE_ESP="ESPs"
-
-DEFAULT_SUBNETMASK="192.168.0.0/24"
-DEFAULT_MAC_REGEX_RASPBERRIES="28:cd:c1|2c:cf:67|b8:27:eb|d8:3a:dd|dc:a6:32|e4:5f:01"
 # see https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
-DEFAULT_MAC_REGEX_ESPS="10:52:1C|24:62:AB|24:6f:28|24:A1:60|3C:61:05|3C:71:BF|48:3F:DA|A4:CF:12|BC:DD:C2|CC:50:E3|E0:98:06|E8:DB:84|EC:64:C9|F4:CF:A2|FC:F5:C4"
 # see https://udger.com/resources/mac-address-vendor-detail?name=espressif_inc
-
+declare -A DEFAULT_MAC_REGEX=(
+				[$RASPBERRY]="28:cd:c1|2c:cf:67|b8:27:eb|d8:3a:dd|dc:a6:32|e4:5f:01"
+				[$ESP]="10:52:1C|24:62:AB|24:6f:28|24:A1:60|3C:61:05|3C:71:BF|48:3F:DA|A4:CF:12|BC:DD:C2|CC:50:E3|E0:98:06|E8:DB:84|EC:64:C9|F4:CF:A2|FC:F5:C4"
+				)
 # help text
 
 function usage() {
@@ -75,16 +84,15 @@ $MYSELF $VERSION ($GITREPO)
 Usage:
     $MYSELF                       Scan subnet $DEFAULT_SUBNETMASK for Raspberries or ESPs sorted by IP
     $MYSELF -n <subnetmask>       Scan subnet for Raspberries
-    $MYSELF -d [e|r]  	          Devices to search for, either Raspberries (r) or ESPs (e) (Default: Raspberries)
+    $MYSELF -d [e|r]  	          Devices to search for, either Raspberries ($RASPBERRY) or ESPs ($ESP) (Default: $RASPBERRY)
     $MYSELF -s [i|m|h|d]          Sort for IPs, Macs, Hostnames or description, Default: IP
     $MYSELF -h | -? | --help      Show this help text 
 
 Defaults:
     Subnetmask: $DEFAULT_SUBNETMASK
-    Mac regex for Raspberries: $DEFAULT_MAC_REGEX_RASPBERRIES
-    Initfilename for Raspberries: /usr/local/etc/${MYNAME}_raspberries.conf
-    Mac regex for ESPs: $DEFAULT_MAC_REGEX_ESPS
-    Initfilename for ESPs: /usr/local/etc/${MYNAME}_raspberries.conf
+    Mac regex for Raspberries: ${DEFAULT_MAC_REGEX[$RASPBERRY]}
+    Mac regex for ESPs: ${DEFAULT_MAC_REGEX[$ESP]}
+    Initfilename: /usr/local/etc/${MYNAME}.conf
 
 Example:
     $MYSELF -n 192.168.179.0/24 -s m
@@ -95,12 +103,36 @@ All following lines can contain a mac and a description separated by a space to 
 description to the system which owns this mac. Otherwise the hostname discovered will used as the description.
 
 Example file contents for init file:
-    b8:27:eb|dc:a6:32|e4:5f:01
-    b8:27:eb:b8:27:eb VPN Server
-    b8:27:eb:b8:28:eb Web Server
-
+    rm b8:27:eb|dc:a6:32|e4:5f:01
+    rd b8:27:eb:b8:27:eb VPN Server
+    rd b8:27:eb:b8:28:eb Web Server
+    em 10:52:1C|24:62:AB|24:6f:28
+    ed 10:52:1C:24:62:AB PiHole
+    ed 10:52:1C:24:62:AC Docker 
 EOH
 }
+
+tmp=""
+
+function cleanup() {
+	if [[ -f $tmp ]]; then
+		rm $tmp &>/dev/null
+	fi
+}
+
+function err() {
+   echo "??? Unexpected error occured"
+   local i=0
+   local FRAMES=${#BASH_LINENO[@]}
+   for ((i=FRAMES-2; i>=0; i--)); do
+      echo '  File' \"${BASH_SOURCE[i+1]}\", line ${BASH_LINENO[i]}, in ${FUNCNAME[i+1]}
+      sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i+1]}"
+   done
+   exit
+}
+
+trap 'cleanup' SIGINT SIGTERM SIGHUP EXIT
+trap 'err' ERR
 
 sortType=""
 device=""
@@ -133,23 +165,16 @@ done
 
 : "${sortType:=i}"
 : "${network:=$DEFAULT_SUBNETMASK}"
-if [[ -z $device ]]; then
-	MY_MAC_REGEX="$DEFAULT_MAC_REGEX_RASPBERRIES"
-	INI_FILENAME=/usr/local/etc/${MYNAME}_raspberries.conf
-	DEVICES=$DEVICE_RASPBERRY
-else
-	MY_MAC_REGEX="$DEFAULT_MAC_REGEX_ESPS"
-	INI_FILENAME=/usr/local/etc/${MYNAME}_esps.conf
-	DEVICES=$DEVICE_ESP
-fi
+: "${device:=$DEFAULT_DEVICE}"
+deviceName="${DEVICE_NAME[$device]}"
+MY_MAC_REGEX="${DEFAULT_MAC_REGEX[$device]}"
 
 # read property file with mac regexes
 
 if [[ -f "$INI_FILENAME" ]]; then
-    MY_MAC_REGEX_FROM_INI="$(head -n 1 "$INI_FILENAME" | awk '{print $2}')"
-    if [[ -z "$MY_MAC_REGEX_FROM_INI" ]]; then
-        MY_MAC_REGEX="$(head -n 1 "$INI_FILENAME")"
-    fi
+	if MY_MAC_REGEX_FROM_INI="$(grep -E "^${device}m" "$INI_FILENAME" | awk '{print $2}')"; then
+		MY_MAC_REGEX="$MY_MAC_REGEX_FROM_INI"		
+    fi    
 fi
 MY_MAC_REGEX=" (${MY_MAC_REGEX})"
 
@@ -158,7 +183,7 @@ MY_MAC_REGEX=" (${MY_MAC_REGEX})"
 declare -A macAddress=()
 
 echo "$MYSELF $VERSION ($GITREPO)"
-echo "Scanning subnet $network for $DEVICES ..."
+echo "Scanning subnet $network for $deviceName ..."
 
 # scan subnet for Raspberry macs
 
@@ -175,38 +200,26 @@ if (( ${#macAddress[@]} > 0 )); then
 
     maxHostnameLen=0
     maxDescriptionLen=0
-
+	
     for ip in "${!macAddress[@]}"; do
-        set +e
-        h="$(host "$ip")"
-        rc=$?
-        set -e
-        host=""
-        if (( ! rc )); then
-            # 12.0.168.192.in-addr.arpa domain name pointer asterix.
-            #shellcheck disable=SC2034
-            #(warning): arpa appears unused. Verify use (or export if used externally).
-            read -r arpa dummy dummy dummy host rest <<< "$h"
-            host=${host::-1} # delete trailing "."
-        fi
+		host=""
+		if h="$(host "$ip")"; then
+			read -r arpa dummy dummy dummy host rest <<< "$h"
+			host=${host::-1} # delete trailing "."
+		else
+			:
+		fi
+		if [[ -z "$host" ]]; then
+			host="Unknown"
+		fi
 
-        if [[ -z "$host" ]]; then
-            host="Unknown"
-        fi
-
-        if [[ -f "$INI_FILENAME" ]]; then
-            set +e
-            hostDescription="$(grep -i "${macAddress[$ip]}" "$INI_FILENAME")"
-            rc=$?
-            set -e
-            if (( ! rc )); then
-                hostDescription="$(cut -f 2- -d ' ' <<< "$hostDescription" | sed 's/^ *//; s/ *$//')"
-            else
-                hostDescription=""
-            fi
-        else
-            hostDescription="n/a"
-        fi
+		if [[ -f "$INI_FILENAME" ]]; then
+				if hostDescription="$(grep -E -i "^${device}d ${macAddress[$ip]}" "$INI_FILENAME")"; then
+					hostDescription="$(cut -f 3- -d ' ' <<< "$hostDescription" | sed 's/^ *//; s/ *$//')"
+				fi
+		fi
+		
+		: "${hostDescription:="n/a"}"
 
         (( maxHostnameLen < ${#host} )) && maxHostnameLen=${#host}
         (( maxDescriptionLen < ${#hostDescription} )) && maxDescriptionLen=${#hostDescription}
@@ -230,7 +243,5 @@ if (( ${#macAddress[@]} > 0 )); then
     done < <($sortCmd "$tmp")
 
 else
-    echo "No $DEVICES found with mac regex $MY_MAC_REGEX"
+    echo "No $deviceName found with mac regex $MY_MAC_REGEX"
 fi
-
-rm "$tmp"

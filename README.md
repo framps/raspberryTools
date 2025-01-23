@@ -32,20 +32,22 @@ For sample outputs of the tools click the links.
 
 6. [retrieveLifetimeWrites.sh](#retrievelifetimewritessh) - Either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
-7. [findRaspis.sh](#findraspissh) - Scan the local net for Raspberries and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname
+7. [findDevices.sh] - Scan the local net for Raspberries or ESPs and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname. This replaces deprecated findRaspis and Sensors. 
 
-8. [findSensors.sh](#findsensorssh) - Scan the local net for ESP sensors and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname
+8. [findRaspis.sh](#findraspissh) - Deprecated. Use findDevices.sh
 
-9. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
+9. [findSensors.sh](#findsensorssh) - Deprecated. Use findDevices.sh
 
-10. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs, PARTUUIDs or LABELs used on the device partitions. Option -u (update) will synchronize the files. Useful when an image was cloned to another device and fails during boot because of missing updates in /boot/cmdline.txt and /etc/fstab.
+10. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
+
+11. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs, PARTUUIDs or LABELs used on the device partitions. Option -u (update) will synchronize the files. Useful when an image was cloned to another device and fails during boot because of missing updates in /boot/cmdline.txt and /etc/fstab.
 With option -n (new) new UUIDs and PARTUUIDs are created on a device and /boot/cmdline.txt and /etc/fstab updated accordingly. Useful if somebody uses dd to clone a system to have the clone and the original in parallel mounted on a system.
 
-11. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
+12. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
-12. [raspiHandleKernels.sh](#raspiHandleKernels.sh) - Uninstall and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
+13. [raspiHandleKernels.sh](#raspiHandleKernels.sh) - Uninstall and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
 
-13. [switchOS.sh](https://github.com/framps/raspberryTools/blob/master/switchOS.sh) - Switch the OS boot device if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
+14. [switchOS.sh](https://github.com/framps/raspberryTools/blob/master/switchOS.sh) - Switch the OS boot device if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
 
 ## raspiHandleKernels.sh
 

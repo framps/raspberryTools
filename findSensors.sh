@@ -121,6 +121,8 @@ declare -A macAddress=()
 echo "$MYSELF $VERSION ($GITREPO)"
 echo "Scanning subnet $network for ESPs ..."
 
+echo "Note: $MYSELF is deprecated. Use findDevies instead"
+
 # scan subnet for ESP macs
 
 # 192.168.0.12             ether   dc:a6:32:8f:28:fd   C                     wlp3s0 -
