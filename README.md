@@ -50,7 +50,7 @@ With option -n (new) new UUIDs and PARTUUIDs are created on a device and /boot/c
 14. [switchOS.sh](https://github.com/framps/raspberryTools/blob/master/switchOS.sh) - Switch the OS boot device if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
 
 
-### finddevices.sh
+## finddevices.sh
 ```
 findDevices.sh 
 findDevices.sh 0.1.0 (https://github.com/framps/raspberryTools)
