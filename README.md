@@ -32,7 +32,7 @@ For sample outputs of the tools click the links.
 
 6. [retrieveLifetimeWrites.sh](#retrievelifetimewritessh) - Either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
-7. [findDevices.sh](#finddevices) - Scan the local net for Raspberries or ESPs and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname. This replaces deprecated findRaspis and Sensors. 
+7. [findDevices.sh](#finddevicessh) - Scan the local net for Raspberries or ESPs and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname. This replaces deprecated findRaspis and Sensors. 
 
 8. findRaspis.sh - Deprecated. Use findDevices.sh
 
@@ -50,10 +50,9 @@ With option -n (new) new UUIDs and PARTUUIDs are created on a device and /boot/c
 14. [switchOS.sh](https://github.com/framps/raspberryTools/blob/master/switchOS.sh) - Switch the OS boot device if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
 
 
-## finddevices.sh
+## findDevices.sh
 ```
-framp@obelix:~$ findDevices.sh
-findDevices.sh 0.1 (https://github.com/framps/raspberryTools)
+findDevices.sh 0.1.0 (https://github.com/framps/raspberryTools)
 Scanning subnet 192.168.0.0/24 for Raspberries ...
 
 IP address      Mac address       Hostname                                        Description     
