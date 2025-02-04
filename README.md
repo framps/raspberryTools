@@ -34,9 +34,9 @@ For sample outputs of the tools click the links.
 
 7. [findDevices.sh](#finddevices) - Scan the local net for Raspberries or ESPs and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname. This replaces deprecated findRaspis and Sensors. 
 
-8. [findRaspis.sh] - Deprecated. Use findDevices.sh
+8. findRaspis.sh - Deprecated. Use findDevices.sh
 
-9. [findSensors.sh] - Deprecated. Use findDevices.sh
+9. findSensors.sh - Deprecated. Use findDevices.sh
 
 10. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
 
