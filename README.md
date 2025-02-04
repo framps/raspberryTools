@@ -32,7 +32,7 @@ For sample outputs of the tools click the links.
 
 6. [retrieveLifetimeWrites.sh](#retrievelifetimewritessh) - Either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
-7. [findDevices.sh](#finddevices) - Scan the local net for Raspberries or ESPs and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname. This replaces deprecated findRaspis and Sensors. 
+7. [findDevices.sh](#finddevicessh) - Scan the local net for Raspberries or ESPs and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname. This replaces deprecated findRaspis and Sensors. 
 
 8. findRaspis.sh - Deprecated. Use findDevices.sh
 
