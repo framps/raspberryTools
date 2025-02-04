@@ -52,8 +52,8 @@ With option -n (new) new UUIDs and PARTUUIDs are created on a device and /boot/c
 
 ## finddevices.sh
 ```
-findDevices.sh 
-findDevices.sh 0.1.0 (https://github.com/framps/raspberryTools)
+framp@obelix:~$ findDevices.sh
+findDevices.sh 0.1 (https://github.com/framps/raspberryTools)
 Scanning subnet 192.168.0.0/24 for Raspberries ...
 
 IP address      Mac address       Hostname                                        Description     

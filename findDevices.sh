@@ -29,7 +29,7 @@
 
 set -euo pipefail
 
-VERSION=0.1.0
+VERSION=0.1
 GITREPO="https://github.com/framps/raspberryTools"
 
 MYSELF="$(basename "$0")"
