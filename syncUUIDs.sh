@@ -6,7 +6,7 @@
 #   with the actual UUIDs/PARTUUIDs/LABELs of the partitions. Useful if a cloned RaspbianOS fails to boot because
 #   of UUID/PARTUUID/LABEL mismatch.
 #
-#   Copyright (C) 2022-2024 framp at linux-tips-and-tricks dot de
+#   Copyright (C) 2022-2025 framp at linux-tips-and-tricks dot de
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 set -euo pipefail
 
-readonly VERSION="0.3"
+readonly VERSION="0.3.1"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 readonly MYSELF=$(basename $0)
 readonly MYNAME=${MYSELF##*/}
@@ -71,13 +71,18 @@ function err() {
 
 function isSupportedSystem() {
 
-    local MODELPATH=/sys/firmware/devicetree/base/model
-    local RPI_ISSUE=/etc/rpi-issue
+    if ! mount $rootPartition $MOUNTPOINT; then
+        error "Unable to mount ${rootPartition}"
+    fi
 
-    [[ ! -e $MODELPATH ]] && return 1
-    ! grep -q -i "raspberry" $MODELPATH && return 1
-    [[ ! -e $RPI_ISSUE ]] && return 1
-    
+    local RPI_ISSUE=$MOUNTPOINT/etc/rpi-issue
+
+    if [[ ! -e $RPI_ISSUE ]]; then
+        umount $rootPartition
+        return 1
+    fi
+
+    umount $rootPartition
     return 0
 }
 
@@ -194,9 +199,9 @@ function updateCmdline() { # bootType uuid newUUID
 function randomizePartitions() {
 
     local answer
-    
+
     echo -n "!!! Creating new UUID and PARTUUID on $device. Are you sure? (y|N) "
-    
+
     read answer
 
     answer=${answer:0:1}    # first char only
@@ -205,11 +210,11 @@ function randomizePartitions() {
     if [[ $answer != "y"  ]]; then
         exit 1
     fi
-    
+
     local newPARTUUID=$(od -A n -t x -N 4 /dev/urandom | tr -d " ")
     echo "--- Creating new PARTUUID $newPARTUUID on $device"
     echo -ne "x\ni\n0x$newPARTUUID\nr\nw\nq\n" | fdisk "$device" &> /dev/null
-    
+
     local newUUID="$(od -A n -t x -N 4 /dev/urandom | tr -d " " | sed -r 's/(.{4})/\1-/')"
     newUUID="${newUUID^^*}"
     echo "--- Creating new UUID $newUUID on $bootPartition"
@@ -237,11 +242,11 @@ with existing UUIDs, PARTUUIDs or LABELs of device partitions.
 If no option is passed the used UUIDs, PARTUUIDs or LABELs are retrieved
 and displayed only. No files are updated.
 
-Create new UUIDs and PARTUUIDs on device partitions and update 
-/etc/fstab and /boot/cmdline.txt. 
+Create new UUIDs and PARTUUIDs on device partitions and update
+/etc/fstab and /boot/cmdline.txt.
 
 Usage: $0 [-n | -u]? [-v]? device
--n: Create new random UUIDs and PARTUUIDs and sync 
+-n: Create new random UUIDs and PARTUUIDs and sync
     /boot/cmdline.txt and /etc/fstab afterwards
 -u: Create backup of files and update the UUIDs, PARTUUIDs or LABELs in
     /boot/cmdline.txt and /etc/fstab
@@ -312,7 +317,7 @@ esac
 if ! isSupportedSystem; then
     error "$MYSELF supports Raspberries running RasbianOS only"
     exit 1
-fi    
+fi
 
 if [[ ! -e $device ]]; then
     error "$device does not exist"
