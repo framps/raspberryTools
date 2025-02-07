@@ -55,8 +55,8 @@ function cleanup() {
    local rc="$1"
    umount "$MOUNTPOINT_BOOT" &>/dev/null || true
    umount "$MOUNTPOINT_ROOT" &>/dev/null || true
-   rmdir "$MOUNTPOINT_BOOT" || true
-   rmdir "$MOUNTPOINT_ROOT" || true
+   rmdir "$MOUNTPOINT_BOOT" &>/dev/null || true
+   rmdir "$MOUNTPOINT_ROOT" &>/dev/null || true
    if (( $rc != 0 )); then
 	   if [[ -e "$LOG_FILE" ]]; then
 		  error "Error log"
@@ -82,7 +82,8 @@ function note() {
 }
 
 function err() {
-   echo "??? Unexpected error occured"
+   local rc="$1"
+   echo "??? Unexpected error occured with RC $rc"
    local i=0
    local FRAMES=${#BASH_LINENO[@]}
    for ((i=FRAMES-2; i>=0; i--)); do
@@ -103,7 +104,7 @@ function isSupportedSystem() {
 }
 
 trap 'cleanup $?' SIGINT SIGTERM SIGHUP EXIT
-trap 'err' ERR
+trap 'err $?' ERR
 
 function isMounted() {
     grep -qs "$1" /proc/mounts
