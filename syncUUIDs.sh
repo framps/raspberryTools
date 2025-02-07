@@ -25,19 +25,24 @@
 
 set -euo pipefail
 
-readonly VERSION="0.3.1"
+readonly VERSION="0.3.2"
 readonly GITREPO="https://github.com/framps/raspberryTools"
-readonly MYSELF=$(basename $0)
+#shellcheck disable=SC2155
+#(warning): Declare and assign separately to avoid masking return values.
+readonly MYSELF="$(basename $0)"
 readonly MYNAME=${MYSELF##*/}
 
 readonly CMDLINE="cmdline.txt"
 readonly FSTAB="etc/fstab"
-readonly MOUNTPOINT="/mnt"
+readonly MOUNTPOINT_BOOT="/mnt/boot"
+readonly MOUNTPOINT_ROOT="/mnt/root"
 readonly BOOT="/boot"
 readonly BOOT_FIRMWARE="/boot/firmware"
 readonly ROOT="/"
 readonly ROOT_TARGET="root="
 readonly LOG_FILE="$MYNAME.log"
+
+declare -r PS4='|${LINENO}> \011${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 dryrun=1                # default, enable update with option -u
 verbose=0
@@ -47,16 +52,33 @@ mismatchDetected=0
 fstabSaved=0
 
 function cleanup() {
-   umount $MOUNTPOINT &>/dev/null || true
-   if [[ -e $LOG_FILE ]]; then
-      cat $LOG_FILE
-      rm $LOG_FILE || true
+   local rc="$1"
+   umount "$MOUNTPOINT_BOOT" &>/dev/null || true
+   umount "$MOUNTPOINT_ROOT" &>/dev/null || true
+   rmdir "$MOUNTPOINT_BOOT" || true
+   rmdir "$MOUNTPOINT_ROOT" || true
+   if (( $rc != 0 )); then
+	   if [[ -e "$LOG_FILE" ]]; then
+		  error "Error log"
+          cat "$LOG_FILE"
+		  rm "$LOG_FILE" &>/dev/null || true
+       fi
+   else
+       rm "$LOG_FILE" &>/dev/null || true
    fi
 }
 
 function error() {
-   echo "??? $1"
+   echo "??? $*"
    exit 1
+}
+
+function info() {
+   echo "--- $*"
+}
+
+function note() {
+   echo "!!! $*"
 }
 
 function err() {
@@ -71,22 +93,16 @@ function err() {
 
 function isSupportedSystem() {
 
-    if ! mount $rootPartition $MOUNTPOINT; then
-        error "Unable to mount ${rootPartition}"
-    fi
+    local RPI_ISSUE=$MOUNTPOINT_ROOT/etc/rpi-issue
 
-    local RPI_ISSUE=$MOUNTPOINT/etc/rpi-issue
-
-    if [[ ! -e $RPI_ISSUE ]]; then
-        umount $rootPartition
+    if [[ ! -e "$RPI_ISSUE" ]]; then
         return 1
     fi
 
-    umount $rootPartition
     return 0
 }
 
-trap 'cleanup' SIGINT SIGTERM SIGHUP EXIT
+trap 'cleanup $?' SIGINT SIGTERM SIGHUP EXIT
 trap 'err' ERR
 
 function isMounted() {
@@ -95,14 +111,13 @@ function isMounted() {
 
 function parseCmdline {
 
-    mount ${bootPartition} $MOUNTPOINT 2>/dev/null
-
-    if [[ ! -e ${MOUNTPOINT}/${CMDLINE} ]]; then
-        error "Unable to find ${MOUNTPOINT}/${CMDLINE}"
+    if [[ ! -e ${MOUNTPOINT_BOOT}/${CMDLINE} ]]; then
+        error "Unable to find ${MOUNTPOINT_BOOT}/${CMDLINE}"
     fi
 
-    local rootTarget=$(grep -Eo "${ROOT_TARGET}\S+=\S+" ${MOUNTPOINT}/${CMDLINE} | sed -E "s/${ROOT_TARGET}//")
-    umount $MOUNTPOINT 2>/dev/null
+	#shellcheck disable=SC2155
+	#(warning): Declare and assign separately to avoid masking return values.
+    local rootTarget=$(grep -Eo "${ROOT_TARGET}\S+=\S+" ${MOUNTPOINT_BOOT}/${CMDLINE} | sed -E "s/${ROOT_TARGET}//")
 
     if [[ -z $rootTarget ]]; then
       error "Parsing of ${CMDLINE} for '${ROOT_TARGET}' failed"
@@ -115,24 +130,22 @@ function parseFstab {
     local tgt mnt
     local bootTgt="" rootTgt=""
 
-    mount $rootPartition $MOUNTPOINT 2>/dev/null
-
-    if [[ ! -e ${MOUNTPOINT}/${FSTAB} ]]; then
-        error "Unable to find ${MOUNTPOINT}/${CMDLINE}"
+    if [[ ! -e ${MOUNTPOINT_ROOT}/${FSTAB} ]]; then
+        error "Unable to find ${MOUNTPOINT_ROOT}/${CMDLINE}"
     fi
 
+	#shellcheck disable=SC2034
+	#(warning): r appears unused. Verify use (or export if used externally).
     while read tgt mnt r; do
         case $mnt in
-            $BOOT | $BOOT_FIRMWARE)
+            "$BOOT" | "$BOOT_FIRMWARE")
                 bootTgt=$tgt
                 ;;
-            $ROOT)
+            "$ROOT")
                 rootTgt=$tgt
                 ;;
         esac
-    done <${MOUNTPOINT}/${FSTAB}
-
-    umount $MOUNTPOINT 2>/dev/null
+    done <"${MOUNTPOINT_ROOT}/${FSTAB}"
 
     if [[ -z $bootTgt ]]; then
       error "Parsing of /${FSTAB} for '$BOOT' or '$BOOT_FIRMWARE' failed"
@@ -146,6 +159,8 @@ function parseFstab {
 }
 
 function parseBLKID {   # device uuid/poartuuid/label
+	#shellcheck disable=SC2155
+	#(warning): Declare and assign separately to avoid masking return values.
     local blkid="$(blkid $1 -o udev | grep "ID_FS_${2}=")"
     if [[ -z $blkid ]]; then
       error "Parsing of blkid $1 for filesystem type $2 failed"
@@ -156,44 +171,39 @@ function parseBLKID {   # device uuid/poartuuid/label
 function updateFstab() { # bootType uuid newUUID
 
     if (( $dryrun )); then
-        echo "!!! $1 $2 should be updated to $3 in $rootPartition/$FSTAB "
+        note "$1 $2 should be updated to $3 in $rootPartition/$FSTAB "
         return
     fi
 
-    mount $rootPartition $MOUNTPOINT 2>/dev/null
-
     if (( ! fstabSaved )); then
-        echo "--- Creating fstab backup /${FSTAB}.bak on $rootPartition"
-        cp ${MOUNTPOINT}/${FSTAB} ${MOUNTPOINT}/${FSTAB}.bak
+        info "Creating fstab backup /${FSTAB}.bak on $rootPartition"
+        cp ${MOUNTPOINT_ROOT}/${FSTAB} ${MOUNTPOINT_ROOT}/${FSTAB}.bak
         fstabSaved=1
     fi
 
-    echo "--- Updating $1 $2 to $3 in $rootPartition/$FSTAB"
+    info "Updating $1 $2 to $3 in $rootPartition/$FSTAB"
 
-    if ! sed -i "s/^$1=$2/$1=$3/" ${MOUNTPOINT}/${FSTAB}; then
-        error "??? Unable to update $rootPartition/$FSTAB"
+    if ! sed -i "s/^$1=$2/$1=$3/" ${MOUNTPOINT_ROOT}/${FSTAB}; then
+        error "Unable to update $rootPartition/$FSTAB"
     fi
-    umount $MOUNTPOINT 2>/dev/null
 }
 
 function updateCmdline() { # bootType uuid newUUID
 
     if (( $dryrun )); then
-        echo "!!! $1 $2 should be updated to $3 in $bootPartition/${CMDLINE}"
+        note "$1 $2 should be updated to $3 in $bootPartition/${CMDLINE}"
         return
     fi
 
-    echo "--- Creating cmdline backup /${CMDLINE}.bak on $bootPartition"
+    info "Creating cmdline backup /${CMDLINE}.bak on $bootPartition"
 
-    mount $bootPartition $MOUNTPOINT 2>/dev/null
-    cp ${MOUNTPOINT}/${CMDLINE} ${MOUNTPOINT}/${CMDLINE}.bak
+    cp ${MOUNTPOINT_BOOT}/${CMDLINE} ${MOUNTPOINT_BOOT}/${CMDLINE}.bak
 
-    echo "--- Updating $1 $2 to $3 in $bootPartition/${CMDLINE}"
+    info "Updating $1 $2 to $3 in $bootPartition/${CMDLINE}"
 
-    if ! sed -i  --follow-symlinks "s/$1=$2/$1=$3/" ${MOUNTPOINT}/${CMDLINE}; then
-        error "??? Unable to update $bootPartition/$CMDLINE"
+    if ! sed -i  --follow-symlinks "s/$1=$2/$1=$3/" ${MOUNTPOINT_BOOT}/${CMDLINE}; then
+        error "Unable to update $bootPartition/$CMDLINE"
     fi
-    umount $MOUNTPOINT 2>/dev/null
 }
 
 function randomizePartitions() {
@@ -211,19 +221,29 @@ function randomizePartitions() {
         exit 1
     fi
 
+	#shellcheck disable=SC2155
+	#(warning): Declare and assign separately to avoid masking return values.
     local newPARTUUID=$(od -A n -t x -N 4 /dev/urandom | tr -d " ")
-    echo "--- Creating new PARTUUID $newPARTUUID on $device"
-    echo -ne "x\ni\n0x$newPARTUUID\nr\nw\nq\n" | fdisk "$device" &> /dev/null
+    info "Creating new PARTUUID $newPARTUUID on $device"
+    echo -ne "x\ni\n0x$newPARTUUID\nr\nw\nq\n" | fdisk "$device" &>>$LOG_FILE
 
+	#shellcheck disable=SC2155
+	#(warning): Declare and assign separately to avoid masking return values.
     local newUUID="$(od -A n -t x -N 4 /dev/urandom | tr -d " " | sed -r 's/(.{4})/\1-/')"
     newUUID="${newUUID^^*}"
-    echo "--- Creating new UUID $newUUID on $bootPartition"
-    printf "\x${newUUID:7:2}\x${newUUID:5:2}\x${newUUID:2:2}\x${newUUID:0:2}" | dd bs=1 seek=67 count=4 conv=notrunc of=$bootPartition # 39 for fat16, 67 for fat32
+    info "Creating new UUID $newUUID on $bootPartition"
+    printf "\x${newUUID:7:2}\x${newUUID:5:2}\x${newUUID:2:2}\x${newUUID:0:2}" | dd bs=1 seek=67 count=4 conv=notrunc of=$bootPartition &>>$LOG_FILE
 
     newUUID="$(</proc/sys/kernel/random/uuid)"
-    echo "--- Creating new UUID $newUUID on $rootPartition"
-    e2fsck -y -f $rootPartition
-    tune2fs -U "$newUUID" $rootPartition
+    info "Creating new UUID $newUUID on $rootPartition"
+    if ! umount $MOUNTPOINT_ROOT; then
+		error "Unable to umount $MOUNTPOINT_ROOT"
+	fi
+    e2fsck -y -f $rootPartition &>>$LOG_FILE
+    tune2fs -U "$newUUID" $rootPartition &>>$LOG_FILE
+    if ! mount $rootPartition $MOUNTPOINT_ROOT; then
+		error "Unable to mount $rootPartition"
+	fi
 
     sync
     sleep 3
@@ -264,6 +284,8 @@ EOF
 
 echo "$MYSELF $VERSION ($GITREPO)"
 
+rm $LOG_FILE &>/dev/null || true
+
 while getopts ":h :n :u :v" opt; do
    case "$opt" in
         h) usage
@@ -290,7 +312,7 @@ if [[ -z $1 ]]; then
 fi
 
 if (( $UID != 0 )); then
-      echo "--- Please call $MYSELF as root or with sudo"
+      info "Please invoke $MYSELF as root or with sudo"
       exit 1
 fi
 
@@ -313,11 +335,6 @@ case $device in
         echo "Device examples: /dev/sda, /dev/mmcblk0, /dev/nvme0n1"
         exit 1
 esac
-
-if ! isSupportedSystem; then
-    error "$MYSELF supports Raspberries running RasbianOS only"
-    exit 1
-fi
 
 if [[ ! -e $device ]]; then
     error "$device does not exist"
@@ -352,24 +369,34 @@ if (( randomize )); then
 fi
 
 if (( $verbose )); then
-   echo "... bootPartition: $bootPartition"
-   echo "... rootPartition: $rootPartition"
+   info "bootPartition: $bootPartition"
+   info "rootPartition: $rootPartition"
    echo
 fi
 
-if ! mount $bootPartition /mnt 2>/dev/null; then
-    echo "??? Unable to mount $bootPartition"
-    exit 1
+if ! mkdir $MOUNTPOINT_BOOT; then
+	error "Unable to mkdir $MOUNTPOINT_BOOT"
 fi
-umount $bootPartition &>/dev/null
+	
+if ! mount $bootPartition $MOUNTPOINT_BOOT; then
+    error "Unable to mount $bootPartition"
+fi
 
-if ! mount $rootPartition /mnt 2>/dev/null; then
-    echo "??? Unable to mount $rootPartition"
-    exit 1
+if ! mkdir $MOUNTPOINT_ROOT; then
+	error "Unable to mkdir $MOUNTPOINT_ROOT"
 fi
-umount $rootPartition &>/dev/null
+
+if ! mount $rootPartition $MOUNTPOINT_ROOT; then
+    error "Unable to mount $rootPartition"
+fi
+
+if ! isSupportedSystem; then
+    error "$MYSELF supports Raspberries running RasbianOS only"
+fi
 
 cmdline=$(parseCmdline)
+#shellcheck disable=SC2207
+#(warning): Prefer mapfile or read -a to split command output (or quote to avoid splitting).
 fstab=( $(parseFstab) )
 
 cmdlineRootType="$(cut -d= -f1 <<< $cmdline)"
@@ -415,31 +442,31 @@ actualCmdlineRootUUID="$(parseBLKID ${rootPartition} $cmdlineRootType | cut -d= 
 actualFstabBootUUID="$(parseBLKID ${bootPartition} $fstabBootType | cut -d= -f2)"
 actualFstabRootUUID="$(parseBLKID ${rootPartition} $fstabRootType | cut -d= -f2)"
 
-if [[ $cmdlineRootUUID == $actualCmdlineRootUUID ]]; then
-   echo "--- Root $fstabRootType $actualFstabRootUUID already used in $bootPartition/$CMDLINE"
+if [[ $cmdlineRootUUID == "$actualCmdlineRootUUID" ]]; then
+   info "Root $fstabRootType $actualFstabRootUUID already used in $bootPartition/$CMDLINE"
 else
    updateCmdline $cmdlineRootType $cmdlineRootUUID $actualCmdlineRootUUID
    mismatchDetected=1
 fi
 
-if [[ $fstabBootUUID == $actualFstabBootUUID ]]; then
-   echo "--- Boot $fstabBootType $actualFstabBootUUID already used in $rootPartition/$FSTAB"
+if [[ $fstabBootUUID == "$actualFstabBootUUID" ]]; then
+   info "Boot $fstabBootType $actualFstabBootUUID already used in $rootPartition/$FSTAB"q
 else
    updateFstab $fstabBootType $fstabBootUUID $actualFstabBootUUID
    mismatchDetected=1
 fi
 
-if [[ $fstabRootUUID == $actualFstabRootUUID ]]; then
-   echo "--- Root $fstabRootType $actualFstabRootUUID already used in $rootPartition/$FSTAB"
+if [[ $fstabRootUUID == "$actualFstabRootUUID" ]]; then
+   info "Root $fstabRootType $actualFstabRootUUID already used in $rootPartition/$FSTAB"
 else
    updateFstab $fstabRootType $fstabRootUUID $actualFstabRootUUID
    mismatchDetected=1
 fi
 
-if (( $mismatchDetected && dryrun)); then
-   echo "!!! Use option -u to update the incorrect UUIDs, PARTUUIDs or LABELs"
+if (( $mismatchDetected && $dryrun)); then
+   note "Use option -u to update the incorrect UUIDs, PARTUUIDs or LABELs"
 fi
 
-if (( ! $mismatchDetected && ! dryrun)); then
-   echo "--- No incorrect UUIDs, PARTUUIDs or LABELs detected"
+if (( ! $mismatchDetected && ! $dryrun)); then
+   info "No incorrect UUIDs, PARTUUIDs or LABELs detected"
 fi
