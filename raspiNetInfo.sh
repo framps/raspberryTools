@@ -40,7 +40,7 @@
 #
 
 MYSELF="${0##*/}"
-VERSION="V0.2.13"
+VERSION="V0.2.14"
 
 GIT_DATE="$Date$"
 GIT_DATE_ONLY=${GIT_DATE/: /}
@@ -291,8 +291,7 @@ function masqueradeSSID() {
 # Masquerade MAC
 
 function masqueradeMAC() {
-	$SED -E "s/((\w{2}):){3}/@@:@@:@@:/g"
-
+	$PERL -pe "s/((?:[a-zA-Z0-9]{2}[:-]){3})((?:[a-zA-Z0-9]{2}[:-]){2}[a-zA-Z0-9]{2})/\1\@@\:@@\:@@/g" 2>/dev/null
 }
 
 # Masquerade external IP addresses
@@ -603,8 +602,13 @@ function collectInfo() {
 			echo '--- /etc/wpa_supplicant/wpa_supplicant.conf'
 
 			sudo $EGREP -v "^(#|$)" /etc/wpa_supplicant/wpa_supplicant.conf | masqueradeMAC | masqueradeIPV6 | masqueradeSSIDinWPA | masqueradePsk
-			echo '--- grep wpa_action /var/log/messages | tail -n 15'
-			sudo grep wpa /var/log/messages | tail -n 15 | masqueradeMAC | masqueradeIPV6 | masqueradeSSID | masqueradePsk
+			if [[ -e /var/log/messages ]]; then
+				echo '--- grep wpa_action /var/log/messages | tail -n 15'
+				sudo grep wpa /var/log/messages | tail -n 15 | masqueradeMAC | masqueradeIPV6 | masqueradeSSID | masqueradePsk
+			else
+				echo "--- journalctl --system -xe | grep wpa_action | tail -n 15"
+				journalctl --system -xe | grep wpa_action | tail -n 15 | masqueradeMAC | masqueradeIPV6 | masqueradeSSID | masqueradePsk
+			fi
 		fi
 	fi
 	
