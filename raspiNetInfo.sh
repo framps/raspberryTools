@@ -603,11 +603,11 @@ function collectInfo() {
 
 			sudo $EGREP -v "^(#|$)" /etc/wpa_supplicant/wpa_supplicant.conf | masqueradeMAC | masqueradeIPV6 | masqueradeSSIDinWPA | masqueradePsk
 			if [[ -e /var/log/messages ]]; then
-				echo '--- grep wpa_action /var/log/messages | tail -n 15'
+				echo '--- grep wpa /var/log/messages | tail -n 15'
 				sudo grep wpa /var/log/messages | tail -n 15 | masqueradeMAC | masqueradeIPV6 | masqueradeSSID | masqueradePsk
 			else
-				echo "--- journalctl --system -xe | grep wpa_action | tail -n 15"
-				journalctl --system -xe | grep wpa_action | tail -n 15 | masqueradeMAC | masqueradeIPV6 | masqueradeSSID | masqueradePsk
+				echo "--- journalctl --system -xe | grep wpa | tail -n 15"
+				journalctl --system -xe | grep wpa | tail -n 15 | masqueradeMAC | masqueradeIPV6 | masqueradeSSID | masqueradePsk
 			fi
 		fi
 	fi
