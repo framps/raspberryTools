@@ -453,7 +453,7 @@ else
 fi
 
 if [[ $fstabBootUUID == "$actualFstabBootUUID" ]]; then
-   info "Boot $fstabBootType $actualFstabBootUUID already used in $rootPartition/$FSTAB"q
+   info "Boot $fstabBootType $actualFstabBootUUID already used in $rootPartition/$FSTAB"
 else
    updateFstab $fstabBootType $fstabBootUUID $actualFstabBootUUID
    mismatchDetected=1
