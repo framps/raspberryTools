@@ -25,7 +25,7 @@
 
 set -euo pipefail
 
-readonly VERSION="0.3.2"
+readonly VERSION="0.3.3"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 #shellcheck disable=SC2155
 #(warning): Declare and assign separately to avoid masking return values.
@@ -69,7 +69,7 @@ function cleanup() {
 }
 
 function error() {
-   echo "??? $*"
+   echo "??? $*" > /dev/tty
    exit 1
 }
 
@@ -116,9 +116,11 @@ function parseCmdline {
         error "Unable to find ${MOUNTPOINT_BOOT}/${CMDLINE}"
     fi
 
-	#shellcheck disable=SC2155
-	#(warning): Declare and assign separately to avoid masking return values.
-    local rootTarget=$(grep -Eo "${ROOT_TARGET}\S+=\S+" ${MOUNTPOINT_BOOT}/${CMDLINE} | sed -E "s/${ROOT_TARGET}//")
+    local rootTarget
+    
+    if ! rootTarget=$(grep -Eo "${ROOT_TARGET}\S+=\S+" ${MOUNTPOINT_BOOT}/${CMDLINE} | sed -E "s/${ROOT_TARGET}//"); then
+      error "Parsing of ${CMDLINE} for '${ROOT_TARGET}' failed"
+    fi
 
     if [[ -z $rootTarget ]]; then
       error "Parsing of ${CMDLINE} for '${ROOT_TARGET}' failed"
