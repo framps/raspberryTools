@@ -25,7 +25,7 @@
 
 set -euo pipefail
 
-readonly VERSION="0.3.3"
+readonly VERSION="0.3.3.1"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 #shellcheck disable=SC2155
 #(warning): Declare and assign separately to avoid masking return values.
@@ -58,10 +58,10 @@ function cleanup() {
    rmdir "$MOUNTPOINT_BOOT" &>/dev/null || true
    rmdir "$MOUNTPOINT_ROOT" &>/dev/null || true
    if (( $rc != 0 )); then
-	   if [[ -e "$LOG_FILE" ]]; then
-		  error "Error log"
+       if [[ -e "$LOG_FILE" ]]; then
+          error "Error log"
           cat "$LOG_FILE"
-		  rm "$LOG_FILE" &>/dev/null || true
+          rm "$LOG_FILE" &>/dev/null || true
        fi
    else
        rm "$LOG_FILE" &>/dev/null || true
@@ -97,6 +97,17 @@ function isSupportedSystem() {
     local RPI_ISSUE=$MOUNTPOINT_ROOT/etc/rpi-issue
 
     if [[ ! -e "$RPI_ISSUE" ]]; then
+        return 1
+    fi
+
+    if [[ ! -e $MOUNTPOINT_ROOT/etc/os-release ]]; then
+        return 1
+    fi
+    
+    local version
+    version=$(grep -E "^VERSION_ID" /etc/os-release | cut -f 2 -d "=" | sed 's/"//g')
+    
+    if (( version < 12 )); then
         return 1
     fi
 
@@ -137,8 +148,8 @@ function parseFstab {
         error "Unable to find ${MOUNTPOINT_ROOT}/${CMDLINE}"
     fi
 
-	#shellcheck disable=SC2034
-	#(warning): r appears unused. Verify use (or export if used externally).
+    #shellcheck disable=SC2034
+    #(warning): r appears unused. Verify use (or export if used externally).
     while read tgt mnt r; do
         case $mnt in
             "$BOOT" | "$BOOT_FIRMWARE")
@@ -162,8 +173,8 @@ function parseFstab {
 }
 
 function parseBLKID {   # device uuid/poartuuid/label
-	#shellcheck disable=SC2155
-	#(warning): Declare and assign separately to avoid masking return values.
+    #shellcheck disable=SC2155
+    #(warning): Declare and assign separately to avoid masking return values.
     local blkid="$(blkid $1 -o udev | grep "ID_FS_${2}=")"
     if [[ -z $blkid ]]; then
       error "Parsing of blkid $1 for filesystem type $2 failed"
@@ -224,14 +235,14 @@ function randomizePartitions() {
         exit 1
     fi
 
-	#shellcheck disable=SC2155
-	#(warning): Declare and assign separately to avoid masking return values.
+    #shellcheck disable=SC2155
+    #(warning): Declare and assign separately to avoid masking return values.
     local newPARTUUID=$(od -A n -t x -N 4 /dev/urandom | tr -d " ")
     info "Creating new PARTUUID $newPARTUUID on $device"
     echo -ne "x\ni\n0x$newPARTUUID\nr\nw\nq\n" | fdisk "$device" &>>$LOG_FILE
 
-	#shellcheck disable=SC2155
-	#(warning): Declare and assign separately to avoid masking return values.
+    #shellcheck disable=SC2155
+    #(warning): Declare and assign separately to avoid masking return values.
     local newUUID="$(od -A n -t x -N 4 /dev/urandom | tr -d " " | sed -r 's/(.{4})/\1-/')"
     newUUID="${newUUID^^*}"
     info "Creating new UUID $newUUID on $bootPartition"
@@ -240,13 +251,13 @@ function randomizePartitions() {
     newUUID="$(</proc/sys/kernel/random/uuid)"
     info "Creating new UUID $newUUID on $rootPartition"
     if ! umount $MOUNTPOINT_ROOT; then
-		error "Unable to umount $MOUNTPOINT_ROOT"
-	fi
+        error "Unable to umount $MOUNTPOINT_ROOT"
+    fi
     e2fsck -y -f $rootPartition &>>$LOG_FILE
     tune2fs -U "$newUUID" $rootPartition &>>$LOG_FILE
     if ! mount $rootPartition $MOUNTPOINT_ROOT; then
-		error "Unable to mount $rootPartition"
-	fi
+        error "Unable to mount $rootPartition"
+    fi
 
     sync
     sleep 3
@@ -378,15 +389,15 @@ if (( $verbose )); then
 fi
 
 if ! mkdir $MOUNTPOINT_BOOT; then
-	error "Unable to mkdir $MOUNTPOINT_BOOT"
+    error "Unable to mkdir $MOUNTPOINT_BOOT"
 fi
-	
+    
 if ! mount $bootPartition $MOUNTPOINT_BOOT; then
     error "Unable to mount $bootPartition"
 fi
 
 if ! mkdir $MOUNTPOINT_ROOT; then
-	error "Unable to mkdir $MOUNTPOINT_ROOT"
+    error "Unable to mkdir $MOUNTPOINT_ROOT"
 fi
 
 if ! mount $rootPartition $MOUNTPOINT_ROOT; then
@@ -394,7 +405,7 @@ if ! mount $rootPartition $MOUNTPOINT_ROOT; then
 fi
 
 if ! isSupportedSystem; then
-    error "$MYSELF supports Raspberries running RasbianOS only"
+    error "$MYSELF supports Raspberries running RasbianOS Bookworm only"
 fi
 
 cmdline=$(parseCmdline)
