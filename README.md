@@ -11,6 +11,7 @@ There is a [very useful tools collection](https://forums.raspberrypi.com/viewtop
 ### Note
 Use invokeTool.sh to download and call a tool immediately.
 * Example: `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- findSensors.sh -s m` will download and call findSensors.sh with argument `-s m`.
+*          `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- synUUIDs.sh -u /dev/mmcblk0 m` will download and call syncUUIDs.sh with argument `-u /dev/mmcblk0`.
 
 Or use downloadRepoFiles.sh to select multiple tools you want to download and test first. Optionally you can install them later with option `-i`.
 
