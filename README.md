@@ -18,7 +18,7 @@ Examples:
 Or use downloadRepoFiles.sh to select multiple tools you want to download and test first. Optionally you can install them later with option `-i`.
 
 Command to download and execute downloadRepoFiles.sh:
-* `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh | bash -s -- -i`
+* `curl -s -O https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -i`
 
 ### List of my "some useful tools for Raspberry Pi"
 For sample outputs of the tools click the links.
