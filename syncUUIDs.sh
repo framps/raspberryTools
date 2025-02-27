@@ -7,7 +7,7 @@
 #   of UUID/PARTUUID/LABEL mismatch.
 #
 #	Either download this script
-#	  curl -sO https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh
+#	  curl -sO https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh syncUUIDs.sh
 #   and invoke
 #      sudo ./syncUUIDs.sh <options>
 #

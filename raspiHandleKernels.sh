@@ -7,6 +7,18 @@
 #    This script uninstalls unused kernels on a Raspberry Pi running bookworm with option -u to speed up apt updates and
 #    reinstalls the uninstalled kernels with option -r if the system should be run on a different Raspberry Pi HW
 #
+#	Either download this script
+#	   curl -sO https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh raspiHandleKernels.sh
+#   and invoke
+#      sudo ./raspiHandleKernels.sh <options>
+#
+#   or use following command to directly download and invoke syncUUIDs:
+#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- raspiHandleKernels.sh.sh <options>
+#	  	for example
+#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- raspiHandleKernels.sh 
+#
+
+#
 #######################################################################################################################
 #
 #    Copyright (c) 2023-2025 framp at linux-tips-and-tricks dot de
