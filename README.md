@@ -44,7 +44,7 @@ For sample outputs of the tools click the links.
 10. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
 
 11. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs, PARTUUIDs or LABELs used on the device partitions. Option -u (update) will synchronize the files. Useful when an image was cloned to another device and fails during boot because of missing updates in /boot/cmdline.txt and /etc/fstab.
-With option -n (new) new UUIDs and PARTUUIDs are created on the target device and /boot/cmdline.txt and /etc/fstab are updated accordingly. Useful if somebody uses dd to clone a system and requires to have the clone mounted on the cloned system **Note**: Runs on any Linux HW.
+With option -n (new) new UUIDs and PARTUUIDs are created on the target device and /boot/cmdline.txt and /etc/fstab are updated accordingly. Useful if somebody uses dd to clone a system and requires to have the clone mounted on the cloned system **Note**: Runs on any Linux OS and HW
 
 12. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
