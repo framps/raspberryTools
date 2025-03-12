@@ -12,9 +12,9 @@
 #      sudo ./syncUUIDs.sh <options>
 #
 #   or use following command to directly download and invoke syncUUIDs:
-#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- synUUIDs.sh <options>
+#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- syncUUIDs.sh <options>
 #	  	for example
-#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- synUUIDs.sh -u /dev/mmcblk0`
+#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- syncUUIDs.sh -u /dev/mmcblk0`
 #
 #   Copyright (C) 2022-2025 framp at linux-tips-and-tricks dot de
 #
