@@ -10,10 +10,10 @@
 #
 #   There is no need to download this script. Just use following oneliner
 #
-#      curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh -o downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -t
+#      curl -s https://raw.githubusercontent.com/framps/raspberryTools/main/downloadRepoFiles.sh -o downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -t
 #         to download any script into a testdirectory without installing it in /usr/local/bin
 #   or
-#      curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh -o downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -i
+#      curl -s https://raw.githubusercontent.com/framps/raspberryTools/main/downloadRepoFiles.sh -o downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -i
 #         to download and install any script into /usr/local/bin
 #
 #######################################################################################################################
@@ -40,10 +40,10 @@ set -euo pipefail
 readonly VERSION="v0.1.5"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
-readonly GITAPI_RESTURL_TREES="https://api.github.com/repos/framps/raspberryTools/git/trees/master?recursive=1"
-readonly GIT_DOWNLOAD_PREFIX="https://raw.githubusercontent.com/framps/raspberryTools/master"
+readonly GITAPI_RESTURL_TREES="https://api.github.com/repos/framps/raspberryTools/git/trees/main?recursive=1"
+readonly GIT_DOWNLOAD_PREFIX="https://raw.githubusercontent.com/framps/raspberryTools/main"
 readonly INSTALL_DIR="/usr/local/bin"
-#shellcheck disable=SC2155 
+#shellcheck disable=SC2155
 # (warning): Declare and assign separately to avoid masking return values
 readonly TEST_DIR="$(pwd)/raspberryTools"
 readonly TEST_OPTION="-t"
@@ -102,7 +102,7 @@ rc=$?
 
 (( HTTP_CODE != 200 )) && { echo "??? Error retrieving repository contents from github. HTTP response: $HTTP_CODE"; jq . "$jsonFile"; }
 
-#shellcheck disable=SC2207 
+#shellcheck disable=SC2207
 # (warning): Prefer mapfile or read -a to split command output (or quote to avoid splitting).
 files=( $(jq -r ".tree[].path" "$jsonFile" | grep -E '\.sh' | grep -v "$MYSELF") )
 

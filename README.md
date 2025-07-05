@@ -11,14 +11,14 @@ There is a [very useful tools collection](https://forums.raspberrypi.com/viewtop
 ### Note
 Use invokeTool.sh to download and call a tool immediately.
 
-Examples: 
-*   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- findSensors.sh -s m` 
-*   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- synUUIDs.sh -u /dev/mmcblk0`
+Examples:
+*   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/main/invokeTool.sh | bash -s -- findSensors.sh -s m`
+*   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/main/invokeTool.sh | sudo bash -s -- synUUIDs.sh -u /dev/mmcblk0`
 
 Or use downloadRepoFiles.sh to select multiple tools you want to download and test first. Optionally you can install them later with option `-i`.
 
 Command to download and execute downloadRepoFiles.sh:
-* `curl -s -O https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -i`
+* `curl -s -O https://raw.githubusercontent.com/framps/raspberryTools/main/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -i`
 
 ### List of my "some useful tools for Raspberry Pi"
 For sample outputs of the tools click the links.
@@ -35,22 +35,22 @@ For sample outputs of the tools click the links.
 
 6. [retrieveLifetimeWrites.sh](#retrievelifetimewritessh) - Either retrieves the LifetimeWrites of one or all existing ext2/ext3 and ext4 partitions. Helps to get an idea when the SD card or disk will reach it's end of life.
 
-7. [findDevices.sh](#finddevicessh) - Scan the local net for Raspberries or ESPs and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname. This replaces deprecated findRaspis and findSensors. 
+7. [findDevices.sh](#finddevicessh) - Scan the local net for Raspberries or ESPs and print the IPs, macs and hostnames sorted by IP. A config file can be used to add an additional descriptions for the hostname. This replaces deprecated findRaspis and findSensors.
 
 8. findRaspis.sh - Deprecated. Use findDevices.sh
 
 9. findSensors.sh - Deprecated. Use findDevices.sh
 
-10. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
+10. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/main/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
 
-11. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs, PARTUUIDs or LABELs used on the device partitions. Option -u (update) will synchronize the files. Useful when an image was cloned to another device and fails during boot because of missing updates in /boot/cmdline.txt and /etc/fstab.
+11. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/main/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs, PARTUUIDs or LABELs used on the device partitions. Option -u (update) will synchronize the files. Useful when an image was cloned to another device and fails during boot because of missing updates in /boot/cmdline.txt and /etc/fstab.
 With option -n (new) new UUIDs and PARTUUIDs are created on the target device and /boot/cmdline.txt and /etc/fstab are updated accordingly. Useful if somebody uses dd to clone a system and requires to have the clone mounted on the cloned system **Note**: Runs on any Linux OS and HW
 
-12. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
+12. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/main/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
 13. [raspiHandleKernels.sh](#raspiHandleKernels.sh) - Uninstall and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
 
-14. [switchOS.sh](https://github.com/framps/raspberryTools/blob/master/switchOS.sh) - Switch the OS boot device if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
+14. [switchOS.sh](https://github.com/framps/raspberryTools/blob/main/switchOS.sh) - Switch the OS boot device if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
 
 
 ## findDevices.sh
@@ -58,13 +58,13 @@ With option -n (new) new UUIDs and PARTUUIDs are created on the target device an
 findDevices.sh 0.1.0 (https://github.com/framps/raspberryTools)
 Scanning subnet 192.168.0.0/24 for Raspberries ...
 
-IP address      Mac address       Hostname                                        Description     
-192.168.0.8     b8:27:eb:a4:e8:74 troubadix                                       NetworkGateway  
-192.168.0.10    b8:27:eb:2c:94:90 idefix                                          HomeAutomation  
+IP address      Mac address       Hostname                                        Description
+192.168.0.8     b8:27:eb:a4:e8:74 troubadix                                       NetworkGateway
+192.168.0.10    b8:27:eb:2c:94:90 idefix                                          HomeAutomation
 192.168.0.12    dc:a6:32:7f:28:fd asterix                                         InfluxDB/Grafana
-192.168.0.158   dc:a6:32:ef:4f:9a raspberrypi-bookworm-64-lite-cm4-emmc.fritz.box CM4             
-192.168.0.164   dc:a6:32:bb:d9:7e raspberrypi4-8GB.fritz.box                      RPi4            
-192.168.0.179   2c:cf:67:b2:18:90 raspberrypi-bookworm64-lite-beta.fritz.box      RPi5            
+192.168.0.158   dc:a6:32:ef:4f:9a raspberrypi-bookworm-64-lite-cm4-emmc.fritz.box CM4
+192.168.0.164   dc:a6:32:bb:d9:7e raspberrypi4-8GB.fritz.box                      RPi4
+192.168.0.179   2c:cf:67:b2:18:90 raspberrypi-bookworm64-lite-beta.fritz.box      RPi5
 ```
 
 ## raspiHandleKernels.sh
@@ -148,7 +148,7 @@ The following NEW packages will be installed:
 Need to get 29.4 MB of archives.
 After this operation, 32.9 MB of additional disk space will be used.
 Get:1 http://archive.raspberrypi.com/debian bookworm/main arm64 linux-image-6.6.31+rpt-rpi-2712 arm64 1:6.6.31-1+rpt1 [29.4 MB]
-Fetched 29.4 MB in 3s (10.5 MB/s)                           
+Fetched 29.4 MB in 3s (10.5 MB/s)
 Selecting previously unselected package linux-image-6.6.31+rpt-rpi-2712.
 (Reading database ... 53260 files and directories currently installed.)
 Preparing to unpack .../linux-image-6.6.31+rpt-rpi-2712_1%3a6.6.31-1+rpt1_arm64.deb ...
@@ -168,7 +168,7 @@ The following NEW packages will be installed:
 Need to get 1,432 B of archives.
 After this operation, 13.3 kB of additional disk space will be used.
 Get:1 http://archive.raspberrypi.com/debian bookworm/main arm64 linux-image-rpi-2712 arm64 1:6.6.31-1+rpt1 [1,432 B]
-Fetched 1,432 B in 0s (8,335 B/s)                
+Fetched 1,432 B in 0s (8,335 B/s)
 Selecting previously unselected package linux-image-rpi-2712.
 (Reading database ... 55832 files and directories currently installed.)
 Preparing to unpack .../linux-image-rpi-2712_1%3a6.6.31-1+rpt1_arm64.deb ...
@@ -183,7 +183,7 @@ The following NEW packages will be installed:
 Need to get 1,428 B of archives.
 After this operation, 13.3 kB of additional disk space will be used.
 Get:1 http://archive.raspberrypi.com/debian bookworm/main arm64 linux-image-rpi-v8 arm64 1:6.6.31-1+rpt1 [1,428 B]
-Fetched 1,428 B in 0s (8,847 B/s)              
+Fetched 1,428 B in 0s (8,847 B/s)
 Selecting previously unselected package linux-image-rpi-v8.
 (Reading database ... 55835 files and directories currently installed.)
 Preparing to unpack .../linux-image-rpi-v8_1%3a6.6.31-1+rpt1_arm64.deb ...
@@ -266,14 +266,14 @@ tune2fs 1.47.0 (5-Feb-2023)
 Setting the UUID on this filesystem could take some time.
 Proceed anyway (or wait 5 seconds to proceed) ? (y,N) <proceeding>
 !!! PARTUUID cc5fd38e-02 should be updated to 856f0aa3-02 in /dev/sda1/cmdline.txt
-!!! PARTUUID cc5fd38e-01 should be updated to 856f0aa3-01 in /dev/sda2/etc/fstab 
-!!! PARTUUID cc5fd38e-02 should be updated to 856f0aa3-02 in /dev/sda2/etc/fstab 
+!!! PARTUUID cc5fd38e-01 should be updated to 856f0aa3-01 in /dev/sda2/etc/fstab
+!!! PARTUUID cc5fd38e-02 should be updated to 856f0aa3-02 in /dev/sda2/etc/fstab
 !!! Use option -u to update the incorrect UUIDs, PARTUUIDs or LABELs
 ```
 
 ## checkThrottled.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/master/checkThrottled.sh)
+[Code](https://github.com/framps/raspberryTools/blob/main/checkThrottled.sh)
 
 ```
 pi@raspberrypi-buster:~ $ ./checkThrottled.sh
@@ -284,7 +284,7 @@ Throttling in hex: 0x20002 (bits reset every call)
 
 ## testCPUTemperature.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/master/testCPUTemperature.sh)
+[Code](https://github.com/framps/raspberryTools/blob/main/testCPUTemperature.sh)
 
 ```
 pi@raspberrypi-buster:~ $ ./testCPUTemperature.sh -i 5
@@ -311,7 +311,7 @@ Watch +75s:temp=82.7'C
 
 ## retrieveLifetimeWrites.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/master/retrieveLifetimeWrites.sh)
+[Code](https://github.com/framps/raspberryTools/blob/main/retrieveLifetimeWrites.sh)
 
 ```
 sudo retrieveLifetimeWrites.sh  -a
@@ -322,7 +322,7 @@ LTW of /dev/md0: 596.31 GiB
 
 ## retrieveTerrabytesWritten.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/master/retrieveTerrabytesWritten.sh)
+[Code](https://github.com/framps/raspberryTools/blob/main/retrieveTerrabytesWritten.sh)
 ```
 sudo retrieveTBW.sh -a
 TBW of sda: 1.56 TiB
@@ -330,7 +330,7 @@ TBW of sda: 1.56 TiB
 
 ## raspiNetInfo.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/master/raspiNetInfo.sh)
+[Code](https://github.com/framps/raspberryTools/blob/main/raspiNetInfo.sh)
 
 Tests executed:
 
