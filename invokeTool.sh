@@ -5,7 +5,7 @@
 #  Download and invoke any tool available on raspberyyTools github repository
 #
 #  Example to execute findSensors and sort the result according their mac addresses
-#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/main/invokeTool.sh | bash -s -- findSensors.sh -s m
+#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- findSensors.sh -s m
 #
 #######################################################################################################################
 #
@@ -38,7 +38,7 @@ if [[ -z "$1" || "$1" == "-h" || "$1" == "--help" || "$1" == "-?" || "$1" == "?"
 	exit 1
 fi
 
-branch="main"
+branch="master"
 targetFilename="$1"
 shift
 

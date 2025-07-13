@@ -12,13 +12,13 @@ There is a [very useful tools collection](https://forums.raspberrypi.com/viewtop
 Use invokeTool.sh to download and call a tool immediately.
 
 Examples:
-*   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/main/invokeTool.sh | bash -s -- findSensors.sh -s m`
-*   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/main/invokeTool.sh | sudo bash -s -- synUUIDs.sh -u /dev/mmcblk0`
+*   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- findSensors.sh -s m`
+*   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- synUUIDs.sh -u /dev/mmcblk0`
 
 Or use downloadRepoFiles.sh to select multiple tools you want to download and test first. Optionally you can install them later with option `-i`.
 
 Command to download and execute downloadRepoFiles.sh:
-* `curl -s -O https://raw.githubusercontent.com/framps/raspberryTools/main/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -i`
+* `curl -s -O https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -i`
 
 ### List of my "some useful tools for Raspberry Pi"
 For sample outputs of the tools click the links.
@@ -41,16 +41,16 @@ For sample outputs of the tools click the links.
 
 9. findSensors.sh - Deprecated. Use findDevices.sh
 
-10. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/main/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
+10. [checkPARTUUIDsInDDImage.sh](https://github.com/framps/raspberryTools/blob/master/checkPARTUUIDsInDDImage.sh) - Retrieve PARTUUIDs of Raspberry dd Backup image partitions /boot and / and check if they match in /boot/cmdline.txt and /etc/fstab
 
-11. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/main/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs, PARTUUIDs or LABELs used on the device partitions. Option -u (update) will synchronize the files. Useful when an image was cloned to another device and fails during boot because of missing updates in /boot/cmdline.txt and /etc/fstab.
+11. [syncUUIDs.sh](https://github.com/framps/raspberryTools/blob/master/syncUUIDs.sh) - Check whether /boot/cmdline.txt and /etc/fstab on a device match the UUIDs, PARTUUIDs or LABELs used on the device partitions. Option -u (update) will synchronize the files. Useful when an image was cloned to another device and fails during boot because of missing updates in /boot/cmdline.txt and /etc/fstab.
 With option -n (new) new UUIDs and PARTUUIDs are created on the target device and /boot/cmdline.txt and /etc/fstab are updated accordingly. Useful if somebody uses dd to clone a system and requires to have the clone mounted on the cloned system **Note**: Runs on any Linux OS and HW
 
-12. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/main/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
+12. [raspiKernelInfo.sh](https://github.com/framps/raspberryTools/blob/master/raspiKernelInfo.sh) - Retrieve info about the running system on a Raspberry
 
 13. [raspiHandleKernels.sh](#raspiHandleKernels.sh) - Uninstall and reinstall unused kernels in a bookworm image to speed up apt upgrade processing
 
-14. [switchOS.sh](https://github.com/framps/raspberryTools/blob/main/switchOS.sh) - Switch the OS boot device if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
+14. [switchOS.sh](https://github.com/framps/raspberryTools/blob/master/switchOS.sh) - Switch the OS boot device if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
 
 
 ## findDevices.sh
@@ -273,7 +273,7 @@ Proceed anyway (or wait 5 seconds to proceed) ? (y,N) <proceeding>
 
 ## checkThrottled.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/main/checkThrottled.sh)
+[Code](https://github.com/framps/raspberryTools/blob/master/checkThrottled.sh)
 
 ```
 pi@raspberrypi-buster:~ $ ./checkThrottled.sh
@@ -284,7 +284,7 @@ Throttling in hex: 0x20002 (bits reset every call)
 
 ## testCPUTemperature.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/main/testCPUTemperature.sh)
+[Code](https://github.com/framps/raspberryTools/blob/master/testCPUTemperature.sh)
 
 ```
 pi@raspberrypi-buster:~ $ ./testCPUTemperature.sh -i 5
@@ -311,7 +311,7 @@ Watch +75s:temp=82.7'C
 
 ## retrieveLifetimeWrites.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/main/retrieveLifetimeWrites.sh)
+[Code](https://github.com/framps/raspberryTools/blob/master/retrieveLifetimeWrites.sh)
 
 ```
 sudo retrieveLifetimeWrites.sh  -a
@@ -322,7 +322,7 @@ LTW of /dev/md0: 596.31 GiB
 
 ## retrieveTerrabytesWritten.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/main/retrieveTerrabytesWritten.sh)
+[Code](https://github.com/framps/raspberryTools/blob/master/retrieveTerrabytesWritten.sh)
 ```
 sudo retrieveTBW.sh -a
 TBW of sda: 1.56 TiB
@@ -330,7 +330,7 @@ TBW of sda: 1.56 TiB
 
 ## raspiNetInfo.sh
 
-[Code](https://github.com/framps/raspberryTools/blob/main/raspiNetInfo.sh)
+[Code](https://github.com/framps/raspberryTools/blob/master/raspiNetInfo.sh)
 
 Tests executed:
 

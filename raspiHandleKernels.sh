@@ -8,14 +8,14 @@
 #    reinstalls the uninstalled kernels with option -r if the system should be run on a different Raspberry Pi HW
 #
 #	Either download this script
-#	   curl -sO https://raw.githubusercontent.com/framps/raspberryTools/main/invokeTool.sh raspiHandleKernels.sh
+#	   curl -sO https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh raspiHandleKernels.sh
 #   and invoke
 #      sudo ./raspiHandleKernels.sh <options>
 #
 #   or use following command to directly download and invoke syncUUIDs:
-#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/main/invokeTool.sh | sudo bash -s -- raspiHandleKernels.sh.sh <options>
+#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- raspiHandleKernels.sh.sh <options>
 #	  	for example
-#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/main/invokeTool.sh | sudo bash -s -- raspiHandleKernels.sh
+#     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- raspiHandleKernels.sh
 #
 
 #

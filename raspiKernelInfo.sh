@@ -4,7 +4,7 @@
 #    Retrieve information about running kernel on a Raspberry
 #
 #    Call with 
-#    curl -s https://raw.githubusercontent.com/framps/raspberryTools/main/raspiKernelInfo.sh | bash
+#    curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/raspiKernelInfo.sh | bash
 #
 ####################################################################################################
 #

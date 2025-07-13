@@ -8,8 +8,8 @@
 # SSID, non local IPs, MACs and other sensitive data is masqueraded
 # as good as possible.
 #
-# Invocation: curl -s https://raw.githubusercontent.com/framps/raspberryTools/refs/heads/main/raspiNetInfo.sh |  bash -s -- -e
-#          or curl -s https://raw.githubusercontent.com/framps/raspberryTools/refs/heads/main/raspiNetInfo.sh |  bash -s -- -s
+# Invocation: curl -s https://raw.githubusercontent.com/framps/raspberryTools/refs/heads/master/raspiNetInfo.sh |  bash -s -- -e
+#          or curl -s https://raw.githubusercontent.com/framps/raspberryTools/refs/heads/master/raspiNetInfo.sh |  bash -s -- -s
 #
 # Script testet auf häufige Konfigurationsfehler bei der Pi
 # und sammelt verschiedene Netzwerkkonfigurationsinformationen
@@ -20,8 +20,8 @@
 # Die SSID, die nicht lokalen IPs sowie die MACs und weitere sensible
 # Daten werden soweit wie moeglich in den Ausgaben maskiert.
 #
-# Aufruf: curl -s https://raw.githubusercontent.com/framps/raspberryTools/refs/heads/main/raspiNetInfo.sh |  bash -s -- -e
-#    oder curl -s https://raw.githubusercontent.com/framps/raspberryTools/refs/heads/main/raspiNetInfo.sh |  bash -s -- -s
+# Aufruf: curl -s https://raw.githubusercontent.com/framps/raspberryTools/refs/heads/master/raspiNetInfo.sh |  bash -s -- -e
+#    oder curl -s https://raw.githubusercontent.com/framps/raspberryTools/refs/heads/master/raspiNetInfo.sh |  bash -s -- -s
 #
 #    Copyright (C) 2013-2025 framp at linux-tips-and-tricks dot de
 #
