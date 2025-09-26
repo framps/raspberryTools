@@ -3,8 +3,12 @@
 #######################################################################################################################
 #
 #   Check and optionally update /boot/cmdline.txt and /etc/fstab on a device with installed RaspbianOS
-#   with the actual UUIDs/PARTUUIDs/LABELs of the partitions. Useful if a cloned RaspbianOS fails to boot because
-#   of UUID/PARTUUID/LABEL mismatch.
+#   with the actual UUIDs/PARTUUIDs/LABELs of the partitions. 
+#
+#	New UUIDS and PARTUUIDs can also be generated before /boot/cmdline.txt and /etc/fstab are synced.
+#
+#	Useful if a cloned RaspbianOS fails to boot because of UUID/PARTUUID/LABEL mismatch or a device
+#	was cloned and should become new UUIDs/PARTUUIDs.
 #
 #	Either download this script
 #	  curl -sO https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh syncUUIDs.sh
@@ -35,11 +39,11 @@
 
 set -euo pipefail
 
-readonly VERSION="0.3.3.1"
+readonly VERSION="0.3.4"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 #shellcheck disable=SC2155
 #(warning): Declare and assign separately to avoid masking return values.
-readonly MYSELF="$(basename $0)"
+readonly MYSELF="$(basename "$0")"
 readonly MYNAME=${MYSELF##*/}
 
 readonly CMDLINE="cmdline.txt"
@@ -69,9 +73,9 @@ function cleanup() {
    rmdir "$MOUNTPOINT_ROOT" &>/dev/null || true
    if (( $rc != 0 )); then
        if [[ -e "$LOG_FILE" ]]; then
-          error "Error log"
           cat "$LOG_FILE"
           rm "$LOG_FILE" &>/dev/null || true
+          error "Error log"
        fi
    else
        rm "$LOG_FILE" &>/dev/null || true
@@ -133,7 +137,7 @@ function isMounted() {
 
 function parseCmdline {
 
-    if [[ ! -e ${MOUNTPOINT_BOOT}/${CMDLINE} ]]; then
+    if [[ ! -e "${MOUNTPOINT_BOOT}/${CMDLINE}" ]]; then
         error "Unable to find ${MOUNTPOINT_BOOT}/${CMDLINE}"
     fi
 
@@ -154,13 +158,13 @@ function parseFstab {
     local tgt mnt
     local bootTgt="" rootTgt=""
 
-    if [[ ! -e ${MOUNTPOINT_ROOT}/${FSTAB} ]]; then
+    if [[ ! -e "${MOUNTPOINT_ROOT}/${FSTAB}" ]]; then
         error "Unable to find ${MOUNTPOINT_ROOT}/${CMDLINE}"
     fi
 
-    #shellcheck disable=SC2034
-    #(warning): r appears unused. Verify use (or export if used externally).
-    while read tgt mnt r; do
+#	shellcheck disable=SC2034
+#	(warning): r appears unused. Verify use (or export if used externally).
+    while read -r tgt mnt r; do
         case $mnt in
             "$BOOT" | "$BOOT_FIRMWARE")
                 bootTgt=$tgt
@@ -171,11 +175,11 @@ function parseFstab {
         esac
     done <"${MOUNTPOINT_ROOT}/${FSTAB}"
 
-    if [[ -z $bootTgt ]]; then
+    if [[ -z "$bootTgt" ]]; then
       error "Parsing of /${FSTAB} for '$BOOT' or '$BOOT_FIRMWARE' failed"
     fi
 
-    if [[ -z $rootTgt ]]; then
+    if [[ -z "$rootTgt" ]]; then
       error "Parsing of /${FSTAB} for '$ROOT' failed"
     fi
 
@@ -183,13 +187,12 @@ function parseFstab {
 }
 
 function parseBLKID {   # device uuid/poartuuid/label
-    #shellcheck disable=SC2155
-    #(warning): Declare and assign separately to avoid masking return values.
-    local blkid="$(blkid $1 -o udev | grep "ID_FS_${2}=")"
-    if [[ -z $blkid ]]; then
+    local blkid
+    blkid="$(blkid "$1" -o udev | grep "ID_FS_${2}=")"
+    if [[ -z "$blkid" ]]; then
       error "Parsing of blkid $1 for filesystem type $2 failed"
     fi
-    echo $blkid
+    echo "$blkid"
 }
 
 function updateFstab() { # bootType uuid newUUID
@@ -236,7 +239,7 @@ function randomizePartitions() {
 
     echo -n "!!! Creating new UUID and PARTUUID on $device. Are you sure? (y|N) "
 
-    read answer
+    read -r answer
 
     answer=${answer:0:1}    # first char only
     answer=${answer:-"n"}   # set default no
@@ -245,35 +248,33 @@ function randomizePartitions() {
         exit 1
     fi
 
-    #shellcheck disable=SC2155
-    #(warning): Declare and assign separately to avoid masking return values.
-    local newPARTUUID=$(od -A n -t x -N 4 /dev/urandom | tr -d " ")
+    local newPARTUUID
+    newPARTUUID=$(od -A n -t x -N 4 /dev/urandom | tr -d " ")
     info "Creating new PARTUUID $newPARTUUID on $device"
-    echo -ne "x\ni\n0x$newPARTUUID\nr\nw\nq\n" | fdisk "$device" &>>$LOG_FILE
+    echo -ne "x\ni\n0x$newPARTUUID\nr\nw\nq\n" | fdisk "$device" &>>"$LOG_FILE"
 
-    #shellcheck disable=SC2155
-    #(warning): Declare and assign separately to avoid masking return values.
-    local newUUID="$(od -A n -t x -N 4 /dev/urandom | tr -d " " | sed -r 's/(.{4})/\1-/')"
+    local newUUID
+    newUUID="$(od -A n -t x -N 4 /dev/urandom | tr -d " " | sed -r 's/(.{4})/\1-/')"
     newUUID="${newUUID^^*}"
     info "Creating new UUID $newUUID on $bootPartition"
     printf "\x${newUUID:7:2}\x${newUUID:5:2}\x${newUUID:2:2}\x${newUUID:0:2}" | dd bs=1 seek=67 count=4 conv=notrunc of=$bootPartition &>>$LOG_FILE
 
     newUUID="$(</proc/sys/kernel/random/uuid)"
     info "Creating new UUID $newUUID on $rootPartition"
-    if ! umount $MOUNTPOINT_ROOT; then
+    if ! umount "$MOUNTPOINT_ROOT"; then
         error "Unable to umount $MOUNTPOINT_ROOT"
     fi
-    e2fsck -y -f $rootPartition &>>$LOG_FILE
-    tune2fs -U "$newUUID" $rootPartition &>>$LOG_FILE
-    if ! mount $rootPartition $MOUNTPOINT_ROOT; then
+    e2fsck -y -f "$rootPartition" &>>"$LOG_FILE"
+    tune2fs -U "$newUUID" "$rootPartition" &>>"$LOG_FILE"
+    if ! mount "$rootPartition" "$MOUNTPOINT_ROOT"; then
         error "Unable to mount $rootPartition"
     fi
 
     sync
     sleep 3
-    partprobe $device
+    partprobe "$device"
     sleep 3
-    udevadm settle
+    udevadm "settle"
 }
 
 function usage() {
@@ -308,7 +309,7 @@ EOF
 
 echo "$MYSELF $VERSION ($GITREPO)"
 
-rm $LOG_FILE &>/dev/null || true
+rm "$LOG_FILE" &>/dev/null || true
 
 while getopts ":h :n :u :v" opt; do
    case "$opt" in
@@ -332,15 +333,22 @@ shift $(( $OPTIND - 1 ))
 
 if [[ -z $1 ]]; then
     error "Missing device to update UUIDs, PARTUUIDs or LABELs"
-    exit 1
 fi
 
 if (( $UID != 0 )); then
       info "Please invoke $MYSELF as root or with sudo"
-      exit 1
+      exit
 fi
 
 device=$1
+
+if [[ ! -e "$device" ]]; then
+    error "$device does not exist"
+fi
+
+if [[ ! -b "$device" ]]; then
+    error "$device is no blockdevice"
+fi
 
 case $device in
 
@@ -360,35 +368,21 @@ case $device in
         exit 1
 esac
 
-if [[ ! -e $device ]]; then
-    error "$device does not exist"
-    exit 1
-fi
-
-if [[ ! -b $device ]]; then
-    error "$device is no blockdevice"
-    exit 1
-fi
-
-if [[ ! -e $bootPartition ]]; then
+if [[ ! -e "$bootPartition" ]]; then
     error "$bootPartition not found"
-    exit 1
 fi
 
-if [[ ! -e $rootPartition ]]; then
+if [[ ! -e "$rootPartition" ]]; then
     error "$rootPartition not found"
-    exit 1
 fi
 
 if (( randomize )); then
-    if isMounted $bootPartition; then
+    if isMounted "$bootPartition"; then
         error "$bootPartition mounted. No update possible."
-        exit 1
     fi
 
-    if isMounted $rootPartition; then
+    if isMounted "$rootPartition"; then
         error "$rootPartition mounted. No update possible."
-        exit 1
     fi
 fi
 
@@ -398,19 +392,19 @@ if (( $verbose )); then
    echo
 fi
 
-if ! mkdir $MOUNTPOINT_BOOT; then
+if ! mkdir "$MOUNTPOINT_BOOT"; then
     error "Unable to mkdir $MOUNTPOINT_BOOT"
 fi
     
-if ! mount $bootPartition $MOUNTPOINT_BOOT; then
+if ! mount "$bootPartition" "$MOUNTPOINT_BOOT"; then
     error "Unable to mount $bootPartition"
 fi
 
-if ! mkdir $MOUNTPOINT_ROOT; then
+if ! mkdir "$MOUNTPOINT_ROOT"; then
     error "Unable to mkdir $MOUNTPOINT_ROOT"
 fi
 
-if ! mount $rootPartition $MOUNTPOINT_ROOT; then
+if ! mount "$rootPartition" "$MOUNTPOINT_ROOT"; then
     error "Unable to mount $rootPartition"
 fi
 
@@ -419,20 +413,18 @@ if ! isSupportedSystem; then
 fi
 
 cmdline=$(parseCmdline)
-#shellcheck disable=SC2207
-#(warning): Prefer mapfile or read -a to split command output (or quote to avoid splitting).
-fstab=( $(parseFstab) )
+IFS=" " read -r -a fstab <<< "$(parseFstab)"
 
-cmdlineRootType="$(cut -d= -f1 <<< $cmdline)"
-cmdlineRootUUID="$(cut -d= -f2 <<< $cmdline)"
+cmdlineRootType="$(cut -d= -f1 <<< "$cmdline")"
+cmdlineRootUUID="$(cut -d= -f2 <<< "$cmdline")"
 fstabBootType="$(cut -d= -f1 <<< "${fstab[0]}")"
 fstabBootUUID="$(cut -d= -f2 <<< "${fstab[0]}")"
 fstabRootType="$(cut -d= -f1 <<< "${fstab[1]}")"
 fstabRootUUID="$(cut -d= -f2 <<< "${fstab[1]}")"
 
-actualCmdlineRootUUID="$(parseBLKID ${rootPartition} $cmdlineRootType | cut -d= -f2)"
-actualFstabBootUUID="$(parseBLKID ${bootPartition} $fstabBootType | cut -d= -f2)"
-actualFstabRootUUID="$(parseBLKID ${rootPartition} $fstabRootType | cut -d= -f2)"
+actualCmdlineRootUUID="$(parseBLKID "${rootPartition}" "$cmdlineRootType" | cut -d= -f2)"
+actualFstabBootUUID="$(parseBLKID "${bootPartition}" "$fstabBootType" | cut -d= -f2)"
+actualFstabRootUUID="$(parseBLKID "${rootPartition}" "$fstabRootType" | cut -d= -f2)"
 
 if [[ -z $actualCmdlineRootUUID || \
       -z $actualFstabBootUUID || \
@@ -462,28 +454,28 @@ if (( randomize )); then
     randomizePartitions
 fi
 
-actualCmdlineRootUUID="$(parseBLKID ${rootPartition} $cmdlineRootType | cut -d= -f2)"
-actualFstabBootUUID="$(parseBLKID ${bootPartition} $fstabBootType | cut -d= -f2)"
-actualFstabRootUUID="$(parseBLKID ${rootPartition} $fstabRootType | cut -d= -f2)"
+actualCmdlineRootUUID="$(parseBLKID "${rootPartition}" "$cmdlineRootType" | cut -d= -f2)"
+actualFstabBootUUID="$(parseBLKID "${bootPartition}" "$fstabBootType" | cut -d= -f2)"
+actualFstabRootUUID="$(parseBLKID "${rootPartition}" "$fstabRootType" | cut -d= -f2)"
 
 if [[ $cmdlineRootUUID == "$actualCmdlineRootUUID" ]]; then
    info "Root $fstabRootType $actualFstabRootUUID already used in $bootPartition/$CMDLINE"
 else
-   updateCmdline $cmdlineRootType $cmdlineRootUUID $actualCmdlineRootUUID
+   updateCmdline "$cmdlineRootType" "$cmdlineRootUUID" "$actualCmdlineRootUUID"
    mismatchDetected=1
 fi
 
 if [[ $fstabBootUUID == "$actualFstabBootUUID" ]]; then
    info "Boot $fstabBootType $actualFstabBootUUID already used in $rootPartition/$FSTAB"
 else
-   updateFstab $fstabBootType $fstabBootUUID $actualFstabBootUUID
+   updateFstab "$fstabBootType" "$fstabBootUUID" "$actualFstabBootUUID"
    mismatchDetected=1
 fi
 
 if [[ $fstabRootUUID == "$actualFstabRootUUID" ]]; then
-   info "Root $fstabRootType $actualFstabRootUUID already used in $rootPartition/$FSTAB"
+   info "Root $fstabRootType" "$actualFstabRootUUID" already used in "$rootPartition/$FSTAB"
 else
-   updateFstab $fstabRootType $fstabRootUUID $actualFstabRootUUID
+   updateFstab "$fstabRootType" "$fstabRootUUID" "$actualFstabRootUUID"
    mismatchDetected=1
 fi
 
