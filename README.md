@@ -52,6 +52,7 @@ With option -n (new) new UUIDs and PARTUUIDs are created on the target device an
 
 14. [switchOS.sh](https://github.com/framps/raspberryTools/blob/master/switchOS.sh) - Switch the OS boot device if there are multiple boot devices (e.g. mmcblk0 and nvme0n1)
 
+15. [downloadFromGit.sh](https://github.com/framps/raspberryTools/blob/master/downloadFromGit.sh) - Download any file from a github repository
 
 ## findDevices.sh
 ```
