@@ -11,9 +11,9 @@
 #	was cloned and should become new UUIDs/PARTUUIDs.
 #
 #	Either download this script
-#	  curl -sO https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh syncUUIDs.sh
+#	  curl -sO https://raw.githubusercontent.com/framps/raspberryTools/master/syncUUIDs.sh
 #   and invoke
-#      sudo ./syncUUIDs.sh <options>
+#      sudo bash ./syncUUIDs.sh <options>
 #
 #   or use following command to directly download and invoke syncUUIDs:
 #     curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- syncUUIDs.sh <options>
