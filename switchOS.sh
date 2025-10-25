@@ -38,45 +38,54 @@ readonly BOOTORDER2="${BOOTORDER1:1:1}${BOOTORDER1:0:1}"
 readonly MODELPATH=/sys/firmware/devicetree/base/model
 
 if ! [[ -e $MODELPATH ]] || ! grep -q -i "raspberry" $MODELPATH; then
-	echo "$MYNAME works on Raspberries only"
-	exit 1
+    echo "$MYNAME works on Raspberries only"
+    exit 1
 fi
 
-if (( $# >= 1 )) && [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
-	cat << EOH
+if (($# >= 1)) && [[ "$1" =~ ^(-h|--help|-\?)$ ]]; then
+    cat << EOH
 	$MYSELF $VERSION ($GITREPO)
 Usage:
 	$MYSELF                       Switch os boot device
 	$MYSELF -h | -? | --help      Show this help text
 
 EOH
-	exit 0
+    exit 0
 fi
 
 echo "$MYSELF $VERSION ($GITREPO)"
 
-configFile=$(mktemp)					# temp file for config change
+configFile=$(mktemp) # temp file for config change
 
-trap "{ rm $configFile; }" EXIT SIGINT SIGTERM 			# cleanup on exit
+trap "{ rm $configFile; }" EXIT SIGINT SIGTERM # cleanup on exit
 
-rpi-eeprom-config --out $configFile			# retrive current config
+rpi-eeprom-config --out $configFile # retrive current config
 
 set +e
-oldBootorder="$(grep "^BOOT_ORDER=" "$configFile")"	# retrieve BOOT_ORDER line
-(( $? )) && { echo "Unable to find BOOT_ORDER line in config"; exit 1; }
+oldBootorder="$(grep "^BOOT_ORDER=" "$configFile")" # retrieve BOOT_ORDER line
+(($?)) && {
+    echo "Unable to find BOOT_ORDER line in config"
+    exit 1
+}
 set -e
 
-oldBoot=${oldBootorder: -2} 				# extract last boot chars
-[[ $oldBoot != "$BOOTORDER1" && $oldBoot != "$BOOTORDER2" ]] && { echo "Unable to extract old boot sequence"; exit 1; }
+oldBoot=${oldBootorder: -2} # extract last boot chars
+[[ $oldBoot != "$BOOTORDER1" && $oldBoot != "$BOOTORDER2" ]] && {
+    echo "Unable to extract old boot sequence"
+    exit 1
+}
 
 newBoot="${oldBoot:1:1}${oldBoot:0:1}" # switch boot order
 
 set +e
 sed -i "s/$oldBoot/$newBoot/" "$configFile"
-(( $? )) && { echo "Unable to edit old config"; exit 1; }
+(($?)) && {
+    echo "Unable to edit old config"
+    exit 1
+}
 set -e
 
-newBootorder="$(grep "^BOOT_ORDER=" "$configFile")"	# retrieve BOOT_ORDER line
+newBootorder="$(grep "^BOOT_ORDER=" "$configFile")" # retrieve BOOT_ORDER line
 echo "Updated BOOT_ORDER from $oldBootorder to $newBootorder"
 
 sudo rpi-eeprom-config --apply "$configFile"

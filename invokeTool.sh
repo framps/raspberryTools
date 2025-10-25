@@ -26,16 +26,16 @@
 #
 #######################################################################################################################
 
-MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"					# use linked script name if the link is used
+MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")" # use linked script name if the link is used
 MYNAME=${MYSELF%.*}
 GITHUBREPO="https://github.com/framps/raspberryTools"
 GITHUBREPODOWNLOAD="https://raw.githubusercontent.com/framps/raspberryTools"
 
 if [[ -z "$1" || "$1" == "-h" || "$1" == "--help" || "$1" == "-?" || "$1" == "?" ]]; then
-	echo "Purpose: Download any file from raspberryTools github repository."
-	echo "Syntax:  $MYSELF fileName"
-	echo "Example: $MYSELF findSensors.sh -s m"
-	exit 1
+    echo "Purpose: Download any file from raspberryTools github repository."
+    echo "Syntax:  $MYSELF fileName"
+    echo "Example: $MYSELF findSensors.sh -s m"
+    exit 1
 fi
 
 branch="master"
@@ -50,10 +50,10 @@ echo "--- Downloading $targetFilename from git branch $branch from $GITHUBREPO i
 wget -q $downloadURL -O "$targetFilename"
 rc=$?
 
-if (( $rc != 0 )); then
-	echo "??? Error occured downloading $downloadURL. RC: $rc"
-	echo "??? Does $targetFilename exist in repository $GITHUBREPO?"
-	exit 1
+if (($rc != 0)); then
+    echo "??? Error occured downloading $downloadURL. RC: $rc"
+    echo "??? Does $targetFilename exist in repository $GITHUBREPO?"
+    exit 1
 fi
 echo "--- Download finished successfully"
 

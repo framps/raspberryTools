@@ -44,7 +44,7 @@ readonly VERSION="v0.3.1"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 #shellcheck disable=SC2155
-# (warning): Declare and assign separately to avoid masking return values.			
+# (warning): Declare and assign separately to avoid masking return values.
 readonly MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 readonly MYNAME=${MYSELF%.*}
 readonly VARLIBDIR="/var/lib/raspiHandleKernels"
@@ -57,21 +57,21 @@ readonly DELETED_KERNELS_TEMP=$(mktemp)
 declare -r PS4='|${LINENO}> \011${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 function err() {
-   set +e
-   echo "??? Unexpected error occured"
-   local i=0
-   local FRAMES=${#BASH_LINENO[@]}
-   for ((i=FRAMES-2; i>=0; i--)); do
-      echo '  File' \""${BASH_SOURCE[i+1]}"\", line "${BASH_LINENO[i]}", in "${FUNCNAME[i+1]}"
-      sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i+1]}"
-   done
+    set +e
+    echo "??? Unexpected error occured"
+    local i=0
+    local FRAMES=${#BASH_LINENO[@]}
+    for ((i = FRAMES - 2; i >= 0; i--)); do
+        echo '  File' \""${BASH_SOURCE[i + 1]}"\", line "${BASH_LINENO[i]}", in "${FUNCNAME[i + 1]}"
+        sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i + 1]}"
+    done
 }
 
 function cleanup() {
-	if [[ -f "$DELETED_KERNELS_TEMP" ]]; then
-		rm "$DELETED_KERNELS_TEMP" &>/dev/null
-	fi
-}	
+    if [[ -f "$DELETED_KERNELS_TEMP" ]]; then
+        rm "$DELETED_KERNELS_TEMP" &> /dev/null
+    fi
+}
 
 trap 'err' ERR
 trap 'cleanup' SIGINT SIGTERM SIGHUP EXIT
@@ -117,11 +117,11 @@ function check4Pi() {
 function do_uninstall() {
 
     local availableKernels usedKernel unusedKernels keptKernel numUnusedKernels
-    
+
     availableKernels="$(dpkg --list | awk '/^ii[[:space:]]+linux-image/ { print $2 }')"
     usedKernel="$(uname -a | awk '{ print "linux-image-" $3 }')"
 
-	set +e
+    set +e
     unusedKernels="$(grep -v "$usedKernel" <<< "$availableKernels" | xargs -I {} echo "{}")"
     set -e
     if [[ -z "$unusedKernels" ]]; then
@@ -132,7 +132,7 @@ function do_uninstall() {
         fi
     fi
 
-	set +e
+    set +e
     keptKernel="$(grep "$usedKernel" <<< "$availableKernels" | xargs -I {} echo "{}")"
     set -e
     if [[ -z "$keptKernel" ]]; then
@@ -145,60 +145,72 @@ function do_uninstall() {
 
     numUnusedKernels="$(wc -l <<< "$unusedKernels")"
 
-	if [[ -z "$unusedKernels" ]]; then
-		info "No unused kernels found"
-	else
-		info "Following $numUnusedKernels kernels are not required and can be uninstalled to speed up system updates"
-		info "Note the kernel names are saved in $VARLIB_DELETED_KERNELS_FILENAME and can be reinstalled if hardware changes"
-		echo "$unusedKernels"
+    if [[ -z "$unusedKernels" ]]; then
+        info "No unused kernels found"
+    else
+        info "Following $numUnusedKernels kernels are not required and can be uninstalled to speed up system updates"
+        info "Note the kernel names are saved in $VARLIB_DELETED_KERNELS_FILENAME and can be reinstalled if hardware changes"
+        echo "$unusedKernels"
 
-		if (( $MODE_EXECUTE )); then
+        if (($MODE_EXECUTE)); then
 
-			local answer
+            local answer
 
-			read -r -p "--- Are you sure to uninstall all $numUnusedKernels unused kernels ? (y/N) " answer
-			if ! yesNo "$answer"; then
-				exit 1
-			fi
+            read -r -p "--- Are you sure to uninstall all $numUnusedKernels unused kernels ? (y/N) " answer
+            if ! yesNo "$answer"; then
+                exit 1
+            fi
 
-			read -r -p "--- Do you have a backup ? (y/N) " answer
-			if ! yesNo "$answer"; then
-				exit 1
-			fi
+            read -r -p "--- Do you have a backup ? (y/N) " answer
+            if ! yesNo "$answer"; then
+                exit 1
+            fi
 
-			if [[ ! -d "$VARLIBDIR" ]]; then
-				sudo mkdir "$VARLIBDIR"
-			fi
-			
-			if [[ -e "$VARLIB_DELETED_KERNELS_FILENAME" ]]; then
-				sudo cp "$VARLIB_DELETED_KERNELS_FILENAME" "$DELETED_KERNELS_TEMP"
-				(( $? )) && { error "Copying $VARLIB_DELETED_KERNELS_FILENAME"; exit 42; }
-			fi
+            if [[ ! -d "$VARLIBDIR" ]]; then
+                sudo mkdir "$VARLIBDIR"
+            fi
 
-			info "Adding $numUnusedKernels unused kernel names in $VARLIB_DELETED_KERNELS_FILENAME"
-			echo "$unusedKernels" >> "$DELETED_KERNELS_TEMP"; 
-			#shellcheck disable=SC2320 
-			#(warning): This $? refers to echo/printf, not a previous command. Assign to variable to avoid it being overwritten.
-			(( $? )) && { error "Failure collecting kernels"; exit 42; }
+            if [[ -e "$VARLIB_DELETED_KERNELS_FILENAME" ]]; then
+                sudo cp "$VARLIB_DELETED_KERNELS_FILENAME" "$DELETED_KERNELS_TEMP"
+                (($?)) && {
+                    error "Copying $VARLIB_DELETED_KERNELS_FILENAME"
+                    exit 42
+                }
+            fi
 
-			sort "$DELETED_KERNELS_TEMP" | uniq | sudo tee "$VARLIB_DELETED_KERNELS_FILENAME" > /dev/null
-			(( $? )) && { error "Failure sorting kernels"; exit 42; }
+            info "Adding $numUnusedKernels unused kernel names in $VARLIB_DELETED_KERNELS_FILENAME"
+            echo "$unusedKernels" >> "$DELETED_KERNELS_TEMP"
+            #shellcheck disable=SC2320
+            #(warning): This $? refers to echo/printf, not a previous command. Assign to variable to avoid it being overwritten.
+            (($?)) && {
+                error "Failure collecting kernels"
+                exit 42
+            }
 
-			rm "$DELETED_KERNELS_TEMP" &>/dev/null
-			
-			info "Removing $numUnusedKernels unused kernels"
-			echo "$unusedKernels" | xargs sudo apt -y remove
-			(( $? )) && { error "Failure removing kernels"; exit 42; }
-		else
-			info "Use option -u to uninstall $numUnusedKernels unused kernels"
-		fi
-	fi
-	return 0
+            sort "$DELETED_KERNELS_TEMP" | uniq | sudo tee "$VARLIB_DELETED_KERNELS_FILENAME" > /dev/null
+            (($?)) && {
+                error "Failure sorting kernels"
+                exit 42
+            }
+
+            rm "$DELETED_KERNELS_TEMP" &> /dev/null
+
+            info "Removing $numUnusedKernels unused kernels"
+            echo "$unusedKernels" | xargs sudo apt -y remove
+            (($?)) && {
+                error "Failure removing kernels"
+                exit 42
+            }
+        else
+            info "Use option -u to uninstall $numUnusedKernels unused kernels"
+        fi
+    fi
+    return 0
 }
 
 function do_install() {
 
-	local numUnusedKernels
+    local numUnusedKernels
 
     if [[ ! -e "$VARLIB_DELETED_KERNELS_FILENAME" ]]; then
         info "$VARLIB_DELETED_KERNELS_FILENAME not found to reinstall unused kernels"
@@ -208,9 +220,9 @@ function do_install() {
     numUnusedKernels=$(wc -l "$VARLIB_DELETED_KERNELS_FILENAME" | cut -f 1 -d ' ')
 
     info "Following $numUnusedKernels unused kernels can be reinstalled"
-    echo "$(<"$VARLIB_DELETED_KERNELS_FILENAME")"
+    echo "$(< "$VARLIB_DELETED_KERNELS_FILENAME")"
 
-    if (( ! $MODE_EXECUTE )); then
+    if ((!$MODE_EXECUTE)); then
         info "Use option -i to reinstall $numUnusedKernels unused kernels"
     else
         read -r -p "--- Are you sure to reinstall all $numUnusedKernels unused kernels ? (y/N) " answer
@@ -223,19 +235,25 @@ function do_install() {
         while IFS= read -r line; do
             sudo apt -y install "$line"
             set +e
-            (( errorOccured |= $? ))
+            ((errorOccured |= $?))
             set -e
-            sudo apt-mark auto "$line"            
+            sudo apt-mark auto "$line"
             set +e
-            (( errorOccured |= $? ))
+            ((errorOccured |= $?))
             set -e
         done < "$VARLIB_DELETED_KERNELS_FILENAME"
-        if (( ! errorOccured )); then
-			info "Deleting $VARLIB_DELETED_KERNELS_FILENAME"
+        if ((!errorOccured)); then
+            info "Deleting $VARLIB_DELETED_KERNELS_FILENAME"
             sudo rm "$VARLIB_DELETED_KERNELS_FILENAME"
-			(( $? )) && { error "Failure removing $VARLIB_DELETED_KERNELS_FILENAME"; exit 42; }
-			sudo rmdir "$VARLIBDIR"
-			(( $? )) && { error "Failure removing $VARLIB"; exit 42; }			
+            (($?)) && {
+                error "Failure removing $VARLIB_DELETED_KERNELS_FILENAME"
+                exit 42
+            }
+            sudo rmdir "$VARLIBDIR"
+            (($?)) && {
+                error "Failure removing $VARLIB"
+                exit 42
+            }
         else
             error "Errors occured when reinstalling kernels"
         fi
@@ -248,25 +266,32 @@ echo "$MYSELF $VERSION ($GITREPO)"
 MODE_INSTALL=1 # 0 for uninstall
 MODE_EXECUTE=0 # modify system
 
-MODE_INSTALL=$( [[ ! -e "$VARLIB_DELETED_KERNELS_FILENAME" ]]; echo $? )
+MODE_INSTALL=$(
+    [[ ! -e "$VARLIB_DELETED_KERNELS_FILENAME" ]]
+    echo $?
+)
 
 while getopts ":uhrv?" opt; do
 
     case "$opt" in
-        u) MODE_EXECUTE=1
-		   MODE_INSTALL=0
-			;;
-		r) MODE_EXECUTE=1
-		   MODE_INSTALL=1
-			;;
-        h|\?)
+        u)
+            MODE_EXECUTE=1
+            MODE_INSTALL=0
+            ;;
+        r)
+            MODE_EXECUTE=1
+            MODE_INSTALL=1
+            ;;
+        h | \?)
             show_help
             exit 0
             ;;
-        v) echo "$MYSELF $VERSION"
+        v)
+            echo "$MYSELF $VERSION"
             exit 0
             ;;
-        *) echo "Unknown option $opt"
+        *)
+            echo "Unknown option $opt"
             show_help
             exit 1
             ;;
@@ -274,15 +299,15 @@ while getopts ":uhrv?" opt; do
 
 done
 
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
 if ! check4Pi; then
     error "No RaspberryPi detected"
     exit 1
 fi
 
-if (( $MODE_INSTALL )); then
+if (($MODE_INSTALL)); then
     do_install
-else 
+else
     do_uninstall
 fi

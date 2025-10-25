@@ -13,7 +13,7 @@
 #  curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/scripts/downloadFromGit.sh | bash -s -- framps/raspiBackup installation/raspiBackupInstallUI.sh beta
 #
 #  Example to download raspiBackup.sh commited in 609632b1e17e924b9b3c94a6e4d34fe60f4412ed:
-#  curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/scripts/downloadFromGit.sh | bash -s -- framps/raspiBackup raspiBackup.sh 609632b1e17e924b9b3c94a6e4d34fe60f4412ed 
+#  curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/scripts/downloadFromGit.sh | bash -s -- framps/raspiBackup raspiBackup.sh 609632b1e17e924b9b3c94a6e4d34fe60f4412ed
 #
 #######################################################################################################################
 #
@@ -34,19 +34,19 @@
 #
 #######################################################################################################################
 
-MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"					# use linked script name if the link is used
+MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")" # use linked script name if the link is used
 
 readonly VERSION="0.1"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 if [[ -z "$1" || "$1" == "-h" || "$1" == "--help" || "$1" == "-?" || "$1" == "?" ]]; then
-	echo "$MYSELF $VERSION ($GITREPO)"
-	echo "Purpose: Download any file from any github repository branch or commit."
-	echo "Syntax:  $MYSELF repository  fileName [branchName|commit]"
-	echo "Example: $MYSELF framps/raspiBackup helper/raspiBackupWrapper.sh master"
-	echo "If the file resides in a subdirectory prefix fileName with the directories."
-	echo "Default branch is master"
-	exit 1
+    echo "$MYSELF $VERSION ($GITREPO)"
+    echo "Purpose: Download any file from any github repository branch or commit."
+    echo "Syntax:  $MYSELF repository  fileName [branchName|commit]"
+    echo "Example: $MYSELF framps/raspiBackup helper/raspiBackupWrapper.sh master"
+    echo "If the file resides in a subdirectory prefix fileName with the directories."
+    echo "Default branch is master"
+    exit 1
 fi
 
 repo="$1"
@@ -67,9 +67,9 @@ echo "--- Starting download of $downloadFile from git repo $repo and branch $bra
 wget -q "$downloadURL" -O "$targetFilename"
 rc=$?
 
-if (( rc != 0 )); then
-	echo "??? File $downloadFile/$branch not found in $repo"
-	exit 1
+if ((rc != 0)); then
+    echo "??? File $downloadFile/$branch not found in $repo"
+    exit 1
 fi
 
 echo "--- Download finished successfully"
@@ -77,7 +77,6 @@ echo "--- Download finished successfully"
 trap - SIGINT SIGTERM EXIT
 
 if [[ "$targetFilename" == *\.sh ]]; then
-	chmod +x "$targetFilename"
-	echo "--- Start $targetFilename with \`./$targetFilename\` now. NOTE THE LEADING PERIOD !"
+    chmod +x "$targetFilename"
+    echo "--- Start $targetFilename with \`./$targetFilename\` now. NOTE THE LEADING PERIOD !"
 fi
-

@@ -29,48 +29,46 @@ GITREPO="https://github.com/framps/raspberryTools"
 echo "$MYSELF $VERSION ($GITREPO)"
 
 if [[ $USER != "root" ]]; then
-        echo "Call me as root"
-        exit 255
+    echo "Call me as root"
+    exit 255
 fi
 
 if [[ -z $1 ]]; then
-        echo "Missing image file"
-        exit 255
+    echo "Missing image file"
+    exit 255
 fi
 
 echo "Mounting image $1"
 kpartx -av $1
 rc=$?
-if (( $rc != 0 )); then
-        echo "kpartx error: $rc"
-        exit 255
+if (($rc != 0)); then
+    echo "kpartx error: $rc"
+    exit 255
 fi
 echo
 
 echo "Checking PARTUUIDs"
-loopUUIDs=( $(blkid | grep "/dev/mapper/loop" | grep -E -o 'PARTUUID=".*"' | sed -e "s/PARTUUID=//" -e "s/\"//g") )
+loopUUIDs=($(blkid | grep "/dev/mapper/loop" | grep -E -o 'PARTUUID=".*"' | sed -e "s/PARTUUID=//" -e "s/\"//g"))
 
 echo "loopUUID[0]: ${loopUUIDs[0]}"
 echo "loopUUID[1]: ${loopUUIDs[1]}"
 
 mount /dev/mapper/loop0p1 /mnt
-cmdUUID=$(grep -Eo "root=PARTUUID=\S+" /mnt/cmdline.txt | sed "s/root=PARTUUID=//" )
+cmdUUID=$(grep -Eo "root=PARTUUID=\S+" /mnt/cmdline.txt | sed "s/root=PARTUUID=//")
 echo "cmdLineUUID: $cmdUUID"
 umount /mnt
 
 mount /dev/mapper/loop0p2 /mnt
-fstabUUIDs=( $(grep -E "/boot\s|/\s" /mnt/etc/fstab | grep -Eo 'PARTUUID=\S+' | sed "s/PARTUUID=//") )
+fstabUUIDs=($(grep -E "/boot\s|/\s" /mnt/etc/fstab | grep -Eo 'PARTUUID=\S+' | sed "s/PARTUUID=//"))
 echo "fstabUUID[0]: ${fstabUUIDs[0]}"
 echo "fstabUUID[1]: ${fstabUUIDs[1]}"
 
 umount /mnt
 
-if [[ $cmdUUID != ${loopUUIDs[1]} ]] \
-|| [[ ${fstabUUIDs[0]} != ${loopUUIDs[0]} ]] \
-|| [[ ${fstabUUIDs[1]} != ${loopUUIDs[1]} ]]; then
-        echo "??? Mismatch ???"
+if [[ $cmdUUID != ${loopUUIDs[1]} ]] ||
+    [[ ${fstabUUIDs[0]} != ${loopUUIDs[0]} ]] ||
+    [[ ${fstabUUIDs[1]} != ${loopUUIDs[1]} ]]; then
+    echo "??? Mismatch ???"
 else
-        echo "!!! Match  !!!"
+    echo "!!! Match  !!!"
 fi
-
-

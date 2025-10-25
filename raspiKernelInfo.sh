@@ -3,7 +3,7 @@
 #
 #    Retrieve information about running kernel on a Raspberry
 #
-#    Call with 
+#    Call with
 #    curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/raspiKernelInfo.sh | bash
 #
 ####################################################################################################
@@ -30,7 +30,7 @@ VERSION="0.2"
 GITREPO="https://github.com/framps/raspberryTools"
 
 function usage() {
-    cat <<EOF
+    cat << EOF
 $MYSELF $VERSION ($GITREPO)
     
 Usage: $MYSELF [option]*
@@ -44,10 +44,10 @@ EOF
 
 function displayAndExec() {
 
-    if (( $ONLYCOMMANDS )) ; then
+    if (($ONLYCOMMANDS)); then
         echo "--- $1"
     else
-        if (( $COMMANDS )) ; then
+        if (($COMMANDS)); then
             echo "--- ${2:+$2 ---} $1"
         else
             echo "--- ${2:-$1}"
@@ -63,76 +63,79 @@ function displayAndExec() {
 }
 
 # see https://github.com/RPi-Distro/pi-gen
-declare -A STAGE_DESCRIPTION=( \
-		["stage0"]="Bootstrap" \
-		["stage1"]="Truly minimal system" \
-		["stage2"]="Lite system" \
-		["stage3"]="Desktop system" \
-		["stage4"]="Normal Raspbian image" \
-		["stage5"]="The Raspbian Full image" \
-		)
+declare -A STAGE_DESCRIPTION=(
+    ["stage0"]="Bootstrap"
+    ["stage1"]="Truly minimal system"
+    ["stage2"]="Lite system"
+    ["stage3"]="Desktop system"
+    ["stage4"]="Normal Raspbian image"
+    ["stage5"]="The Raspbian Full image"
+)
 function extractStageDescription() {
-	local stage=""
-	stage="$(grep "^Generated" /etc/rpi-issue)"
-	stage="${stage##* }"			# retrieve last field
+    local stage=""
+    stage="$(grep "^Generated" /etc/rpi-issue)"
+    stage="${stage##* }" # retrieve last field
 
-	if [[ "${STAGE_DESCRIPTION[$stage]+abc}" ]]; then
-		echo "${STAGE_DESCRIPTION[$stage]}"
-	else
-		echo "Unknown stage"
-	fi
+    if [[ "${STAGE_DESCRIPTION[$stage]+abc}" ]]; then
+        echo "${STAGE_DESCRIPTION[$stage]}"
+    else
+        echo "Unknown stage"
+    fi
 }
 
 COMMANDS=0
 ONLYCOMMANDS=0
 FULL=0
 
-while (( "$#" )); do
+while (("$#")); do
 
-  case "$1" in
-      -c|--commands)
-          COMMANDS=1 ; shift 1
-          ;;
-      -C|--onlycommands)
-          ONLYCOMMANDS=1 ; shift 1
-          ;;
-      -f|--full)
-          FULL=1 ; shift 1
-          ;;
-      -h|--help)
-          usage ; exit
-          ;;
-  esac
+    case "$1" in
+        -c | --commands)
+            COMMANDS=1
+            shift 1
+            ;;
+        -C | --onlycommands)
+            ONLYCOMMANDS=1
+            shift 1
+            ;;
+        -f | --full)
+            FULL=1
+            shift 1
+            ;;
+        -h | --help)
+            usage
+            exit
+            ;;
+    esac
 done
-
 
 echo "$MYSELF $VERSION ($GITREPO)"
 
-if (( $FULL )) ; then
-    displayAndExec "tail -4 /proc/cpuinfo"  "CPUINFO"
+if (($FULL)); then
+    displayAndExec "tail -4 /proc/cpuinfo" "CPUINFO"
 else
-    displayAndExec "tail -4 /proc/cpuinfo | grep -v \"^Serial\""  "CPUINFO"
+    displayAndExec "tail -4 /proc/cpuinfo | grep -v \"^Serial\"" "CPUINFO"
 fi
 
-displayAndExec "free --human |  grep -E '^Speicher:|Mem:' | cut -c -20"  "MEMORY"
+displayAndExec "free --human |  grep -E '^Speicher:|Mem:' | cut -c -20" "MEMORY"
 
-(( $FULL )) && displayAndExec "(ip --brief link ; ip --brief address) | grep -v '^lo'"  "NETWORK"
+(($FULL)) && displayAndExec "(ip --brief link ; ip --brief address) | grep -v '^lo'" "NETWORK"
 
-displayAndExec "grep PRETTY_NAME /etc/os-release"  "OS"
+displayAndExec "grep PRETTY_NAME /etc/os-release" "OS"
 if [[ -f /etc/rpi-issue ]]; then
-	displayAndExec "cat /etc/rpi-issue ; echo -e \"($(extractStageDescription))\""  "ORIGINAL IMAGE"
+    displayAndExec "cat /etc/rpi-issue ; echo -e \"($(extractStageDescription))\"" "ORIGINAL IMAGE"
 fi
 
 configFile="/boot/config.txt"
 [[ -f /boot/firmware/config.txt ]] && configFile="/boot/firmware/config.txt"
 
-[[ -f $configFile ]] && displayAndExec "grep arm_64bit $configFile"  "64 BIT SET IN CONFIG?"
-displayAndExec "getconf LONG_BIT"  "SOFTWARE BITS"
-displayAndExec "dpkg --print-architecture"  "SOFTWARE ARCH"
-displayAndExec "uname -a"  "SYSTEM INFORMATION"
+[[ -f $configFile ]] && displayAndExec "grep arm_64bit $configFile" "64 BIT SET IN CONFIG?"
+displayAndExec "getconf LONG_BIT" "SOFTWARE BITS"
+displayAndExec "dpkg --print-architecture" "SOFTWARE ARCH"
+displayAndExec "uname -a" "SYSTEM INFORMATION"
 
-(( $FULL )) && displayAndExec "sudo parted -l | grep -v -e '^Sector' -e '^Partition' -e '^$' -e '^Disk Flags'"  "STORAGE"
-(( $FULL )) && displayAndExec "lsblk -f"  "STORAGE"
+(($FULL)) && displayAndExec "sudo parted -l | grep -v -e '^Sector' -e '^Partition' -e '^$' -e '^Disk Flags'" "STORAGE"
+(($FULL)) && displayAndExec "lsblk -f" "STORAGE"
 
-displayAndExec "echo \$XDG_SESSION_TYPE"  "X11, WAYLAND OR TTY"
+displayAndExec "echo \$XDG_SESSION_TYPE" "X11, WAYLAND OR TTY"
 [[ -n $DESKTOP_SESSION ]] && displayAndExec "echo \$DESKTOP_SESSION"

@@ -41,16 +41,16 @@ declare -r PS4='|${LINENO}> \011${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 # check for required commands and required bash version
 
 if ! command -v nmap COMMAND &> /dev/null; then
-	echo "Missing required program nmap."
-	exit 255
+    echo "Missing required program nmap."
+    exit 255
 fi
 
 if ! command -v host COMMAND &> /dev/null; then
-	echo "Missing required program host."
-	exit 255
+    echo "Missing required program host."
+    exit 255
 fi
 
-if (( BASH_VERSINFO[0] < 4 )); then
+if ((BASH_VERSINFO[0] < 4)); then
     echo "Minimum bash 4.0 is required. You have $BASH_VERSION."
     exit 255
 fi
@@ -64,21 +64,21 @@ readonly RASPBERRY="r"
 readonly ESP="e"
 
 declare -A DEVICE_NAME=(
-			[$RASPBERRY]="Raspberries"
-			[$ESP]="ESPs"
-			)
+    [$RASPBERRY]="Raspberries"
+    [$ESP]="ESPs"
+)
 
 # See https://www.ipchecktool.com/tool/macfinder for MACs
 # see https://udger.com/resources/mac-address-vendor-detail?name=raspberry_pi_foundation
 # see https://udger.com/resources/mac-address-vendor-detail?name=espressif_inc
 declare -A DEFAULT_MAC_REGEX=(
-				[$RASPBERRY]="28:cd:c1|2c:cf:67|b8:27:eb|d8:3a:dd|dc:a6:32|e4:5f:01"
-				[$ESP]="10:52:1C|24:62:AB|24:6f:28|24:A1:60|3C:61:05|3C:71:BF|48:3F:DA|A4:CF:12|BC:DD:C2|CC:50:E3|E0:98:06|E8:DB:84|EC:64:C9|F4:CF:A2|FC:F5:C4"
-				)
+    [$RASPBERRY]="28:cd:c1|2c:cf:67|b8:27:eb|d8:3a:dd|dc:a6:32|e4:5f:01"
+    [$ESP]="10:52:1C|24:62:AB|24:6f:28|24:A1:60|3C:61:05|3C:71:BF|48:3F:DA|A4:CF:12|BC:DD:C2|CC:50:E3|E0:98:06|E8:DB:84|EC:64:C9|F4:CF:A2|FC:F5:C4"
+)
 # help text
 
 function usage() {
-	cat << EOH
+    cat << EOH
 $MYSELF $VERSION ($GITREPO)
 
 Usage:
@@ -115,20 +115,20 @@ EOH
 tmp=""
 
 function cleanup() {
-	if [[ -f "$tmp" ]]; then
-		rm "$tmp" &>/dev/null
-	fi
+    if [[ -f "$tmp" ]]; then
+        rm "$tmp" &> /dev/null
+    fi
 }
 
 function err() {
-   echo "??? Unexpected error occured"
-   local i=0
-   local FRAMES=${#BASH_LINENO[@]}
-   for ((i=FRAMES-2; i>=0; i--)); do
-      echo '  File' \""${BASH_SOURCE[i+1]}\"", line ${BASH_LINENO[i]}, in "${FUNCNAME[i+1]}"
-      sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i+1]}"
-   done
-   exit
+    echo "??? Unexpected error occured"
+    local i=0
+    local FRAMES=${#BASH_LINENO[@]}
+    for ((i = FRAMES - 2; i >= 0; i--)); do
+        echo '  File' \""${BASH_SOURCE[i + 1]}\"", line ${BASH_LINENO[i]}, in "${FUNCNAME[i + 1]}"
+        sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i + 1]}"
+    done
+    exit
 }
 
 trap 'cleanup' SIGINT SIGTERM SIGHUP EXIT
@@ -139,27 +139,40 @@ device=""
 network=""
 
 while getopts ":h :n: :d: :s:" opt; do
-   case "$opt" in
-        h) usage
-           exit 0
-           ;;
-        n) network=${OPTARG}
-           ;;
-        d) device=${OPTARG}
-           if [[ ! "$device" =~ [e|r] ]]; then
-				echo "Unknown parameter $OPTARG for option -d"
-				exit 1;
-			fi
-           ;;
-        s) sortType=${OPTARG}
-           if [[ ! "$sortType" =~ [i|m|h|d] ]]; then
-				echo "Unknown parameter $OPTARG for option -"
-				exit 1;
-			fi
-           ;;
-     \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
-     :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
-     *  ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+    case "$opt" in
+        h)
+            usage
+            exit 0
+            ;;
+        n)
+            network=${OPTARG}
+            ;;
+        d)
+            device=${OPTARG}
+            if [[ ! "$device" =~ [e|r] ]]; then
+                echo "Unknown parameter $OPTARG for option -d"
+                exit 1
+            fi
+            ;;
+        s)
+            sortType=${OPTARG}
+            if [[ ! "$sortType" =~ [i|m|h|d] ]]; then
+                echo "Unknown parameter $OPTARG for option -"
+                exit 1
+            fi
+            ;;
+        \?)
+            echo "Unknown option: -$OPTARG" >&2
+            exit 1
+            ;;
+        :)
+            echo "Missing option argument for -$OPTARG" >&2
+            exit 1
+            ;;
+        *)
+            echo "Unimplemented option: -$OPTARG" >&2
+            exit 1
+            ;;
     esac
 done
 
@@ -172,9 +185,9 @@ MY_MAC_REGEX="${DEFAULT_MAC_REGEX[$device]}"
 # read property file with mac regexes
 
 if [[ -f "$INI_FILENAME" ]]; then
-	if MY_MAC_REGEX_FROM_INI="$(grep -E "^${device}m" "$INI_FILENAME" | awk '{print $2}')"; then
-		MY_MAC_REGEX="$MY_MAC_REGEX_FROM_INI"		
-    fi    
+    if MY_MAC_REGEX_FROM_INI="$(grep -E "^${device}m" "$INI_FILENAME" | awk '{print $2}')"; then
+        MY_MAC_REGEX="$MY_MAC_REGEX_FROM_INI"
+    fi
 fi
 MY_MAC_REGEX=" (${MY_MAC_REGEX})"
 
@@ -190,57 +203,60 @@ echo "Scanning subnet $network for $deviceName ..."
 # 192.168.0.12             ether   dc:a6:32:8f:28:fd   C                     wlp3s0 -
 while read -r ip dummy mac rest; do
     macAddress["$ip"]="$mac"
-done < <(nmap -sP "$network" &>/dev/null; arp -n | grep -Ei " $MY_MAC_REGEX")
+done < <(
+    nmap -sP "$network" &> /dev/null
+    arp -n | grep -Ei " $MY_MAC_REGEX"
+)
 
 tmp=$(mktemp)
 
 # retrieve and print hostnames
 
-if (( ${#macAddress[@]} > 0 )); then
+if ((${#macAddress[@]} > 0)); then
 
     maxHostnameLen=0
     maxDescriptionLen=0
-	
+
     for ip in "${!macAddress[@]}"; do
-		host=""
-		if h="$(host "$ip")"; then
-			#shellcheck disable=SC2034
-			# (warning): arpa appears unused. Verify use (or export if used externally).
-			read -r arpa dummy dummy dummy host rest <<< "$h"
-			host=${host::-1} # delete trailing "."
-		else
-			:
-		fi
-		if [[ -z "$host" ]]; then
-			host="Unknown"
-		fi
+        host=""
+        if h="$(host "$ip")"; then
+            #shellcheck disable=SC2034
+            # (warning): arpa appears unused. Verify use (or export if used externally).
+            read -r arpa dummy dummy dummy host rest <<< "$h"
+            host=${host::-1} # delete trailing "."
+        else
+            :
+        fi
+        if [[ -z "$host" ]]; then
+            host="Unknown"
+        fi
 
-		if [[ -f "$INI_FILENAME" ]]; then
-				if hostDescription="$(grep -E -i "^${device}d ${macAddress[$ip]}" "$INI_FILENAME")"; then
-					hostDescription="$(cut -f 3- -d ' ' <<< "$hostDescription" | sed 's/^ *//; s/ *$//')"
-				fi
-		fi
-		
-		: "${hostDescription:="n/a"}"
+        if [[ -f "$INI_FILENAME" ]]; then
+            if hostDescription="$(grep -E -i "^${device}d ${macAddress[$ip]}" "$INI_FILENAME")"; then
+                hostDescription="$(cut -f 3- -d ' ' <<< "$hostDescription" | sed 's/^ *//; s/ *$//')"
+            fi
+        fi
 
-        (( maxHostnameLen < ${#host} )) && maxHostnameLen=${#host}
-        (( maxDescriptionLen < ${#hostDescription} )) && maxDescriptionLen=${#hostDescription}
+        : "${hostDescription:="n/a"}"
+
+        ((maxHostnameLen < ${#host})) && maxHostnameLen=${#host}
+        ((maxDescriptionLen < ${#hostDescription})) && maxDescriptionLen=${#hostDescription}
 
         printf "%s %s %s %s\n" "$ip" "${macAddress[$ip]}" "$host" "$hostDescription" >> "$tmp"
     done
 
-    printf "\n%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "IP address" "Mac address" "Hostname" "Description"   
+    printf "\n%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "IP address" "Mac address" "Hostname" "Description"
 
     sort=$(cut -f 2 -d " " <<< "$sortType")
     if [[ $sort == "i" ]]; then
         sortCmd="sort -t . -k 1,1n -k 2,2n -k 3,3n -k 4,4n"
     else
-        key=$(grep -aob "$sort" <<< "$S_OPTIONARGS"| grep -oE '[0-9]+')
+        key=$(grep -aob "$sort" <<< "$S_OPTIONARGS" | grep -oE '[0-9]+')
         ((key++))
         sortCmd="sort -k $key"
     fi
 
-    while read -r ip mac host desc ; do
+    while read -r ip mac host desc; do
         printf "%-15s %-17s %-${maxHostnameLen}s %-${maxDescriptionLen}s\n" "$ip" "$mac" "$host" "$desc"
     done < <($sortCmd "$tmp")
 
