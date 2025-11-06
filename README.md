@@ -54,7 +54,7 @@ With option -n (new) new UUIDs and PARTUUIDs are created on the target device an
 
 15. [downloadFromGit.sh](https://github.com/framps/raspberryTools/blob/master/downloadFromGit.sh) - Download any file from a github repository
 
-16. [monitorCPUTemperaturesAndFanRPi5.sh] (https://github.com/framps/raspberryTools/blob/master/monitorCPUTemperaturesAndFanRPi5.sh) - Monitor CPU temperature and fan speed of a Raspberry 5 with active cooler
+16. [monitorCPUTemperaturesAndFanRPi5.sh](https://github.com/framps/raspberryTools/blob/master/monitorCPUTemperaturesAndFanRPi5.sh) - Monitor CPU temperature and fan speed of a Raspberry 5 with active cooler
 
 ## findDevices.sh
 ```
