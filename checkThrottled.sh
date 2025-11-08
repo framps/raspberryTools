@@ -26,7 +26,7 @@
 #######################################################################################################################
 
 MYSELF="$(basename "$0")"
-VERSION="0.1"
+VERSION="0.2"
 GITREPO="https://github.com/framps/raspberryTools"
 
 echo "$MYSELF $VERSION ($GITREPO)"
@@ -36,19 +36,29 @@ m=("Under-voltage detected" "Arm frequency capped" "Currently throttled" "Soft t
     "" "" "" "" "" "" "" "" "" "" "" ""
     "Under-voltage has occurred" "Arm frequency capped has occurred" "Throttling has occurred" "Soft temperature limit has occurred")
 # Bits      16                            17                              18                              19
+d=("Power supply dipped below 4.63 V" "CPU speed limited due to temperature" "Performance reduced due to temperature or power" "CPU temperature near limit (default ~60°C)"
+    "" "" "" "" "" "" "" "" "" "" "" ""
+    "Power supply dipped below 4.63 V" "CPU speed limited due to temperature" "Performance reduced due to temperature or power" "CPU temperature near limit (default ~60°C)" )
+# Bits      16                            17                              18                              19
 
-function analyze() {
+function analyze() { 
 
-    local b=$(perl -e "printf \"%08b\\n\", $1" 2> /dev/null) # convert hex number into binary number
-    local i=0                                                # start with bit 0 (LSb)
-    local t
-    while [[ -n $b ]]; do                                        # there are still bits to process
+    local i=0                                                    # start with bit 0 (LSb)
+    local t=$(vcgencmd get_throttled $o | cut -f 2 -d "=")
+    local b=$(perl -e "printf \"%020b\\n\", $t" 2> /dev/null) # convert hex number into binary number
+
+    while [[ -n $b ]]; do                                       # there are still bits to process
+	if (( $i == 0 )); then
+		echo "- Current issues"
+	elif (( $i == 16 )); then
+		echo "- Previous detected issues"
+	fi
         t=${b:${#b}-1:1}                                         # extract LSb
-        if (($t != 0)); then                                     # bit set
-            if (($i <= ${#m[@]} - 1)) && [[ -n ${m[$i]} ]]; then # bit meaning is defined
-                echo "Bit $i set: ${m[$i]}"
+        if (( $t != 0 )); then                                     # bit set ?
+            if (( $i <= ${#m[@]} - 1 )) && [[ -n ${m[$i]} ]]; then # bit meaning is defined
+	        echo "Bit $i: ${m[$i]} (${d[$i]})"
             else # bit meaning unknown
-                echo "Bit $i set: meaning unknown"
+                echo "Bit $i: meaning unknown"               # undefined bit
             fi
         fi
         b=${b::-1} # remove LSb from throttle bits
@@ -56,28 +66,9 @@ function analyze() {
     done
 }
 
-if (($UID != 0)); then
-    echo "Call script as root or use sudo"
-    exit 42
-fi
-
 if ! $which vcgencmd &> /dev/null; then
     echo "No vcgencmd detected."
     exit 42
 fi
 
-options=("" 0xf)
-for o in "${options[@]}"; do
-    t=$(vcgencmd get_throttled $o | cut -f 2 -d "=")
-    if [[ $t != "0x0" ]]; then
-        echo ":-( Throttling bits in hex: $t"
-        analyze $t
-    else
-        echo ":-) Neither undervoltage nor throttling detected"
-    fi
-    if [[ -z $o ]]; then
-        echo "Bits reset on boot only"
-    else
-        echo "Bits reset after call of this script"
-    fi
-done
+analyze 
