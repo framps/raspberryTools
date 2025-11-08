@@ -2,7 +2,7 @@
 
 #######################################################################################################################
 #
-#    Monitor CPU temperature and fan speed of a RPi5 with an original active fan
+#    Monitor CPU temperature and fan speed of a RPi5 with an original active cooler
 #	 First parameter defines the monitor interval. Default is 3 seconds.
 #	 All measurements are recorded in a log file
 #
@@ -30,8 +30,22 @@
 readonly MYSELF="$(basename "$0")"
 readonly MYNAME=${MYSELF##*/}
 readonly LOGFILE="${MYNAME/.sh/}.log"
+readonly VERSION="0.1"
+readonly GITREPO="https://github.com/framps/raspberryTools"
 
 DELAY=${1:-3} # first parm defines the delay if specified
+
+echo "$MYSELF $VERSION ($GITREPO)"
+
+if ! $which vcgencmd &> /dev/null; then
+    echo "No vcgencmd detected."
+    exit 42
+fi
+
+if [[ -z $(ls /sys/devices/platform/cooling_fan/hwmon/*/fan1_input) ]]; then
+    echo "No active cooler detected."
+	exit 42
+fi
 
 [[ -f $LOGFILE ]] && rm $LOGFILE # make sure log is deleted an all future logs can be appended
 
