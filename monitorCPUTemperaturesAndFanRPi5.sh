@@ -44,21 +44,39 @@ fi
 
 if [[ -z $(ls /sys/devices/platform/cooling_fan/hwmon/*/fan1_input) ]]; then
     echo "No active cooler detected."
-	exit 42
+    exit 42
 fi
+
+cnt=0
+
+function finish() {
+
+    trap - SIGINT
+
+    local rc=$1
+
+    if [[ -f $LOGFILE ]]; then
+        echo
+        echo "$LOGFILE with $cnt entries created"
+    fi
+    exit $rc
+}
 
 [[ -f $LOGFILE ]] && rm $LOGFILE # make sure log is deleted an all future logs can be appended
 
-echo -e "Time \t\tFan \tCPU \tPMIC \tFreq" | tee -a "$LOGFILE" 
+trap 'finish $?' SIGINT
+
+echo -e "Time \t\tFan \tCPU \tPMIC \tFreq" | tee -a "$LOGFILE"
 while true; do
-  FAN="$(</sys/devices/platform/cooling_fan/hwmon/*/fan1_input)"	
-  CPU="$(vcgencmd measure_temp | cut -d "=" -f 2)"
-  CPU="${CPU//\'C/}"
-  PMIC="$(vcgencmd measure_temp pmic | cut -d "=" -f 2)" 
-  PMIC="${PMIC//\'C/}"
-  FREQ="$(vcgencmd measure_clock arm | cut -d "=" -f 2)" 
-  FREQ="${FREQ::4}"
-  TIME="$(date +%H:%M:%S)"
-  echo -e "$TIME \t$FAN \t$CPU \t$PMIC\t$FREQ" | tee -a "$LOGFILE"
-  sleep $DELAY 
+    FAN="$(< /sys/devices/platform/cooling_fan/hwmon/*/fan1_input)"
+    CPU="$(vcgencmd measure_temp | cut -d "=" -f 2)"
+    CPU="${CPU//\'C/}"
+    PMIC="$(vcgencmd measure_temp pmic | cut -d "=" -f 2)"
+    PMIC="${PMIC//\'C/}"
+    FREQ="$(vcgencmd measure_clock arm | cut -d "=" -f 2)"
+    FREQ="$(($FREQ / 1000000))"
+    TIME="$(date +%H:%M:%S)"
+    echo -e "$TIME \t$FAN \t$CPU \t$PMIC\t$FREQ" | tee -a "$LOGFILE"
+    ((cnt++))
+    sleep $DELAY
 done
