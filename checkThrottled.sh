@@ -8,7 +8,7 @@
 #
 #######################################################################################################################
 #
-#    Copyright (c) 2019-2023 framp at linux-tips-and-tricks dot de
+#    Copyright (c) 2019-2025 framp at linux-tips-and-tricks dot de
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #######################################################################################################################
 
 MYSELF="$(basename "$0")"
-VERSION="0.2"
+VERSION="0.2.1"
 GITREPO="https://github.com/framps/raspberryTools"
 
 echo "$MYSELF $VERSION ($GITREPO)"
@@ -44,26 +44,44 @@ d=("Power supply dipped below 4.63 V" "CPU speed limited due to temperature" "Pe
 function analyze() { 
 
     local i=0                                                    # start with bit 0 (LSb)
+    local hits=0
     local t=$(vcgencmd get_throttled $o | cut -f 2 -d "=")
     local b=$(perl -e "printf \"%020b\\n\", $t" 2> /dev/null) # convert hex number into binary number
-
+    
     while [[ -n $b ]]; do                                       # there are still bits to process
-	if (( $i == 0 )); then
-		echo "- Current issues"
-	elif (( $i == 16 )); then
-		echo "- Previous detected issues"
-	fi
-        t=${b:${#b}-1:1}                                         # extract LSb
-        if (( $t != 0 )); then                                     # bit set ?
-            if (( $i <= ${#m[@]} - 1 )) && [[ -n ${m[$i]} ]]; then # bit meaning is defined
-	        echo "Bit $i: ${m[$i]} (${d[$i]})"
-            else # bit meaning unknown
-                echo "Bit $i: meaning unknown"               # undefined bit
-            fi
-        fi
-        b=${b::-1} # remove LSb from throttle bits
-        ((i++))    # inc bit counter
+		if (( $i == 0 )); then
+			echo -n "- Current issues"
+		elif (( $i == 16 )); then
+			if (( hits == 0 )); then
+				echo " - None detected"
+			else
+				echo
+			fi
+			
+			i=0
+			hits=0
+			echo -n "- Previous detected issues"
+		fi
+		
+		t=${b:${#b}-1:1}                                         # extract LSb		
+		if (( $t != 0 )); then                                     # bit set ?
+			(( hits ++ ))
+			if (( hits == 1 )); then
+				echo
+			fi
+			if (( $i <= ${#m[@]} - 1 )) && [[ -n ${m[$i]} ]]; then # bit meaning is defined
+				echo "Bit $i: ${m[$i]} (${d[$i]})"
+			else # bit meaning unknown
+				echo "Bit $i: meaning unknown"               # undefined bit
+			fi
+		fi
+		b=${b::-1} # remove LSb from throttle bits
+		((i++))    # inc bit counter
     done
+
+	if (( hits == 0 )); then
+		echo " - None detected"
+	fi
 }
 
 if ! $which vcgencmd &> /dev/null; then
