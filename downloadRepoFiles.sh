@@ -37,7 +37,7 @@
 
 set -euo pipefail
 
-readonly VERSION="v0.1.5"
+readonly VERSION="v0.1.6"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 readonly GITAPI_RESTURL_TREES="https://api.github.com/repos/framps/raspberryTools/git/trees/master?recursive=1"
@@ -161,13 +161,13 @@ for i in $nums; do
 
     if [[ "$fkt" == "$INSTALL_OPTION" ]]; then
         echo "Installing ${files[$i]} into $INSTALL_DIR"
-        if ! chown root:root "${files[$i]}"; then
+        if ! sudo chown root:root "${files[$i]}"; then
             {
                 echo "??? $LINENO: Error chown"
                 exit 1
             }
         fi
-        if ! chmod 755 "${files[$i]}"; then
+        if ! sudo chmod 755 "${files[$i]}"; then
             {
                 echo "??? $LINENO: Error chmod"
                 exit 1
