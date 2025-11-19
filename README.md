@@ -56,7 +56,7 @@ With option -n (new) new UUIDs and PARTUUIDs are created on the target device an
 
 16. [monitorCPUTemperature.sh](https://github.com/framps/raspberryTools/blob/master/monitorCPUTemperature.sh) - Monitor CPU temperature and CPU speed and optionally the fan speed of an existing active cooler
 
-17. [shutdownMyRaspberries.sh](https://github.com/framps/raspberryTools/blob/master/shutdownMyRaspberries.sh) - Shutdown a number of Raspberries not used right now and turn off power supply with a Tasmota switch
+17. [controlMyRaspberries.sh](https://github.com/framps/raspberryTools/blob/master/controlMyRaspberries.sh) - Start and shutdown a number of Raspberries with a Tasmota power switch. The Raspberries are shutdown first before power is turned off
 
 ]
 ## findDevices.sh

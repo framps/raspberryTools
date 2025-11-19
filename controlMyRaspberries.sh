@@ -1,7 +1,7 @@
 #!/bin/bash
 #######################################################################################################################
 #
-# 	 Shut down Raspberry servers connected to a Tasmota power switch and turn off power supply
+# 	 Start up and shut down Raspberry servers connected to a Tasmota power switch
 #
 #######################################################################################################################
 #
@@ -29,9 +29,9 @@ readonly GITREPO="https://github.com/framps/raspberryTools"
 readonly MYSELF="$(basename "$0")"
 readonly MYNAME=${MYSELF##*/}
 
-readonly SWITCH="192.168.0.155"						# Tasmota switch to turn off Raspberries
+readonly SWITCH="192.168.0.155"						 	# Tasmota switch to turn off and on Raspberries
 
-readonly SERVERS=( pi@192.168.0.194 pi@192.168.0.158 )	# Raspberries connected to Tasmota switch
+readonly SERVERS=( pi@192.168.0.194 pi@192.168.0.158 )	# Raspberries powered via a Tasmota power switch
 
 function isOnline() { # ip
 	ping -c1 -w3 $1 &>/dev/null
@@ -39,44 +39,63 @@ function isOnline() { # ip
 }
 
 function turnOff() { # ip
-
 	curl http://$1/cm?cmnd=Power%20Off &>/dev/null
 }
 
-function powerStatus() { # ip
+function turnOn() { # ip
+	curl http://$1/cm?cmnd=Power%20On &>/dev/null
+}
 
+function powerStatus() { # ip
 	local state=$(curl -s http://$1/cm?cmnd=Status | jq .[].Power)
 	echo "$state"
 }
 
 echo "$MYSELF $VERSION ($GITREPO)"
 
-# shutdown servers and wait until they are offline
+if [[ $1 == "off" ]]; then
 
-for user in "${SERVERS[@]}"; do
-	ip="$(cut -f 2 -d "@" <<< "$user")"
-	if isOnline $ip; then
-		echo -n "Shutting down $ip ... "
-		ssh $user "sudo shutdown -h now" &>/dev/null
-		while $(isOnline $ip); do
+	for user in "${SERVERS[@]}"; do
+		ip="$(cut -f 2 -d "@" <<< "$user")"
+		if isOnline $ip; then
+			echo -n "Shutting down $ip ... "
+			ssh $user "sudo shutdown -h now" &>/dev/null
+			while $(isOnline $ip); do
+				sleep 3
+			done
+			echo "done"
+		else
+			echo "$ip already offline"
+		fi
+	done
+
+	# now turn off power supply
+
+	status="$(powerStatus $SWITCH)"
+	if (( $status != 0 )); then
+		echo -n "Turning off $SWITCH ... "
+		turnOff $SWITCH
+		while (( $(powerStatus $SWITCH) != 0 )); do
 			sleep 3
 		done
 		echo "done"
 	else
-		echo "$ip already offline"
+		echo "$SWITCH already off"
 	fi
-done
 
-# now turn off power supply
+elif [[ $1 == "on" ]]; then
 
-status="$(powerStatus $SWITCH)"
-if (( $status != 0 )); then
-	echo "Turning off $SWITCH"
-	turnOff $SWITCH
-	while (( $(powerStatus $SWITCH) != 0 )); do
-		sleep 3
-	done
-	echo "done"
+	status="$(powerStatus $SWITCH)"
+	if (( $status == 0 )); then
+		echo -n "Turning on $SWITCH ... "
+		turnOn $SWITCH
+		while (( $(powerStatus $SWITCH) == 0 )); do
+			sleep 3
+		done
+		echo "done"
+	else
+		echo "$SWITCH already on"
+	fi
 else
-	echo "$SWITCH already off"
+	echo "Missing command \"on\" or \"off\""
 fi
