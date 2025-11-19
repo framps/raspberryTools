@@ -23,7 +23,7 @@
 #######################################################################################################################
 
 
-readonly VERSION="0.1"
+readonly VERSION="0.2"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
 readonly MYSELF="$(basename "$0")"
@@ -31,36 +31,52 @@ readonly MYNAME=${MYSELF##*/}
 
 readonly SWITCH="192.168.0.155"						# Tasmota switch to turn off Raspberries
 
-readonly SERVERS=( 192.168.0.194 192.168.0.158 )	# Raspberries connected to Tasmota switch
+readonly SERVERS=( pi@192.168.0.194 pi@192.168.0.158 )	# Raspberries connected to Tasmota switch
 
 function isOnline() { # ip
 	ping -c1 -w3 $1 &>/dev/null
 	return
 }
 
-function shutdown() { # ip 
+function turnOff() { # ip
+
 	curl http://$1/cm?cmnd=Power%20Off &>/dev/null
-	echo -n "Initiated shut down of $ip ... "
+}
+
+function powerStatus() { # ip
+
+	local state=$(curl -s http://$1/cm?cmnd=Status | jq .[].Power)
+	echo "$state"
 }
 
 echo "$MYSELF $VERSION ($GITREPO)"
 
 # shutdown servers and wait until they are offline
 
-for ip in "${SERVERS[@]}"; do
+for user in "${SERVERS[@]}"; do
+	ip="$(cut -f 2 -d "@" <<< "$user")"
 	if isOnline $ip; then
 		echo -n "Shutting down $ip ... "
-		ssh $ip "sudo shutdown -h now" &>/dev/null
+		ssh $user "sudo shutdown -h now" &>/dev/null
 		while $(isOnline $ip); do
 			sleep 3
 		done
 		echo "done"
 	else
-		echo "$ip already offline"	
-	fi	
-done	
+		echo "$ip already offline"
+	fi
+done
 
 # now turn off power supply
 
-shutdown $SWITCH
-echo "done"
+status="$(powerStatus $SWITCH)"
+if (( $status != 0 )); then
+	echo "Turning off $SWITCH"
+	turnOff $SWITCH
+	while (( $(powerStatus $SWITCH) != 0 )); do
+		sleep 3
+	done
+	echo "done"
+else
+	echo "$SWITCH already off"
+fi
