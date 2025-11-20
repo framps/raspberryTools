@@ -55,46 +55,46 @@ echo "$MYSELF $VERSION ($GITREPO)"
 
 if [[ $1 == "off" ]]; then
 
-	for user in "${SERVERS[@]}"; do
-		ip="$(cut -f 2 -d "@" <<< "$user")"
-		if isOnline $ip; then
-			echo -n "Shutting down $ip ... "
-			ssh $user "sudo shutdown -h now" &>/dev/null
-			while $(isOnline $ip); do
-				sleep 3
-			done
-			echo "done"
-		else
-			echo "$ip already offline"
-		fi
-	done
-
-	# now turn off power supply
-
 	status="$(powerStatus $SWITCH)"
 	if (( $status != 0 )); then
-		echo -n "Turning off $SWITCH ... "
+		for user in "${SERVERS[@]}"; do
+			ip="$(cut -f 2 -d "@" <<< "$user")"
+			if isOnline $ip; then
+				echo -n "Shutting down $ip ... "
+				ssh $user "sudo shutdown -h now" &>/dev/null
+				while $(isOnline $ip); do
+					sleep 3
+				done
+				echo "done"
+			else
+				echo "$ip already offline"
+			fi
+		done
+
+		# now turn off power
+
+		echo -n "Turning power off ... "
 		turnOff $SWITCH
 		while (( $(powerStatus $SWITCH) != 0 )); do
 			sleep 3
 		done
 		echo "done"
 	else
-		echo "$SWITCH already off"
+		echo "Raspberries already off"
 	fi
 
 elif [[ $1 == "on" ]]; then
 
 	status="$(powerStatus $SWITCH)"
 	if (( $status == 0 )); then
-		echo -n "Turning on $SWITCH ... "
+		echo -n "Turning power on ... "
 		turnOn $SWITCH
 		while (( $(powerStatus $SWITCH) == 0 )); do
 			sleep 3
 		done
 		echo "done"
 	else
-		echo "$SWITCH already on"
+		echo "Raspberries already up and running"
 	fi
 else
 	echo "Missing command \"on\" or \"off\""
