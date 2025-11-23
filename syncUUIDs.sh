@@ -426,7 +426,7 @@ if ! mount "$rootPartition" "$MOUNTPOINT_ROOT"; then
 fi
 
 if ! isSupportedSystem; then
-    error "$MYSELF supports Raspberries running RasbianOS Bookworm only"
+    error "$MYSELF supports Raspberries running RasbianOS Bookworm and newer versions only"
 fi
 
 cmdline=$(parseCmdline)
