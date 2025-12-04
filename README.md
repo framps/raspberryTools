@@ -58,7 +58,8 @@ With option -n (new) new UUIDs and PARTUUIDs are created on the target device an
 
 17. [controlMyRaspberries.sh](https://github.com/framps/raspberryTools/blob/master/controlMyRaspberries.sh) - Start and shutdown a number of Raspberries with a Tasmota power switch. The Raspberries are shutdown first before power is turned off
 
-]
+18. [tempSpeed.sh](https://github.com/framps/raspberryTools/blob/master/tempSpeed.sh) - Tiny script to display cpu temperature and cpu speed
+
 ## findDevices.sh
 ```
 findDevices.sh 0.1.0 (https://github.com/framps/raspberryTools)
