@@ -73,7 +73,7 @@ declare -A DEVICE_NAME=(
 # see https://udger.com/resources/mac-address-vendor-detail?name=espressif_inc
 declare -A DEFAULT_MAC_REGEX=(
     [$RASPBERRY]="28:cd:c1|2c:cf:67|b8:27:eb|d8:3a:dd|dc:a6:32|e4:5f:01"
-    [$ESP]="10:52:1C|24:62:AB|24:6f:28|24:A1:60|3C:61:05|3C:71:BF|48:3F:DA|A4:CF:12|BC:DD:C2|CC:50:E3|E0:98:06|E8:DB:84|EC:64:C9|F4:CF:A2|FC:F5:C4"
+    [$ESP]="10:52:1C|24:62:AB|24:6f:28|24:A1:60|3C:61:05|3C:71:BF|48:3F:DA|88:a2:9e|A4:CF:12|BC:DD:C2|CC:50:E3|E0:98:06|E8:DB:84|EC:64:C9|F4:CF:A2|FC:F5:C4"
 )
 # help text
 
