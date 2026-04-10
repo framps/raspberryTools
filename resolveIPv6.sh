@@ -43,4 +43,11 @@ fi
 ipv6="$1"
 
 dns="${2:-192.168.0.1}"
-dig -x "$ipv6" @$dns +short
+hostname=$(dig -x "$ipv6" @$dns +short)
+if [[ -z $hostname ]]; then
+	echo "Hostname of $1 not found"
+	exit 1
+else
+	echo "Hostname of $1 is ${hostname::-1}"
+	exit 0
+fi	
