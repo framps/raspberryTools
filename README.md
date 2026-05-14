@@ -60,7 +60,7 @@ With option -n (new) new UUIDs and PARTUUIDs are created on the target device an
 
 18. [tempSpeed.sh](https://github.com/framps/raspberryTools/blob/master/tempSpeed.sh) - Tiny script to display cpu temperature and cpu speed
 
-19. bmwcardata - Proof of concept scripts to retrieve bmw cardata from API and via mqtt
+19. bmwcardata - Proof of concept how to retrieve bmw cardata via API and mqtt/stream
 
 ## findDevices.sh
 ```
