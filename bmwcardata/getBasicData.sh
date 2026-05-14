@@ -7,7 +7,7 @@
 #
 # See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation
 # See https://bmw-cardata.bmwgroup.com/customer/public/api-specification for API Doc with Swagger
-
+#
 #######################################################################################################################
 #
 #    Copyright (c) 2026 framp at linux-tips-and-tricks dot de

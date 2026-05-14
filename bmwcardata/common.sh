@@ -6,7 +6,7 @@
 #
 # See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation 
 # See https://bmw-cardata.bmwgroup.com/customer/public/api-specification for API Doc with Swagger
-
+#
 #######################################################################################################################
 #
 #    Copyright (c) 2026 framp at linux-tips-and-tricks dot de
@@ -44,6 +44,7 @@ function err() {
 }
 
 function require() {
+	
 	if ! command -v $1 &>/dev/null; then
 	    echo "??? $1 could not be found"
 	    exit 42
