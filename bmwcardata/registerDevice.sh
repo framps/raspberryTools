@@ -2,7 +2,7 @@
 #
 # Proof of concept code to retrieve BMW car data
 #
-# Step 1: Verify a device to BMW car data and create an oauth token
+# Step 1: Register a device to access BMW car data and create an oauth token
 #
 # See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation 
 # See https://bmw-cardata.bmwgroup.com/customer/public/api-specification for API Doc with Swagger
