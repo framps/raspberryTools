@@ -29,19 +29,7 @@
 
 source ./common.sh
 
-if [[ ! -f $TOKEN_FILE ]]; then
-	echo "Missing $TOKEN_FILE"
-	exit 1
-else
-	source $TOKEN_FILE
-fi
-
-if [[ ! -f $CONFIG_FILE ]]; then
-	echo "Missing $CONFIG_FILE"
-	exit 1
-else
-	source $CONFIG_FILE
-fi
+requireBothConfigs
 
 response="$(curl -s -X 'GET' \
   "https://api-cardata.bmwgroup.com/customers/vehicles/$VIN/basicData" \

@@ -28,21 +28,7 @@
 
 source ./common.sh
 
-if [[ ! -f $CONFIG_FILE ]]; then
-	echo "CLIENT_ID=" > $CONFIG_FILE
-	echo "VIN=" >> $CONFIG_FILE
-	echo "$CONFIG_FILE created. Define CLIENT_ID and VIN and invoke script once more"
-	exit 1
-else
-	source $CONFIG_FILE
-fi
-
-if [[ ! -f $TOKEN_FILE ]]; then
-	echo "Missing $TOKEN_FILE"
-	exit 1
-else
-	source $TOKEN_FILE
-fi
+requireBothConfigs
 
 response="$(curl -s -X 'POST' \
   'https://customer.bmwgroup.com/gcdm/oauth/token' \
@@ -63,4 +49,4 @@ echo "REFRESH_TOKEN=\"$REFRESH_TOKEN\"" >> $TOKEN_FILE
 echo "GCID=\"$GCID\"" >> $TOKEN_FILE
 echo "ID_TOKEN=\"$ID_TOKEN\"" >> $TOKEN_FILE
 
-echo "$TOKEN_FILE updated"
+echo "--- $TOKEN_FILE updated"

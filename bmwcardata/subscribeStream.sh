@@ -4,9 +4,9 @@
 #
 # Step 3: Retrieve car data with a stream
 #
-# See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation 
+# See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation
 # See https://bmw-cardata.bmwgroup.com/customer/public/api-specification for API Doc with Swagger
-
+#
 #######################################################################################################################
 #
 #    Copyright (c) 2026 framp at linux-tips-and-tricks dot de
@@ -28,19 +28,8 @@
 
 source ./common.sh
 
-if [[ ! -f $TOKEN_FILE ]]; then
-	echo "Missing $TOKEN_FILE"
-	exit 1
-else
-	source $TOKEN_FILE
-fi
+requireBothConfigs
+require mosquitto_sub
 
-if [[ ! -f $CONFIG_FILE ]]; then	
-	echo "Missing $CONFIG_FILE"
-	exit 1
-else
-	source $CONFIG_FILE
-fi
-
+echo "--- Subscribing for updates on $VIN"
 mosquitto_sub -h customer.streaming-cardata.bmwgroup.com -p 9000 -u $GCID -P $ID_TOKEN -t "$GCID/$VIN" --capath /etc/ssl/certs -k 15 
-

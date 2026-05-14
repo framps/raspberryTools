@@ -4,7 +4,7 @@
 #
 # Step 1: Register a device to access BMW car data and create an oauth token
 #
-# See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation 
+# See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation
 # See https://bmw-cardata.bmwgroup.com/customer/public/api-specification for API Doc with Swagger
 
 #######################################################################################################################
@@ -28,14 +28,7 @@
 
 source ./common.sh
 
-if [[ ! -f $CONFIG_FILE ]]; then
-	echo "CLIENT_ID=" > $CONFIG_FILE
-	echo "VIN=" >> $CONFIG_FILE
-	echo "$CONFIG_FILE created. Define CLIENT_ID and VIN and invoke script once more"
-	exit 1
-else
-	source $CONFIG_FILE
-fi
+requireConfig
 
 CODE_VERIFIER="$(openssl rand -base64 64 | tr -d '\n' | tr -d '=+/' | cut -c1-64)"
 
@@ -59,7 +52,7 @@ DEVICE_CODE="$(jq -r .device_code <<< "$result")"
 USER_CODE="$(jq -r .user_code <<< "$result")"
 VERIFICATION_URI="$(jq -r .verification_uri <<< "$result")"
 
-echo "Now verify this client with \"$USER_CODE\" on \"$VERIFICATION_URI\" ... and press ENTER afterwards to create an oauth token..."
+echo "--- Now verify this client with \"$USER_CODE\" on \"$VERIFICATION_URI\" ... and press ENTER afterwards to create an oauth token..."
 read
 
 response="$(curl -s -X 'POST' \
@@ -83,5 +76,5 @@ echo "REFRESH_TOKEN=\"$REFRESH_TOKEN\"" >> $TOKEN_FILE
 echo "GCID=\"$GCID\"" >> $TOKEN_FILE
 echo "ID_TOKEN=\"$ID_TOKEN\"" >> $TOKEN_FILE
 
-echo "$TOKEN_FILE created"
+echo "--- $TOKEN_FILE created"
 

@@ -43,6 +43,40 @@ function err() {
     exit 42
 }
 
+function require() {
+	if ! command -v $1 &>/dev/null; then
+	    echo "??? $1 could not be found"
+	    exit 42
+	fi
+}
+
+function requireConfig() {
+	
+	if [[ ! -f $CONFIG_FILE ]]; then
+		echo "CLIENT_ID=" > $CONFIG_FILE
+		echo "VIN=" >> $CONFIG_FILE
+		echo "$CONFIG_FILE created. Define CLIENT_ID and VIN and invoke script once more"
+		exit 42
+	else
+		source $CONFIG_FILE
+	fi
+}
+
+function requireBothConfigs() {
+	
+	requireConfig
+	
+	if [[ ! -f $TOKEN_FILE ]]; then
+		echo "??? Missing $TOKEN_FILE"
+		exit 42
+	else
+		source $TOKEN_FILE
+	fi
+}
+
 trap 'err $?' ERR
+
+require curl
+require jq
 
 
