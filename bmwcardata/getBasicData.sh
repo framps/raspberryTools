@@ -5,7 +5,7 @@
 # Step 2: Retrieve car data from API
 # Note: Only 50 API calls allowed per day ! Other wise you get a 403 (Rate limit exceeded)
 #
-# See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation 
+# See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation
 # See https://bmw-cardata.bmwgroup.com/customer/public/api-specification for API Doc with Swagger
 
 #######################################################################################################################
@@ -36,7 +36,7 @@ else
 	source $TOKEN_FILE
 fi
 
-if [[ ! -f $CONFIG_FILE ]]; then	
+if [[ ! -f $CONFIG_FILE ]]; then
 	echo "Missing $CONFIG_FILE"
 	exit 1
 else
@@ -44,7 +44,7 @@ else
 fi
 
 response="$(curl -s -X 'GET' \
-  'https://api-cardata.bmwgroup.com/customers/vehicles/$VIN/basicData' \
+  "https://api-cardata.bmwgroup.com/customers/vehicles/$VIN/basicData" \
   -H 'accept: application/json' \
   -H 'x-version: v1' \
   -H "Authorization: Bearer $ACCESS_TOKEN")"
