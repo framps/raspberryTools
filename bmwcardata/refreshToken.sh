@@ -4,7 +4,7 @@
 #
 # Step 4: Refresh oauth token, token is valid only for 1 hour
 #
-# See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation 
+# See https://bmw-cardata.bmwgroup.com/customer/public/api-documentation
 # See https://bmw-cardata.bmwgroup.com/customer/public/api-specification for API Doc with Swagger
 #
 #######################################################################################################################
@@ -31,22 +31,22 @@ source ./common.sh
 requireBothConfigs
 
 response="$(curl -s -X 'POST' \
-  'https://customer.bmwgroup.com/gcdm/oauth/token' \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d grant_type=refresh_token \
-  -d refresh_token=$REFRESH_TOKEN \
-  -d client_id=$CLIENT_ID)"
+   'https://customer.bmwgroup.com/gcdm/oauth/token' \
+   -H 'Content-Type: application/x-www-form-urlencoded' \
+   -d grant_type=refresh_token \
+   -d refresh_token=$REFRESH_TOKEN \
+   -d client_id=$CLIENT_ID)"
 
-echo "$response" | jq '.' > oauthToken.json
+echo "$response" | jq '.' >oauthToken.json
 
-BEARER_TOKEN="$(jq -r .access_token <<< "$response")"
-REFRESH_TOKEN="$(jq -r .refresh_token <<< "$response")"
-GCID="$(jq -r .gcid <<< "$response")"						# userid in MQTT requests
-ID_TOKEN="$(jq -r .id_token <<< "$response")"				# password in MQTT requests, valid for 1 hour
+ACCESS_TOKEN="$(jq -r .access_token <<<"$response")"
+REFRESH_TOKEN="$(jq -r .refresh_token <<<"$response")"
+GCID="$(jq -r .gcid <<<"$response")"         # userid in MQTT requests
+ID_TOKEN="$(jq -r .id_token <<<"$response")" # password in MQTT requests, valid for 1 hour
 
-echo "ACCESS_TOKEN=\"$ACCESS_TOKEN\"" > $TOKEN_FILE
-echo "REFRESH_TOKEN=\"$REFRESH_TOKEN\"" >> $TOKEN_FILE
-echo "GCID=\"$GCID\"" >> $TOKEN_FILE
-echo "ID_TOKEN=\"$ID_TOKEN\"" >> $TOKEN_FILE
+echo "ACCESS_TOKEN=\"$ACCESS_TOKEN\"" >$TOKEN_FILE
+echo "REFRESH_TOKEN=\"$REFRESH_TOKEN\"" >>$TOKEN_FILE
+echo "GCID=\"$GCID\"" >>$TOKEN_FILE
+echo "ID_TOKEN=\"$ID_TOKEN\"" >>$TOKEN_FILE
 
 echo "--- $TOKEN_FILE updated"

@@ -32,11 +32,9 @@ source ./common.sh
 requireBothConfigs
 
 response="$(curl -s -X 'GET' \
-  "https://api-cardata.bmwgroup.com/customers/vehicles/$VIN/basicData" \
-  -H 'accept: application/json' \
-  -H 'x-version: v1' \
-  -H "Authorization: Bearer $ACCESS_TOKEN")"
+   "https://api-cardata.bmwgroup.com/customers/vehicles/$VIN/basicData" \
+   -H 'accept: application/json' \
+   -H 'x-version: v1' \
+   -H "Authorization: Bearer $ACCESS_TOKEN")"
 
 echo "$response" | jq
-
-

@@ -33,48 +33,47 @@ requireConfig
 CODE_VERIFIER="$(openssl rand -base64 64 | tr -d '\n' | tr -d '=+/' | cut -c1-64)"
 
 CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" \
-  | openssl dgst -binary -sha256 \
-  | openssl base64 \
-  | tr '+/' '-_' \
-  | tr -d '=')
+   | openssl dgst -binary -sha256 \
+   | openssl base64 \
+   | tr '+/' '-_' \
+   | tr -d '=')
 
 result="$(curl -s -X 'POST' \
-  'https://customer.bmwgroup.com/gcdm/oauth/device/code' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d "client_id=$CLIENT_ID" \
-  -d 'response_type=device_code' \
-  -d 'scope=authenticate_user%20openid%20cardata%3Aapi%3Aread%20cardata%3Astreaming%3Aread' \
-  -d "code_challenge=$CODE_CHALLENGE" \
-  -d 'code_challenge_method=S256')"
+   'https://customer.bmwgroup.com/gcdm/oauth/device/code' \
+   -H 'accept: application/json' \
+   -H 'Content-Type: application/x-www-form-urlencoded' \
+   -d "client_id=$CLIENT_ID" \
+   -d 'response_type=device_code' \
+   -d 'scope=authenticate_user%20openid%20cardata%3Aapi%3Aread%20cardata%3Astreaming%3Aread' \
+   -d "code_challenge=$CODE_CHALLENGE" \
+   -d 'code_challenge_method=S256')"
 
-DEVICE_CODE="$(jq -r .device_code <<< "$result")"
-USER_CODE="$(jq -r .user_code <<< "$result")"
-VERIFICATION_URI="$(jq -r .verification_uri <<< "$result")"
+DEVICE_CODE="$(jq -r .device_code <<<"$result")"
+USER_CODE="$(jq -r .user_code <<<"$result")"
+VERIFICATION_URI="$(jq -r .verification_uri <<<"$result")"
 
 echo "--- Now verify this client with \"$USER_CODE\" on \"$VERIFICATION_URI\" ... and press ENTER afterwards to create an oauth token..."
-read
+read -r
 
 response="$(curl -s -X 'POST' \
-  'https://customer.bmwgroup.com/gcdm/oauth/token' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d "client_id=$CLIENT_ID" \
-  -d "device_code=$DEVICE_CODE" \
-  -d 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code' \
-  -d "code_verifier=$CODE_VERIFIER")"
+   'https://customer.bmwgroup.com/gcdm/oauth/token' \
+   -H 'accept: application/json' \
+   -H 'Content-Type: application/x-www-form-urlencoded' \
+   -d "client_id=$CLIENT_ID" \
+   -d "device_code=$DEVICE_CODE" \
+   -d 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code' \
+   -d "code_verifier=$CODE_VERIFIER")"
 
-echo "$response" | jq '.' > oauthToken.json
+echo "$response" | jq '.' >oauthToken.json
 
-ACCESS_TOKEN="$(jq -r .access_token <<< "$response")"		# required for API calls, valid for 1 hour, 50 API requests per day allowed
-REFRESH_TOKEN="$(jq -r .refresh_token <<< "$response")"		# required to refresh oauth token, valid for 2 weeks
-GCID="$(jq -r .gcid <<< "$response")"						# userid in MQTT requests
-ID_TOKEN="$(jq -r .id_token <<< "$response")"				# password in MQTT requests, valid for 1 hour
+ACCESS_TOKEN="$(jq -r .access_token <<<"$response")"   # required for API calls, valid for 1 hour, 50 API requests per day allowed
+REFRESH_TOKEN="$(jq -r .refresh_token <<<"$response")" # required to refresh oauth token, valid for 2 weeks
+GCID="$(jq -r .gcid <<<"$response")"                   # userid in MQTT requests
+ID_TOKEN="$(jq -r .id_token <<<"$response")"           # password in MQTT requests, valid for 1 hour
 
-echo "ACCESS_TOKEN=\"$ACCESS_TOKEN\"" > $TOKEN_FILE
-echo "REFRESH_TOKEN=\"$REFRESH_TOKEN\"" >> $TOKEN_FILE
-echo "GCID=\"$GCID\"" >> $TOKEN_FILE
-echo "ID_TOKEN=\"$ID_TOKEN\"" >> $TOKEN_FILE
+echo "ACCESS_TOKEN=\"$ACCESS_TOKEN\"" >$TOKEN_FILE
+echo "REFRESH_TOKEN=\"$REFRESH_TOKEN\"" >>$TOKEN_FILE
+echo "GCID=\"$GCID\"" >>$TOKEN_FILE
+echo "ID_TOKEN=\"$ID_TOKEN\"" >>$TOKEN_FILE
 
 echo "--- $TOKEN_FILE created"
-

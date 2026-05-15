@@ -32,4 +32,4 @@ requireBothConfigs
 require mosquitto_sub
 
 echo "--- Subscribing for updates on $VIN"
-mosquitto_sub -h customer.streaming-cardata.bmwgroup.com -p 9000 -u $GCID -P $ID_TOKEN -t "$GCID/$VIN" --capath /etc/ssl/certs -k 15 
+mosquitto_sub -h customer.streaming-cardata.bmwgroup.com -p 9000 -u $GCID -P $ID_TOKEN -t "$GCID/$VIN" --capath /etc/ssl/certs -k 15
