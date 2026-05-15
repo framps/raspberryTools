@@ -38,7 +38,7 @@ CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" \
    | tr '+/' '-_' \
    | tr -d '=')
 
-result="$(curl -s -X 'POST' \
+response="$(curl -s -X 'POST' \
    'https://customer.bmwgroup.com/gcdm/oauth/device/code' \
    -H 'accept: application/json' \
    -H 'Content-Type: application/x-www-form-urlencoded' \
@@ -48,11 +48,15 @@ result="$(curl -s -X 'POST' \
    -d "code_challenge=$CODE_CHALLENGE" \
    -d 'code_challenge_method=S256')"
 
-DEVICE_CODE="$(jq -r .device_code <<<"$result")"
-USER_CODE="$(jq -r .user_code <<<"$result")"
-VERIFICATION_URI="$(jq -r .verification_uri <<<"$result")"
+checkSuccess "$response"
 
-echo "--- Now verify this client with \"$USER_CODE\" on \"$VERIFICATION_URI\" ... and press ENTER afterwards to create an oauth token..."
+DEVICE_CODE="$(jq -r .device_code <<<"$response")"
+USER_CODE="$(jq -r .user_code <<<"$response")"
+VERIFICATION_URI="$(jq -r .verification_uri <<<"$response")"
+EXPIRES_IN="$(jq -r .expires_in <<<"$response")"
+
+echo "--- Now verify this client with \"$USER_CODE\" on \"$VERIFICATION_URI\" within $EXPIRES_IN seconds"
+echo "--- and press ENTER afterwards to create API token..."
 read -r
 
 response="$(curl -s -X 'POST' \
@@ -64,16 +68,21 @@ response="$(curl -s -X 'POST' \
    -d 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code' \
    -d "code_verifier=$CODE_VERIFIER")"
 
-echo "$response" | jq '.' >oauthToken.json
+checkSuccess "$response"
+
+echo "$response" | jq '.' >"$JSON_FILE"
 
 ACCESS_TOKEN="$(jq -r .access_token <<<"$response")"   # required for API calls, valid for 1 hour, 50 API requests per day allowed
 REFRESH_TOKEN="$(jq -r .refresh_token <<<"$response")" # required to refresh oauth token, valid for 2 weeks
 GCID="$(jq -r .gcid <<<"$response")"                   # userid in MQTT requests
 ID_TOKEN="$(jq -r .id_token <<<"$response")"           # password in MQTT requests, valid for 1 hour
+EXPIRES_IN="$(jq -r .expires_in <<<"$response")"
 
 echo "ACCESS_TOKEN=\"$ACCESS_TOKEN\"" >$TOKEN_FILE
-echo "REFRESH_TOKEN=\"$REFRESH_TOKEN\"" >>$TOKEN_FILE
-echo "GCID=\"$GCID\"" >>$TOKEN_FILE
-echo "ID_TOKEN=\"$ID_TOKEN\"" >>$TOKEN_FILE
+{
+   echo "REFRESH_TOKEN=\"$REFRESH_TOKEN\""
+   echo "GCID=\"$GCID\""
+   echo "ID_TOKEN=\"$ID_TOKEN\""
+} >>$TOKEN_FILE
 
-echo "--- $TOKEN_FILE created"
+echo "--- API token created and valid for $EXPIRES_IN seconds"

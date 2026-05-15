@@ -37,16 +37,21 @@ response="$(curl -s -X 'POST' \
    -d refresh_token=$REFRESH_TOKEN \
    -d client_id=$CLIENT_ID)"
 
-echo "$response" | jq '.' >oauthToken.json
+checkSuccess "$response"
+
+echo "$response" | jq '.' >$JSON_FILE
 
 ACCESS_TOKEN="$(jq -r .access_token <<<"$response")"
 REFRESH_TOKEN="$(jq -r .refresh_token <<<"$response")"
 GCID="$(jq -r .gcid <<<"$response")"         # userid in MQTT requests
 ID_TOKEN="$(jq -r .id_token <<<"$response")" # password in MQTT requests, valid for 1 hour
+EXPIRES_IN="$(jq -r .expires_in <<<"$response")"
 
-echo "ACCESS_TOKEN=\"$ACCESS_TOKEN\"" >$TOKEN_FILE
-echo "REFRESH_TOKEN=\"$REFRESH_TOKEN\"" >>$TOKEN_FILE
-echo "GCID=\"$GCID\"" >>$TOKEN_FILE
-echo "ID_TOKEN=\"$ID_TOKEN\"" >>$TOKEN_FILE
+echo "ACCESS_TOKEN=\"$ACCESS_TOKEN\"" >"$TOKEN_FILE"
+{
+   echo "REFRESH_TOKEN=\"$REFRESH_TOKEN\""
+   echo "GCID=\"$GCID\""
+   echo "ID_TOKEN=\"$ID_TOKEN\""
+} >>"$TOKEN_FILE"
 
-echo "--- $TOKEN_FILE updated"
+echo "--- API token refreshed and valid for $EXPIRES_IN seconds"

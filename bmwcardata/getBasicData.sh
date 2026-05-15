@@ -37,4 +37,6 @@ response="$(curl -s -X 'GET' \
    -H 'x-version: v1' \
    -H "Authorization: Bearer $ACCESS_TOKEN")"
 
+checkSuccess "$response"
+
 echo "$response" | jq

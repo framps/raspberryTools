@@ -30,6 +30,7 @@ set -euo pipefail
 
 readonly CONFIG_FILE=".bmwConfig"
 readonly TOKEN_FILE=".bmwToken"
+readonly JSON_FILE="oauthToken.json"
 
 function err() {
    local rc="$1"
@@ -72,6 +73,14 @@ function requireBothConfigs() {
       exit 42
    else
       source $TOKEN_FILE
+   fi
+}
+
+function checkSuccess() {
+   if grep -q -i "error" <<<"$1"; then
+      echo "??? API call returned an error"
+      jq "." <<<"$response"
+      exit 42
    fi
 }
 
