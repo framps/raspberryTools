@@ -12,12 +12,15 @@ There is a [very useful tools collection](https://forums.raspberrypi.com/viewtop
 Use invokeTool.sh to download and call a tool immediately.
 
 Examples:
-*   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- findSensors.sh -s m`
+*   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | bash -s -- findDevices.sh -s m`
 *   `curl -s https://raw.githubusercontent.com/framps/raspberryTools/master/invokeTool.sh | sudo bash -s -- synUUIDs.sh -u /dev/mmcblk0`
 
 Or use downloadRepoFiles.sh to select multiple tools you want to download and test first. Optionally you can install them later with option `-i`.
 
-Command to download and execute downloadRepoFiles.sh:
+Command to download and execute downloadRepoFiles.sh to test some scripts:
+* `curl -s -O https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -t`
+
+Command to download and execute downloadRepoFiles.sh to install some scripts in /usr/local/bin:
 * `curl -s -O https://raw.githubusercontent.com/framps/raspberryTools/master/downloadRepoFiles.sh; bash ./downloadRepoFiles.sh -i`
 
 ### List of my "some useful tools for Raspberry Pi"
