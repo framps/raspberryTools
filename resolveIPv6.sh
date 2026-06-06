@@ -26,10 +26,12 @@ MYSELF=${0##*/}
 VERSION="0.1"
 GITREPO="https://github.com/framps/raspberryTools"
 
+DEFAULT_DNS_SERVER="192.168.0.1"
+
 function usage() {
     cat << EOF
 $MYSELF $VERSION ($GITREPO)
-    
+
 Usage: $MYSELF IPv6Address [dnsserver]
 
 EOF
@@ -42,12 +44,14 @@ fi
 
 ipv6="$1"
 
-dns="${2:-192.168.0.1}"
+dns="${2:-$DEFAULT_DNS_SERVER}"
+
 hostname=$(dig -x "$ipv6" @$dns +short)
+
 if [[ -z $hostname ]]; then
 	echo "Hostname of $1 not found"
 	exit 1
 else
 	echo "Hostname of $1 is ${hostname::-1}"
 	exit 0
-fi	
+fi
