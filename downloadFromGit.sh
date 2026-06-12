@@ -39,12 +39,12 @@ MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")" # use linke
 readonly VERSION="0.1"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
-if [[ -z "$1" || "$1" == "-h" || "$1" == "--help" || "$1" == "-?" || "$1" == "?" ]]; then
+if (( $# < 2 )); then
     echo "$MYSELF $VERSION ($GITREPO)"
     echo "Purpose: Download any file from any github repository branch or commit."
-    echo "Syntax:  $MYSELF repository  fileName [branchName|commit]"
+    echo "Syntax:  $MYSELF repository fileName [branchName|commit]"
     echo "Example: $MYSELF framps/raspiBackup helper/raspiBackupWrapper.sh master"
-    echo "If the file resides in a subdirectory prefix fileName with the directories."
+    echo "If the file resides in a subdirectory prefix fileName with the directory."
     echo "Default branch is master"
     exit 1
 fi
@@ -52,16 +52,20 @@ fi
 repo="$1"
 downloadFile="$2"
 branch="${3:-master}"
-shift
 
 echo "$MYSELF $VERSION ($GITREPO)"
+
+if [[ -z "$repo" || -z "$downloadFile" ]]; then
+	echo "??? Missing argument"
+	exit 1
+fi
 
 downloadURL="https://raw.githubusercontent.com/$repo/$branch/$downloadFile"
 targetFilename="$(basename "$downloadFile")"
 
-rm -f "$targetFilename"
+rm -f -- "$targetFilename"
 
-trap 'rm -f $targetFilename' SIGINT SIGTERM EXIT
+trap 'rm -f -- "$targetFilename"' SIGINT SIGTERM EXIT
 
 echo "--- Starting download of $downloadFile from git repo $repo and branch $branch into current directory ..."
 wget -q "$downloadURL" -O "$targetFilename"
