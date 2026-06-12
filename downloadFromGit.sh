@@ -39,14 +39,14 @@ MYSELF="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")" # use linke
 readonly VERSION="0.1"
 readonly GITREPO="https://github.com/framps/raspberryTools"
 
-if (( $# < 2 )); then
-    echo "$MYSELF $VERSION ($GITREPO)"
-    echo "Purpose: Download any file from any github repository branch or commit."
-    echo "Syntax:  $MYSELF repository fileName [branchName|commit]"
-    echo "Example: $MYSELF framps/raspiBackup helper/raspiBackupWrapper.sh master"
-    echo "If the file resides in a subdirectory prefix fileName with the directory."
-    echo "Default branch is master"
-    exit 1
+if (($# < 2)); then
+   echo "$MYSELF $VERSION ($GITREPO)"
+   echo "Purpose: Download any file from any github repository branch or commit."
+   echo "Syntax:  $MYSELF repository fileName [branchName|commit]"
+   echo "Example: $MYSELF framps/raspiBackup helper/raspiBackupWrapper.sh master"
+   echo "If the file resides in a subdirectory prefix fileName with the directory."
+   echo "Default branch is master"
+   exit 1
 fi
 
 repo="$1"
@@ -56,8 +56,8 @@ branch="${3:-master}"
 echo "$MYSELF $VERSION ($GITREPO)"
 
 if [[ -z "$repo" || -z "$downloadFile" ]]; then
-	echo "??? Missing argument"
-	exit 1
+   echo "??? Missing argument"
+   exit 1
 fi
 
 downloadURL="https://raw.githubusercontent.com/$repo/$branch/$downloadFile"
@@ -72,8 +72,8 @@ wget -q "$downloadURL" -O "$targetFilename"
 rc=$?
 
 if ((rc != 0)); then
-    echo "??? File $downloadFile/$branch not found in $repo"
-    exit 1
+   echo "??? File $downloadFile/$branch not found in $repo"
+   exit 1
 fi
 
 echo "--- Download finished successfully"
@@ -81,6 +81,6 @@ echo "--- Download finished successfully"
 trap - SIGINT SIGTERM EXIT
 
 if [[ "$targetFilename" == *\.sh ]]; then
-    chmod +x "$targetFilename"
-    echo "--- Start $targetFilename with \`./$targetFilename\` now. NOTE THE LEADING PERIOD !"
+   chmod +x "$targetFilename"
+   echo "--- Start $targetFilename with \`./$targetFilename\` now. NOTE THE LEADING PERIOD !"
 fi
