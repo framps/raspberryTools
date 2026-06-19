@@ -65,6 +65,8 @@ With option -n (new) new UUIDs and PARTUUIDs are created on the target device an
 
 19. bmwcardata - Proof of concept how to retrieve bmw cardata via API and mqtt/stream
 
+20. digitalPhotoFrame - Simple photo frame for a RPiZero with a photo and video upload function
+
 ## findDevices.sh
 ```
 findDevices.sh 0.1.0 (https://github.com/framps/raspberryTools)
