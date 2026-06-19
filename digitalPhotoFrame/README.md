@@ -5,7 +5,13 @@
 Displays photos and videos on a monitor and provides a simple Python HTTP app, which allows to upload
 photos and videos from a mobile or Laptop per drag n drop. 
 
-## Required HW
+### Note
+
+The upload app should be used in a local secure environment only !
+
+## Required HW and SW
+
+### HW
 
 1. RaspberryPi Zero 2W
 1. SD card with enough space, i.e. 32GB
@@ -13,10 +19,11 @@ photos and videos from a mobile or Laptop per drag n drop.
 1. Power supply for the monitor
 1. Either a power supply for the RPi Zero or at least two USB 2.0 ports which can be bundled with a Y cable to power the RPi Zero
 
-## Required SW
+### SW
 
 1. RaspberryOS lite
 1. mpv
+
 
 ## Installation
 
