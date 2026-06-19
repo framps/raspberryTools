@@ -37,3 +37,8 @@ This toolset should be used in a local secure environment only !
    1. `sudo systemctl enable pictureUpload.service`
    1. `sudo systemctl start pictureViewer.service`
    1. `sudo systemctl start pictureUpload.service`
+
+## Upload photos and videos
+
+1. The digital photo frame receives an IP per DHCP from the local network. Check your local router for the IP.
+2. Open this IP with port 8080 (`http:/<ip>:8080`) and select or drop the pictures and photos
