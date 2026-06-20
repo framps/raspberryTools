@@ -5,9 +5,8 @@
 ### registerDevice.sh
 
 This script will register the device the script is started so it can retrieve BMW car data.
-A code will be created and has to be inserted on your BMW Portal. The link to the portal is given.
-Finally an OAuthToken will be created and stored locally. This token is reuqired to retrieve
-BMW car data.
+A verification code will be created and has to be inserted on your BMW Portal to finally verify your cardata acces. The link to the portal is displayed and just can be copied and pasted into a browser.
+Finally an OAuthToken will be created and stored locally. This token is required and allows to access the BMW car data.
 
 ### getBasicData
 
