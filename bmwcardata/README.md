@@ -21,6 +21,8 @@ This script will subscribe to a MQTT port to receive any BMW data updates.
 The OAuthToken is valid for 1 hour and has to be refreshed earlier. Otherwise a new registration is required.
 This script refreshes the OAuthToken.
 
+## API reference
 
+https://bmw-cardata.bmwgroup.com/customer/public/api-specification
 
 
