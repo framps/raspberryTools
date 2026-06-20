@@ -10,7 +10,7 @@ Just copy and paste the URL into a browser to access the BMW Portal to enter the
 
 ### getBasicData
 
-This script will retrive some basic informations from BMW card data.
+This script will retrive some basic informations from BMW card data. Note there is a limit per day for these requests.
 
 ### subScribeStream
 
