@@ -1,9 +1,5 @@
 # Proof of concept to retrieve BMW car data
 
-## API reference
-
-https://bmw-cardata.bmwgroup.com/thirdparty/public/car-data/technical-configuration/api-specification
-
 ## Scripts
 
 ### registerDevice.sh
