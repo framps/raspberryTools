@@ -36,21 +36,6 @@ This toolset should be used in a local secure environment only !
    1. `sudo systemctl enable pictureUpload.service`
    1. `sudo systemctl start pictureViewer.service`
    1. `sudo systemctl start pictureUpload.service`
-
-## Reduce memory consumption
-
-The PiZero has 512MB RAM only. Therefore some additional configuration is suggested.
-1. Add a dedicated section in /boot/firmware/cmdline.txt to turn off unused services and define the used GPU memory for a PIZero
-   ```
-   # pizero 2w settings 
-   [board-type=0x902120]
-   dtoverlay=disable-bt
-   dtparam=krnbt=off
-   dtparam=act_led_trigger=non
-   disable_poe_fan
-   ```
-2. Turn of systemd logging with raspi-config
-   
 ## Upload photos and videos
 
 1. The digital photo frame will get an IP with DHCP from the local network router. Check your local router for the IP.
