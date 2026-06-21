@@ -17,7 +17,7 @@ This toolset should be used in a local secure environment only !
 1. SD card with enough space, i.e. 32GB
 1. Any monitor which has a HDMI input port
 1. Power supply for the monitor
-1. Either a power supply for the RPi Zero or at least two USB 2.0 ports which can be bundled with a Y cable to power the RPi Zero
+1. Either a power supply for the RPi Zero or at least two USB 2.0 ports which are bundled with a Y cable to power the RPi Zero
 
 ### SW
 
@@ -40,5 +40,5 @@ This toolset should be used in a local secure environment only !
 
 ## Upload photos and videos
 
-1. The digital photo frame receives an IP per DHCP from the local network. Check your local router for the IP.
-2. Open this IP with port 8080 (`http:/<ip>:8080`) and select or drop the pictures and photos
+1. The digital photo frame will get an IP with DHCP from the local network router. Check your local router for the IP.
+2. Open this IP with port 8080 (`http:/<ip>:8080`) and select or drop the pictures and photos to upload
