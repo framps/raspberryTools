@@ -48,7 +48,6 @@ The PiZero has 512MB RAM only. Therefore some additional configuration is sugges
    dtparam=krnbt=off
    dtparam=act_led_trigger=non
    disable_poe_fan
-   gpu_mem=64
    ```
 2. Turn of systemd logging with raspi-config
    
