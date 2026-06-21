@@ -40,7 +40,7 @@ This toolset should be used in a local secure environment only !
 ## Reduce memory consumption
 
 The PiZero has 512MB RAM only. Therefore some additional configuration is suggested.
-1. Special section in /boot/firmware/cmdline.txt to turn off unused services and define the used GPU memory for a PIZero
+1. Add a dedicated section in /boot/firmware/cmdline.txt to turn off unused services and define the used GPU memory for a PIZero
    ```
    # pizero 2w settings 
    [board-type=0x902120]
