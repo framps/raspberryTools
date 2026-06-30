@@ -13,11 +13,12 @@ This toolset should be used in a local secure environment only !
 
 ### HW
 
-1. RaspberryPi Zero 2W
-1. SD card with enough space, for example 32GB
-1. Any monitor which has a HDMI input port and optionally two USB 2.0 ports
-1. Power supply for the monitor
-1. Either a dedicated power supply for the RPi Zero or two USB 2.0 ports availabel on the monitor which are bundled with a Y cable to power the RPi Zero
+1. Monitor with a HDMI input port and optionally two USB 2.0 ports
+2. Power supply for the monitor
+3. RaspberryPi Zero 2W
+4. Either a dedicated power supply for the RPi Zero or used two USB 2.0 ports available on the monitor which are bundled with a Y cable to power the RPi
+5. HDMI cable to connect the monitor to the Raspberry Pi Zero 2W
+6. SD card with enough space, for example 32GB
 
 ### SW
 
@@ -26,6 +27,7 @@ This toolset should be used in a local secure environment only !
 
 ## Installation
 
+1. Install RaspberryOS lite
 1. Create a directory /opt/pictureViewer
 1. Copy pictureViewer.sh and pictureUpload.py into /opt/pictureViewer
 1. Copy both *.service files into /etc/systemd/system
@@ -36,7 +38,8 @@ This toolset should be used in a local secure environment only !
    1. `sudo systemctl enable pictureUpload.service`
    1. `sudo systemctl start pictureViewer.service`
    1. `sudo systemctl start pictureUpload.service`
+
 ## Upload photos and videos
 
-1. The digital photo frame will get an IP with DHCP from the local network router. Check your local router for the IP.
-2. Open this IP with port 8080 (`http:/<ip>:8080`) and select or drop the pictures and photos to upload
+1. The digital photo frame will request an IP with DHCP from the local network router. Check your local router for the IP.
+2. Open this IP with port 8080 (`http:/<ip>:8080`) and select or drop the photos and videos to upload
