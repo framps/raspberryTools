@@ -27,7 +27,7 @@ This toolset should be used in a local secure environment only !
 
 ## Installation
 
-1. Install RaspberryOS lite
+1. Install RaspberryOS lite and mpv
 1. Create a directory /opt/pictureViewer
 1. Copy pictureViewer.sh and pictureUpload.py into /opt/pictureViewer
 1. Copy both *.service files into /etc/systemd/system
