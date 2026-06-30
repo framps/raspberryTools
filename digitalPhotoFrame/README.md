@@ -14,10 +14,10 @@ This toolset should be used in a local secure environment only !
 ### HW
 
 1. RaspberryPi Zero 2W
-1. SD card with enough space, i.e. 32GB
-1. Any monitor which has a HDMI input port
+1. SD card with enough space, for example 32GB
+1. Any monitor which has a HDMI input port and optionally two USB 2.0 ports
 1. Power supply for the monitor
-1. Either a power supply for the RPi Zero or at least two USB 2.0 ports which are bundled with a Y cable to power the RPi Zero
+1. Either a dedicated power supply for the RPi Zero or two USB 2.0 ports availabel on the monitor which are bundled with a Y cable to power the RPi Zero
 
 ### SW
 
