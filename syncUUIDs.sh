@@ -8,7 +8,7 @@
 #	New UUIDS and PARTUUIDs can also be generated before /boot/cmdline.txt and /etc/fstab are synced.
 #
 #	Useful if a cloned RaspbianOS fails to boot because of UUID/PARTUUID/LABEL mismatch or a device
-#	was cloned and should become new UUIDs/PARTUUIDs.
+#	was cloned and should get new UUIDs/PARTUUIDs.
 #
 #	Either download this script
 #	  curl -sO https://raw.githubusercontent.com/framps/raspberryTools/master/syncUUIDs.sh
