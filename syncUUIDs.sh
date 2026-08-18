@@ -3,7 +3,8 @@
 #######################################################################################################################
 #
 #   Check and optionally update /boot/cmdline.txt and /etc/fstab on a device with installed RaspbianOS
-#   with the actual UUIDs/PARTUUIDs/LABELs of the partitions.
+#   with the actual UUIDs/PARTUUIDs/LABELs of the partitions. In addition new UUIDs/PARTUUIDs can be generated
+#   and updated on the device.
 #
 #	New UUIDS and PARTUUIDs can also be generated before /boot/cmdline.txt and /etc/fstab are synced.
 #
